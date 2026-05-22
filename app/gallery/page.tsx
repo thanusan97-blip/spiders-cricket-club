@@ -1,8 +1,12 @@
 export default function GalleryPage() {
-  const images = [
-    "/gallery/photo1.jpeg",
+  const galleryImages = [
+  "/gallery/photo1.jpeg",
   "/gallery/photo2.jpeg",
-  ];
+  "/gallery/photo3.jpeg",
+  "/gallery/photo4.jpeg",
+  "/gallery/photo5.jpeg",
+  "/gallery/photo6.jpeg",
+];
 
   return (
     <main className="min-h-screen bg-[#eef2ff] px-6 py-20 text-[#071a52]">
