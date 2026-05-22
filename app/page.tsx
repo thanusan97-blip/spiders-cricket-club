@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 
 const sliderImages = ["/gallery/photo1.jpeg", "/gallery/photo2.jpeg"];
 
@@ -346,7 +347,49 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+{/* SOCIAL MEDIA FOOTER */}
+<section className="bg-[#071a52] py-10 text-white">
+  <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-6 px-6">
 
+    <h2 className="text-3xl font-bold">
+      Follow Spiders Sports Club UK
+    </h2>
+
+    <div className="flex flex-wrap justify-center gap-6">
+
+      <a
+        href="https://www.facebook.com/profile.php?id=61553153775249"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 rounded-full bg-blue-600 px-6 py-3 font-semibold transition hover:scale-110"
+      >
+        <FaFacebookF size={22} />
+        Facebook
+      </a>
+
+      <a
+        href="https://www.instagram.com/spidersscuk_23/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 rounded-full bg-pink-600 px-6 py-3 font-semibold transition hover:scale-110"
+      >
+        <FaInstagram size={22} />
+        Instagram
+      </a>
+
+      <a
+        href="https://www.youtube.com/@Spiderssportsclubuk"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 rounded-full bg-red-600 px-6 py-3 font-semibold transition hover:scale-110"
+      >
+        <FaYoutube size={22} />
+        YouTube
+      </a>
+
+    </div>
+  </div>
+</section>
       {/* FOOTER */}
       <footer className="bg-[#04113a] px-6 py-8 text-center text-white">
         <p className="text-lg">
