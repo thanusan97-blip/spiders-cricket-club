@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Spiders Sports Club UK",
   description: "Official website of Spiders Sports Club UK",
+  manifest: "/manifest.json",
   icons: {
     icon: "/logo.png",
   },
