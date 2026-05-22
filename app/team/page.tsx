@@ -32,7 +32,7 @@ const players = [
   "Rexsan Shanthakumar",
   "Dinesh Srikantharanganathan",
   "Ajanthan Thiraviyarasa",
-  "Thuyarakan Thiraviyarasa",
+  "Thuvarakan Thiraviyarasa",
   "Vijitharan Vijayarathnam",
 ];
 

@@ -250,29 +250,47 @@ export default function HomePage() {
       </section>
 
       {/* SPONSORS */}
-      <section
-        id="sponsors"
-        className="bg-[#071a52] px-6 py-24 text-white"
-      >
-        <div className="mx-auto max-w-7xl">
+<section
+  id="sponsors"
+  className="bg-[#071a52] px-6 py-24 text-white"
+>
+  <div className="mx-auto max-w-7xl">
 
-          <h2 className="mb-12 text-5xl font-extrabold">
-            Sponsors
-          </h2>
+    <h2 className="mb-12 text-5xl font-extrabold">
+      Sponsors
+    </h2>
 
-          <div className="grid gap-8 md:grid-cols-2">
+    <div className="grid gap-8 md:grid-cols-2">
 
-            <div className="rounded-3xl bg-white p-10 text-center text-4xl font-bold text-[#071a52] shadow-xl">
-              KIWIKMART
-            </div>
+      {/* KIWIKMART */}
+      <div className="flex items-center justify-center rounded-3xl bg-white p-10 shadow-xl transition hover:scale-105">
 
-            <div className="rounded-3xl bg-white p-10 text-center text-4xl font-bold text-[#071a52] shadow-xl">
-              Twenty 20 Estates
-            </div>
+        <Image
+          src="/sponsors/kiwikmart.png"
+          alt="Kiwikmart"
+          width={250}
+          height={120}
+          className="object-contain"
+        />
 
-          </div>
-        </div>
-      </section>
+      </div>
+
+      {/* TWENTY20 */}
+      <div className="flex items-center justify-center rounded-3xl bg-white p-10 shadow-xl transition hover:scale-105">
+
+        <Image
+          src="/sponsors/twenty20.png"
+          alt="Twenty20 Estates"
+          width={250}
+          height={120}
+          className="object-contain"
+        />
+
+      </div>
+
+    </div>
+  </div>
+</section>
 
       {/* CONTACT */}
       <section
