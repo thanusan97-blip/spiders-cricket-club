@@ -58,7 +58,7 @@ export default function CompetitionsPage() {
                 </p>
 
                 <a
-                  href="https://spidersscuk.play-cricket.com/Competitions"
+                  href="https://btcl.play-cricket.com/website/division/137686"
                   target="_blank"
                   className="mt-4 inline-block text-lg font-bold text-red-600"
                 >
