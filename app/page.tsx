@@ -34,12 +34,12 @@ export default function HomePage() {
 
           {/* DESKTOP MENU */}
           <nav className="hidden items-center gap-8 font-semibold text-white md:flex">
-            <Link href="/">Home</Link>
-            <Link href="/competitions">Competitions</Link>
-            <Link href="/statistics">Statistics</Link>
-            <Link href="/gallery">Gallery</Link>
-            <Link href="/sponsors">Sponsors</Link>
-            <Link href="/contact">Contact</Link>
+            <a href="/">Home</a>
+            <a href="#club">Competitions</a>
+            <a href="#club">Statistics</a>
+            <a href="#club">Gallery</a>
+            <a href="#sponsors">Sponsors</a>
+            <a href="#contact">Contact</a>
           </nav>
 
           {/* MOBILE BUTTON */}
@@ -54,32 +54,29 @@ export default function HomePage() {
         {/* MOBILE MENU */}
         {menuOpen && (
           <div className="flex flex-col gap-4 bg-[#2563eb] px-6 py-6 text-lg font-semibold text-white md:hidden">
-            <Link href="/" onClick={() => setMenuOpen(false)}>
+            <a href="/" onClick={() => setMenuOpen(false)}>
               Home
-            </Link>
+            </a>
 
-            <Link
-              href="/competitions"
-              onClick={() => setMenuOpen(false)}
-            >
+            <a href="#club" onClick={() => setMenuOpen(false)}>
               Competitions
-            </Link>
+            </a>
 
-            <Link href="/statistics" onClick={() => setMenuOpen(false)}>
+            <a href="#club" onClick={() => setMenuOpen(false)}>
               Statistics
-            </Link>
+            </a>
 
-            <Link href="/gallery" onClick={() => setMenuOpen(false)}>
+            <a href="#club" onClick={() => setMenuOpen(false)}>
               Gallery
-            </Link>
+            </a>
 
-            <Link href="/sponsors" onClick={() => setMenuOpen(false)}>
+            <a href="#sponsors" onClick={() => setMenuOpen(false)}>
               Sponsors
-            </Link>
+            </a>
 
-            <Link href="/contact" onClick={() => setMenuOpen(false)}>
+            <a href="#contact" onClick={() => setMenuOpen(false)}>
               Contact
-            </Link>
+            </a>
           </div>
         )}
       </header>
@@ -120,47 +117,42 @@ export default function HomePage() {
           <h2 className="mb-12 text-5xl font-extrabold">Club Areas</h2>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/competitions">
-              <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
-                <h3 className="mb-4 text-3xl font-bold">Competitions</h3>
-                <p className="text-lg">
-                  View BTCL and VCTB competitions for 2026, 2025 and 2024.
-                </p>
-              </div>
-            </Link>
+            <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+              <h3 className="mb-4 text-3xl font-bold">Competitions</h3>
+              <p className="text-lg">
+                View BTCL and VCTB competitions for 2026, 2025 and 2024.
+              </p>
+            </div>
 
-            <Link href="/statistics">
-              <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
-                <h3 className="mb-4 text-3xl font-bold">Statistics</h3>
-                <p className="text-lg">
-                  View detailed player batting, bowling and fielding statistics.
-                </p>
-              </div>
-            </Link>
+            <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+              <h3 className="mb-4 text-3xl font-bold">Statistics</h3>
+              <p className="text-lg">
+                View detailed player batting, bowling and fielding statistics.
+              </p>
+            </div>
 
-            <Link href="/gallery">
-              <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
-                <h3 className="mb-4 text-3xl font-bold">Gallery</h3>
-                <p className="text-lg">
-                  Match day photos and club memories.
-                </p>
-              </div>
-            </Link>
+            <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+              <h3 className="mb-4 text-3xl font-bold">Gallery</h3>
+              <p className="text-lg">
+                Match day photos and club memories.
+              </p>
+            </div>
 
-            <Link href="/hall-of-fame">
-              <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
-                <h3 className="mb-4 text-3xl font-bold">Hall of Fame</h3>
-                <p className="text-lg">
-                  Top performers and club legends.
-                </p>
-              </div>
-            </Link>
+            <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+              <h3 className="mb-4 text-3xl font-bold">Hall of Fame</h3>
+              <p className="text-lg">
+                Top performers and club legends.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* SPONSORS */}
-      <section className="bg-[#071a52] px-6 py-24 text-white">
+      <section
+        id="sponsors"
+        className="bg-[#071a52] px-6 py-24 text-white"
+      >
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-12 text-5xl font-extrabold">Sponsors</h2>
 
@@ -171,6 +163,42 @@ export default function HomePage() {
 
             <div className="rounded-3xl bg-white p-10 text-center text-4xl font-bold text-[#071a52] shadow-xl">
               Twenty 20 Estates
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section
+        id="contact"
+        className="bg-white px-6 py-24 text-[#071a52]"
+      >
+        <div className="mx-auto max-w-7xl text-center">
+          <h2 className="text-5xl font-extrabold">Contact Us</h2>
+
+          <p className="mx-auto mt-6 max-w-3xl text-xl text-slate-600">
+            Get in touch with Spiders Sports Club UK for matches,
+            sponsorships, memberships and general enquiries.
+          </p>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            <div className="rounded-3xl bg-[#eef2ff] p-8 shadow-lg">
+              <h3 className="text-2xl font-bold">Email</h3>
+              <p className="mt-4 text-lg">
+                spiderssportsclubuk@gmail.com
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-[#eef2ff] p-8 shadow-lg">
+              <h3 className="text-2xl font-bold">Location</h3>
+              <p className="mt-4 text-lg">High Wycombe, UK</p>
+            </div>
+
+            <div className="rounded-3xl bg-[#eef2ff] p-8 shadow-lg">
+              <h3 className="text-2xl font-bold">Join Us</h3>
+              <p className="mt-4 text-lg">
+                Players and supporters are welcome.
+              </p>
             </div>
           </div>
         </div>
