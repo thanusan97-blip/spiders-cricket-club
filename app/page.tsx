@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-const sliderImages = [
-  "/gallery/photo1.jpeg",
-  "/gallery/photo2.jpeg",
-];
+const sliderImages = ["/gallery/photo1.jpeg", "/gallery/photo2.jpeg"];
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,6 +23,7 @@ export default function HomePage() {
       {/* TOP BAR */}
       <header className="fixed top-0 z-50 w-full bg-[#3b82f6] shadow-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          {/* LOGO */}
           <div className="flex items-center gap-4">
             <Image
               src="/logo.png"
@@ -39,19 +37,24 @@ export default function HomePage() {
               <h1 className="text-xl font-bold text-white md:text-3xl">
                 Spiders Sports Club UK
               </h1>
-              <p className="text-sm text-white">Cricket Club • High Wycombe</p>
+              <p className="text-sm text-white">
+                Cricket Club • High Wycombe
+              </p>
             </div>
           </div>
 
+          {/* DESKTOP MENU */}
           <nav className="hidden items-center gap-8 font-semibold text-white md:flex">
             <a href="/">Home</a>
             <Link href="/competitions">Competitions</Link>
             <Link href="/statistics">Statistics</Link>
+            <Link href="/fixtures">Fixtures</Link>
             <Link href="/gallery">Gallery</Link>
             <a href="#sponsors">Sponsors</a>
             <a href="#contact">Contact</a>
           </nav>
 
+          {/* MOBILE BUTTON */}
           <button
             className="text-4xl text-white md:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -60,14 +63,36 @@ export default function HomePage() {
           </button>
         </div>
 
+        {/* MOBILE MENU */}
         {menuOpen && (
           <div className="flex flex-col gap-4 bg-[#2563eb] px-6 py-6 text-lg font-semibold text-white md:hidden">
-            <a href="/" onClick={() => setMenuOpen(false)}>Home</a>
-            <Link href="/competitions" onClick={() => setMenuOpen(false)}>Competitions</Link>
-            <Link href="/statistics" onClick={() => setMenuOpen(false)}>Statistics</Link>
-            <Link href="/gallery" onClick={() => setMenuOpen(false)}>Gallery</Link>
-            <a href="#sponsors" onClick={() => setMenuOpen(false)}>Sponsors</a>
-            <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+            <a href="/" onClick={() => setMenuOpen(false)}>
+              Home
+            </a>
+
+            <Link href="/competitions" onClick={() => setMenuOpen(false)}>
+              Competitions
+            </Link>
+
+            <Link href="/statistics" onClick={() => setMenuOpen(false)}>
+              Statistics
+            </Link>
+
+            <Link href="/fixtures" onClick={() => setMenuOpen(false)}>
+              Fixtures
+            </Link>
+
+            <Link href="/gallery" onClick={() => setMenuOpen(false)}>
+              Gallery
+            </Link>
+
+            <a href="#sponsors" onClick={() => setMenuOpen(false)}>
+              Sponsors
+            </a>
+
+            <a href="#contact" onClick={() => setMenuOpen(false)}>
+              Contact
+            </a>
           </div>
         )}
       </header>
@@ -112,25 +137,55 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-12 text-5xl font-extrabold">Club Areas</h2>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/competitions" className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
+            <Link
+              href="/competitions"
+              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+            >
               <h3 className="mb-4 text-3xl font-bold">Competitions</h3>
-              <p className="text-lg">View BTCL and VCTB competitions for 2026, 2025 and 2024.</p>
+              <p className="text-lg">
+                View BTCL and VCTB competitions for 2026, 2025 and 2024.
+              </p>
             </Link>
 
-            <Link href="/statistics" className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+            <Link
+              href="/statistics"
+              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+            >
               <h3 className="mb-4 text-3xl font-bold">Statistics</h3>
-              <p className="text-lg">View detailed player batting, bowling and fielding statistics.</p>
+              <p className="text-lg">
+                View detailed player batting, bowling and fielding statistics.
+              </p>
             </Link>
 
-            <Link href="/gallery" className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+            <Link
+              href="/fixtures"
+              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+            >
+              <h3 className="mb-4 text-3xl font-bold">Fixtures</h3>
+              <p className="text-lg">
+                View latest fixtures, results and upcoming matches.
+              </p>
+            </Link>
+
+            <Link
+              href="/gallery"
+              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+            >
               <h3 className="mb-4 text-3xl font-bold">Gallery</h3>
-              <p className="text-lg">Match day photos and club memories.</p>
+              <p className="text-lg">
+                Match day photos and club memories.
+              </p>
             </Link>
 
-            <Link href="/hall-of-fame" className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl">
+            <Link
+              href="/hall-of-fame"
+              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+            >
               <h3 className="mb-4 text-3xl font-bold">Hall of Fame</h3>
-              <p className="text-lg">Top performers and club legends.</p>
+              <p className="text-lg">
+                Top performers and club legends.
+              </p>
             </Link>
           </div>
         </div>
@@ -176,14 +231,19 @@ export default function HomePage() {
 
             <div className="rounded-3xl bg-[#eef2ff] p-8 shadow-lg">
               <h3 className="text-2xl font-bold">Join Us</h3>
-              <p className="mt-4 text-lg">Players and supporters are welcome.</p>
+              <p className="mt-4 text-lg">
+                Players and supporters are welcome.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer className="bg-[#04113a] px-6 py-8 text-center text-white">
-        <p className="text-lg">© 2026 Spiders Sports Club UK. All Rights Reserved.</p>
+        <p className="text-lg">
+          © 2026 Spiders Sports Club UK. All Rights Reserved.
+        </p>
       </footer>
     </main>
   );
