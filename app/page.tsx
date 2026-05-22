@@ -287,7 +287,16 @@ export default function HomePage() {
         />
 
       </div>
-
+ {/* Jatheesan LTD 3 */}
+  <div className="rounded-3xl bg-white p-6 shadow-lg hover:scale-105 transition">
+    <Image
+      src="/sponsors/jatheesan.png"
+      alt="Jatheesan Ltd"
+      width={250}
+      height={120}
+      className="mx-auto object-contain"
+    />
+  </div>
     </div>
   </div>
 </section>
