@@ -22,20 +22,7 @@ const batsmen = [
   ["8", "Aravinthan", "NK", "82"],
   ["9", "Dikson", "MB", "58"],
   ["10", "Theivendran", "TT", "58"],
-  ["11", "Visnujith", "BF", "56"],
-  ["12", "Loki", "PPR", "53"],
-  ["13", "Dinesh", "TT", "51"],
-  ["14", "Bala Rajesh", "PPR", "49"],
-  ["15", "Anusan", "ASK", "47"],
-  ["16", "Kavi", "TR", "45"],
-  ["17", "Vinothan", "KW", "43"],
-  ["18", "Kalgoban", "MB", "37"],
-  ["19", "Jeyarupan", "ASK", "35"],
-  ["20", "Satheeskanth", "TT", "35"],
-  ["21", "Heshan", "TR", "34"],
-  ["22", "Kirushioban", "KW", "33"],
-  ["23", "Ahamad", "NK", "31"],
-  ["24", "Abi Kanthiraj", "ASK", "28"],
+  
 ];
 
 const bowlers = [
@@ -49,20 +36,7 @@ const bowlers = [
   ["8", "Neru", "TR", "5"],
   ["9", "Ryan", "NK", "4"],
   ["10", "Kavi", "TR", "4"],
-  ["11", "Anusan", "BF", "3"],
-  ["12", "Bala Rajesh", "PPR", "3"],
-  ["13", "Loki", "PPR", "3"],
-  ["14", "Yathusan", "PPR", "3"],
-  ["15", "Ratheesh", "TT", "3"],
-  ["16", "Abi Kanthiraj", "ASK", "2"],
-  ["17", "Dinalan", "KW", "2"],
-  ["18", "Kibreeth", "KW", "2"],
-  ["19", "Satheeswaran", "KW", "2"],
-  ["20", "Umaisuthan", "KW", "2"],
-  ["21", "Jasitharan", "MB", "2"],
-  ["22", "Pirasath", "MB", "2"],
-  ["23", "Ahamad", "NK", "2"],
-  ["24", "Aravinthan", "NK", "2"],
+  
 ];
 
 export default function VCTB2025Page() {
