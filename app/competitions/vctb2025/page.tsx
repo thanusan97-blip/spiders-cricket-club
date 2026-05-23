@@ -44,6 +44,53 @@ export default function VCTB2025Page() {
             </p>
           </div>
         </div>
+<section className="mt-16">
+  <div className="grid gap-6 md:grid-cols-3">
+
+    <div className="rounded-3xl bg-white p-8 shadow-lg text-center">
+      <h2 className="text-2xl font-bold">
+        🏆 MVP of the Season
+      </h2>
+
+      <p className="mt-4 text-3xl font-extrabold text-[#071a52]">
+        Mohamad Fazlan
+      </p>
+
+      <p className="mt-2 text-lg text-slate-600">
+        148 Runs & 8 Wickets
+      </p>
+    </div>
+
+    <div className="rounded-3xl bg-white p-8 shadow-lg text-center">
+      <h2 className="text-2xl font-bold">
+        🏏 Best Batsman
+      </h2>
+
+      <p className="mt-4 text-3xl font-extrabold text-[#071a52]">
+        Jacob Sachin
+      </p>
+
+      <p className="mt-2 text-lg text-slate-600">
+        187 Runs
+      </p>
+    </div>
+
+    <div className="rounded-3xl bg-white p-8 shadow-lg text-center">
+      <h2 className="text-2xl font-bold">
+        🎯 Best Bowler
+      </h2>
+
+      <p className="mt-4 text-3xl font-extrabold text-[#071a52]">
+        Farusath
+      </p>
+
+      <p className="mt-2 text-lg text-slate-600">
+        10 Wickets
+      </p>
+    </div>
+
+  </div>
+</section>
 
         <section className="mt-16 rounded-3xl bg-white p-8 shadow-lg">
           <h2 className="text-4xl font-extrabold">
