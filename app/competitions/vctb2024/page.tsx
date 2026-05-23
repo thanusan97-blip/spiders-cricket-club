@@ -29,14 +29,14 @@ export default function VCTB2024Page() {
           <div className="rounded-3xl bg-white p-8 shadow-lg">
             <h2 className="text-3xl font-bold">Champions</h2>
             <p className="mt-4 text-2xl font-extrabold text-green-600">
-              Add champion team here
+              Thunnalai Royals
             </p>
           </div>
 
           <div className="rounded-3xl bg-white p-8 shadow-lg">
             <h2 className="text-3xl font-bold">Runners Up</h2>
             <p className="mt-4 text-2xl font-extrabold text-red-600">
-              Add runner-up team here
+              Point Pedro Rangers
             </p>
           </div>
         </div>
