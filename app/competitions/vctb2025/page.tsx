@@ -104,12 +104,15 @@ export default function VCTB2025Page() {
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {teams.map((team) => (
-              <div
-                key={team}
-                className="rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold"
-              >
-                {team}
-              </div>
+              <Link
+  href={`/competitions/vctb2025/${team
+    .toLowerCase()
+    .replaceAll(" ", "-")}`}
+  key={team}
+  className="rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold hover:bg-white transition block"
+>
+  {team}
+</Link>
             ))}
           </div>
         </section>
