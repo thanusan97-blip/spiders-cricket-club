@@ -53,7 +53,7 @@ export default function ThunnalaiRoyalsPage() {
               </h2>
 
               <p className="mt-4 text-xl">
-                Neru Sivathasan
+                Kugan Navarnam & Neru Sivathasan
               </p>
             </div>
 
