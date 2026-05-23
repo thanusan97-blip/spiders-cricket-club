@@ -29,7 +29,7 @@ export default function VCTB2025Page() {
 
         <div className="mt-12 grid gap-8 md:grid-cols-2">
           <div className="rounded-3xl bg-white p-8 shadow-lg">
-            <h2 className="text-3xl font-bold">Champions</h2>
+            <h2 className="text-3xl font-bold">🏆 Champions</h2>
 
             <p className="mt-4 text-2xl font-extrabold text-green-600">
               Thunnalai Royals
@@ -37,7 +37,7 @@ export default function VCTB2025Page() {
           </div>
 
           <div className="rounded-3xl bg-white p-8 shadow-lg">
-            <h2 className="text-3xl font-bold">Runners Up</h2>
+            <h2 className="text-3xl font-bold">🥈 Runners Up</h2>
 
             <p className="mt-4 text-2xl font-extrabold text-red-600">
               Balmoral Fighters
