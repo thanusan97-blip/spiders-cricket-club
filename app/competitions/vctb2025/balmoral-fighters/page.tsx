@@ -50,7 +50,7 @@ export default function BalmoralFightersPage() {
               </h2>
 
               <p className="mt-4 text-xl">
-                OWNER NAME
+                Anushan Arulanantham
               </p>
             </div>
 
@@ -60,7 +60,7 @@ export default function BalmoralFightersPage() {
               </h2>
 
               <p className="mt-4 text-xl">
-                CAPTAIN NAME
+                 Mohamed Fazlan
               </p>
             </div>
 
