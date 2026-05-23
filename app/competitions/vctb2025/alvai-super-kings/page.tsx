@@ -53,7 +53,7 @@ export default function AlvaiSuperKingsPage() {
               </h2>
 
               <p className="mt-4 text-xl">
-                Thuva Murali
+                Thuva Murali & Sutha Mano
               </p>
             </div>
 
