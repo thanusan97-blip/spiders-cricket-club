@@ -71,7 +71,7 @@ export default function PointPedroRangersPage() {
               </h2>
 
               <p className="mt-4 text-xl">
-                Runners Up
+                Playoffs
               </p>
             </div>
 
