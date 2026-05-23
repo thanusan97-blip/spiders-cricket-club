@@ -181,7 +181,7 @@ export default function CompetitionsPage() {
                 </p>
 
                 <a
-                  href="/competitions/2024"
+                  href="/competitions/vctb2024"
                   className="mt-4 inline-block text-lg font-bold"
                 >
                   Open 2024 competition →
