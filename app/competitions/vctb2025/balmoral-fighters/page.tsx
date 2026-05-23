@@ -50,7 +50,7 @@ export default function BalmoralFightersPage() {
               </h2>
 
               <p className="mt-4 text-xl">
-                Anushan Arulanantham
+                Anushan Arulanantham & Krishanth Thayalan
               </p>
             </div>
 
