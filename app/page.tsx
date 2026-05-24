@@ -160,18 +160,18 @@ export default function HomePage() {
             Club Areas
           </h2>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
 
             {/* COMPETITIONS */}
             <Link
               href="/competitions"
-              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+              className="min-h-[220px] rounded-2xl bg-white p-8 shadow-lg"
             >
-              <h3 className="mb-4 text-3xl font-bold">
+              <h3 className="break-words text-xl font-bold leading-tight">
                 Competitions
               </h3>
 
-              <p className="text-lg">
+              <p className="mt-4 text-base leading-8 text-slate-700">
                 View BTCL and VCTB competitions for 2026, 2025 and 2024.
               </p>
             </Link>
@@ -179,13 +179,13 @@ export default function HomePage() {
             {/* STATISTICS */}
             <Link
               href="/statistics"
-              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+              className="min-h-[220px] rounded-2xl bg-white p-8 shadow-lg"
             >
-              <h3 className="mb-4 text-3xl font-bold">
+              <h3 className="break-words text-xl font-bold leading-tight">
                 Statistics
               </h3>
 
-              <p className="text-lg">
+              <p className="mt-4 text-base leading-8 text-slate-700">
                 View detailed player batting, bowling and fielding statistics.
               </p>
             </Link>
@@ -193,13 +193,13 @@ export default function HomePage() {
             {/* FIXTURES */}
             <Link
               href="/fixtures"
-              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+              className="min-h-[220px] rounded-2xl bg-white p-8 shadow-lg"
             >
-              <h3 className="mb-4 text-3xl font-bold">
+              <h3 className="break-words text-xl font-bold leading-tight">
                 Fixtures
               </h3>
 
-              <p className="text-lg">
+              <p className="mt-4 text-base leading-8 text-slate-700">
                 View latest fixtures, results and upcoming matches.
               </p>
             </Link>
@@ -207,13 +207,13 @@ export default function HomePage() {
             {/* TEAM */}
             <Link
               href="/team"
-              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+              className="min-h-[220px] rounded-2xl bg-white p-8 shadow-lg"
             >
-              <h3 className="mb-4 text-3xl font-bold">
+              <h3 className="break-words text-xl font-bold leading-tight">
                 Team
               </h3>
 
-              <p className="text-lg">
+              <p className="mt-4 text-base leading-8 text-slate-700">
                 View team information, squad list and player profiles.
               </p>
             </Link>
@@ -221,13 +221,13 @@ export default function HomePage() {
             {/* GALLERY */}
             <Link
               href="/gallery"
-              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+              className="min-h-[220px] rounded-2xl bg-white p-8 shadow-lg"
             >
-              <h3 className="mb-4 text-3xl font-bold">
+              <h3 className="break-words text-xl font-bold leading-tight">
                 Gallery
               </h3>
 
-              <p className="text-lg">
+              <p className="mt-4 text-base leading-8 text-slate-700">
                 Match day photos and club memories.
               </p>
             </Link>
@@ -235,13 +235,13 @@ export default function HomePage() {
             {/* HALL OF FAME */}
             <Link
               href="/hall-of-fame"
-              className="rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+              className="min-h-[220px] rounded-2xl bg-white p-8 shadow-lg"
             >
-              <h3 className="mb-4 text-3xl font-bold">
+              <h3 className="break-words text-xl font-bold leading-tight">
                 Hall of Fame
               </h3>
 
-              <p className="text-lg">
+              <p className="mt-4 text-base leading-8 text-slate-700">
                 Top performers and club legends.
               </p>
             </Link>
