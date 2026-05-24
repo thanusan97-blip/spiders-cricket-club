@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const teams = [
   "Alvai Super Kings",
@@ -99,23 +100,143 @@ export default function VCTB2025Page() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-3xl bg-white p-8 shadow-lg">
-          <h2 className="text-4xl font-extrabold">Participating Teams</h2>
+      <section className="mt-16 rounded-3xl bg-white p-8 shadow-lg">
+  <h2 className="text-4xl font-extrabold">
+    Participating Teams
+  </h2>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {teams.map((team) => (
-              <Link
-  href={`/competitions/vctb2025/${team
-    .toLowerCase()
-    .replaceAll(" ", "-")}`}
-  key={team}
-  className="rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold hover:bg-white transition block"
->
-  {team}
-</Link>
-            ))}
-          </div>
-        </section>
+  <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+    <a
+      href="/competitions/vctb2025/alvai-super-kings"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/alvai-super-kings.jpg"
+          alt="Alvai Super Kings"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Alvai Super Kings</span>
+      </div>
+    </a>
+
+    <a
+      href="/competitions/vctb2025/balmoral-fighters"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/balmoral-fighters.jpg"
+          alt="Balmoral Fighters"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Balmoral Fighters</span>
+      </div>
+    </a>
+
+    <a
+      href="/competitions/vctb2025/karavaddy-warriors"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/karavaddy-warriors.jpg"
+          alt="Karavaddy Warriors"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Karavaddy Warriors</span>
+      </div>
+    </a>
+
+    <a
+      href="/competitions/vctb2025/measureland-blazers"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/measureland-blazers.jpg"
+          alt="Measureland Blazers"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Measureland Blazers</span>
+      </div>
+    </a>
+
+    <a
+      href="/competitions/vctb2025/niruvaththampai-knights"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/niruvaththampai-knights.jpg"
+          alt="Niruvaththampai Knights"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Niruvaththampai Knights</span>
+      </div>
+    </a>
+
+    <a
+      href="/competitions/vctb2025/point-pedro-rangers"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/point-pedro-rangers.jpg"
+          alt="Point Pedro Rangers"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Point Pedro Rangers</span>
+      </div>
+    </a>
+
+    <a
+      href="/competitions/vctb2025/team-tiger"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/team-tiger.jpg"
+          alt="Team Tiger"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Team Tiger</span>
+      </div>
+    </a>
+
+    <a
+      href="/competitions/vctb2025/thunnalai-royals"
+      className="block rounded-2xl border border-[#071a52]/20 bg-[#eef2ff] p-5 text-xl font-bold transition hover:bg-white hover:scale-105"
+    >
+      <div className="flex items-center gap-4">
+        <Image
+          src="/logos/thunnalai-royals.jpg"
+          alt="Thunnalai Royals"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span>Thunnalai Royals</span>
+      </div>
+    </a>
+
+  </div>
+</section>
 
         <section className="mt-16 grid gap-10 lg:grid-cols-2">
           <StatsTable
