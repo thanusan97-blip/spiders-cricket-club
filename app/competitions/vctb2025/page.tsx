@@ -46,7 +46,7 @@ export default function VCTB2025Page() {
           ← Back to Competitions
         </Link>
 
-        <section className="relative mt-8 overflow-hidden rounded-3xl shadow-lg">
+        <section className="relative mt-8 overflow-hidden rounded-3xl shadow-lg pb-20">
           <Image
             src="/covers/vctb2025-cover.jpg"
             alt="VCTB 2025 Background"
@@ -102,7 +102,7 @@ export default function VCTB2025Page() {
               </div>
             </div>
           </div>
-        </section>
+        
 
         <section className="mt-16">
           <div className="grid gap-6 md:grid-cols-3">
@@ -134,7 +134,7 @@ export default function VCTB2025Page() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-3xl bg-white p-8 shadow-lg">
+        <section className="mt-16 rounded-3xl bg-white/90 p-8 shadow-lg backdrop-blur-sm">
           <h2 className="text-4xl font-extrabold">Participating Teams</h2>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -158,7 +158,7 @@ export default function VCTB2025Page() {
             ))}
           </div>
         </section>
-
+</section>
         <section className="mt-16 grid gap-10 lg:grid-cols-2">
           <StatsTable
             title="Top Batsmen"
