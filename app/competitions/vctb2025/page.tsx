@@ -47,76 +47,69 @@ export default function VCTB2025Page() {
         <Link href="/competitions" className="font-bold hover:underline">
           ← Back to Competitions
         </Link>
-<div className="mt-8 overflow-hidden rounded-3xl shadow-lg">
+<div className="relative mt-8 overflow-hidden rounded-3xl shadow-lg">
   <Image
     src="/covers/vctb2025-cover.jpg"
-    alt="VCTB 2025 Cover"
-    width={1400}
-    height={500}
-    className="h-[400px] w-full object-cover"
-    priority
+    alt="VCTB Background"
+    fill
+    className="object-cover opacity-20"
   />
+
+  <div className="relative z-10 p-10">
+    <h1 className="text-7xl font-extrabold text-[#071a52]">
+      VCTB 2025
+    </h1>
+
+    <p className="mt-4 text-3xl text-slate-700">
+      Vadamaradchy Champion T10 Blast
+    </p>
+
+    <div className="mt-12 grid gap-8 md:grid-cols-2">
+      <div className="flex items-center gap-6 rounded-3xl bg-white/90 p-8 shadow-lg">
+        <div className="relative h-24 w-24 shrink-0">
+          <Image
+            src="/logos/thunnalai-royals.jpg"
+            alt="Thunnalai Royals"
+            fill
+            className="object-contain"
+          />
+        </div>
+
+        <div>
+          <h2 className="text-4xl font-bold">🏆 Champions</h2>
+          <p className="mt-3 text-3xl font-extrabold text-green-600">
+            Thunnalai Royals
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-6 rounded-3xl bg-white/90 p-8 shadow-lg">
+        <div className="relative h-24 w-24 shrink-0">
+          <Image
+            src="/logos/balmoral-fighters.jpg"
+            alt="Balmoral Fighters"
+            fill
+            className="object-contain"
+          />
+        </div>
+
+        <div>
+          <h2 className="text-4xl font-bold">🥈 Runners Up</h2>
+          <p className="mt-3 text-3xl font-extrabold text-red-600">
+            Balmoral Fighters
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-        <h1 className="mt-8 text-6xl font-extrabold">VCTB 2025</h1>
+</div>
 
         <p className="mt-4 text-2xl text-slate-600">
           Vadamaradchy Champion T10 Blast
         </p>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-
-  {/* CHAMPIONS */}
-  <div className="flex items-center gap-6 rounded-3xl bg-white p-8 shadow-lg">
-
-    <div className="relative h-16 w-16 shrink-0">
-      <Image
-        src="/logos/thunnalai-royals.jpg"
-        alt="Thunnalai Royals"
-        fill
-        sizes="64px"
-        className="object-contain"
-      />
-    </div>
-
-    <div>
-      <h2 className="text-3xl font-bold flex items-center gap-2">
-        🏆 Champions
-      </h2>
-
-      <p className="mt-2 text-2xl font-extrabold text-green-600">
-        Thunnalai Royals
-      </p>
-    </div>
-
-  </div>
-
-  {/* RUNNERS UP */}
-  <div className="flex items-center gap-6 rounded-3xl bg-white p-8 shadow-lg">
-
-    <div className="relative h-16 w-16 shrink-0">
-      <Image
-        src="/logos/balmoral-fighters.jpg"
-        alt="Balmoral Fighters"
-        fill
-        sizes="64px"
-        className="object-contain"
-      />
-    </div>
-
-    <div>
-      <h2 className="text-3xl font-bold flex items-center gap-2">
-        🥈 Runners Up
-      </h2>
-
-      <p className="mt-2 text-2xl font-extrabold text-red-600">
-        Balmoral Fighters
-      </p>
-    </div>
-
-
-          </div>
-        </div>
-
+        
         <section className="mt-16">
           <div className="grid gap-6 md:grid-cols-3">
             <div className="rounded-3xl bg-white p-8 text-center shadow-lg">
