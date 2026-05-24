@@ -47,7 +47,16 @@ export default function VCTB2025Page() {
         <Link href="/competitions" className="font-bold hover:underline">
           ← Back to Competitions
         </Link>
-
+<div className="mt-8 overflow-hidden rounded-3xl shadow-lg">
+  <Image
+    src="/covers/vctb2025-cover.jpg"
+    alt="VCTB 2025 Cover"
+    width={1400}
+    height={500}
+    className="h-[400px] w-full object-cover"
+    priority
+  />
+</div>
         <h1 className="mt-8 text-6xl font-extrabold">VCTB 2025</h1>
 
         <p className="mt-4 text-2xl text-slate-600">
@@ -55,18 +64,56 @@ export default function VCTB2025Page() {
         </p>
 
         <div className="mt-12 grid gap-8 md:grid-cols-2">
-          <div className="rounded-3xl bg-white p-8 shadow-lg">
-            <h2 className="text-3xl font-bold">🏆 Champions</h2>
-            <p className="mt-4 text-2xl font-extrabold text-green-600">
-              Thunnalai Royals
-            </p>
-          </div>
 
-          <div className="rounded-3xl bg-white p-8 shadow-lg">
-            <h2 className="text-3xl font-bold">🥈 Runners Up</h2>
-            <p className="mt-4 text-2xl font-extrabold text-red-600">
-              Balmoral Fighters
-            </p>
+  {/* CHAMPIONS */}
+  <div className="flex items-center gap-6 rounded-3xl bg-white p-8 shadow-lg">
+
+    <div className="relative h-16 w-16 shrink-0">
+      <Image
+        src="/logos/thunnalai-royals.jpg"
+        alt="Thunnalai Royals"
+        fill
+        sizes="64px"
+        className="object-contain"
+      />
+    </div>
+
+    <div>
+      <h2 className="text-3xl font-bold flex items-center gap-2">
+        🏆 Champions
+      </h2>
+
+      <p className="mt-2 text-2xl font-extrabold text-green-600">
+        Thunnalai Royals
+      </p>
+    </div>
+
+  </div>
+
+  {/* RUNNERS UP */}
+  <div className="flex items-center gap-6 rounded-3xl bg-white p-8 shadow-lg">
+
+    <div className="relative h-16 w-16 shrink-0">
+      <Image
+        src="/logos/balmoral-fighters.jpg"
+        alt="Balmoral Fighters"
+        fill
+        sizes="64px"
+        className="object-contain"
+      />
+    </div>
+
+    <div>
+      <h2 className="text-3xl font-bold flex items-center gap-2">
+        🥈 Runners Up
+      </h2>
+
+      <p className="mt-2 text-2xl font-extrabold text-red-600">
+        Balmoral Fighters
+      </p>
+    </div>
+
+
           </div>
         </div>
 
