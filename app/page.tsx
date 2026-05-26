@@ -161,7 +161,7 @@ export default function HomePage() {
       >
         <div className="absolute inset-0">
           <Image
-            src="/home/club-bg.jpg"
+            src="/home/club-bg.jpeg"
             alt="Club Background"
             fill
             className="object-cover opacity-85"
