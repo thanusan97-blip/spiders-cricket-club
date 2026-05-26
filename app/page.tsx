@@ -163,10 +163,10 @@ export default function HomePage() {
     src="/home/club-bg.jpg"
     alt="Club Background"
     fill
-    className="object-cover opacity-40"
+    className="object-cover opacity-55"
   />
 
-  <div className="absolute inset-0 bg-[#eef2ff]/65" />
+  <div className="absolute inset-0 bg-[#eef2ff]/40" />
 </div>
         <div className="relative z-10 mx-auto max-w-7xl">
 
