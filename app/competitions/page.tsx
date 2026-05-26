@@ -20,7 +20,7 @@ export default function CompetitionsPage() {
           {/* BTCL */}
           <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/30 shadow-2xl">
             <Image
-              src="/competitions/btcl-bg.jpeg"
+              src="/competitions/btcl-bg.jpg"
               alt="BTCL Background"
               fill
               className="object-cover"
@@ -109,7 +109,7 @@ export default function CompetitionsPage() {
           {/* VCTB */}
           <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/30 shadow-2xl">
             <Image
-              src="/competitions/vctb-bg.jpeg"
+              src="/competitions/vctb-bg.jpg"
               alt="VCTB Background"
               fill
               className="object-cover"
