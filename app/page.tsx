@@ -27,12 +27,12 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
 
           {/* LOGO */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Image
               src="/logo.png"
               alt="Spiders Logo"
-              width={70}
-              height={70}
+              width={55}
+              height={55}
               className="rounded-full"
             />
 
@@ -133,7 +133,7 @@ export default function HomePage() {
 
         <div className="relative z-10 max-w-5xl px-6 text-center text-white">
 
-          <h1 className="mb-6 text-5xl font-extrabold leading-tight md:text-7xl">
+          <h1 className="mb-6 text-4xl font-extrabold leading-tight sm:text-5xl md:text-7xl">
             WELCOME TO <br />
             SPIDERS SPORTS CLUB UK
           </h1>
@@ -145,7 +145,7 @@ export default function HomePage() {
 
           <a
             href="#club"
-            className="border-4 border-white px-10 py-4 text-xl font-bold transition hover:bg-white hover:text-[#071a52]"
+            className="border-4 border-white px-6 py-3 text-lg font-bold transition hover:bg-white hover:text-[#071a52] md:px-10 md:py-4 md:text-xl"
           >
             EXPLORE CLUB
           </a>
@@ -153,10 +153,10 @@ export default function HomePage() {
       </section>
 
       {/* CLUB AREAS */}
-      <section id="club" className="px-6 py-24">
+      <section id="club" className="px-4 py-16 md:px-6 md:py-24">
         <div className="mx-auto max-w-7xl">
 
-          <h2 className="mb-12 text-5xl font-extrabold">
+          <h2 className="mb-12 text-4xl font-extrabold md:text-5xl">
             Club Areas
           </h2>
 
@@ -253,15 +253,15 @@ export default function HomePage() {
       {/* SPONSORS */}
 <section
   id="sponsors"
-  className="bg-[#071a52] px-6 py-24 text-white"
+  className="bg-[#071a52] px-4 py-16 text-white md:px-6 md:py-24"
 >
   <div className="mx-auto max-w-7xl">
 
-    <h2 className="mb-12 text-5xl font-extrabold">
+    <h2 className="mb-12 text-4xl font-extrabold md:text-5xl">
       Sponsors
     </h2>
 
-    <div className="grid gap-8 md:grid-cols-2">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
       {/* KIWIKMART */}
       <div className="flex items-center justify-center rounded-3xl bg-white p-10 shadow-xl transition hover:scale-105">
@@ -305,15 +305,15 @@ export default function HomePage() {
       {/* CONTACT */}
       <section
         id="contact"
-        className="bg-white px-6 py-24 text-[#071a52]"
+        className="bg-white px-4 py-16 text-[#071a52] md:px-6 md:py-24"
       >
         <div className="mx-auto max-w-7xl text-center">
 
-          <h2 className="text-5xl font-extrabold">
+          <h2 className="text-4xl font-extrabold md:text-5xl">
             Contact Us
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-xl text-slate-600">
+          <p className="mx-auto mt-6 max-w-3xl text-lg text-slate-600 md:text-xl">
             Get in touch with Spiders Sports Club UK for matches,
             sponsorships, memberships and general enquiries.
           </p>
@@ -351,7 +351,7 @@ export default function HomePage() {
 <section className="bg-[#071a52] py-10 text-white">
   <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-6 px-6">
 
-    <h2 className="text-3xl font-bold">
+    <h2 className="text-2xl font-bold text-center md:text-3xl">
       Follow Spiders Sports Club UK
     </h2>
 
