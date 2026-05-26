@@ -111,7 +111,7 @@ export default function CompetitionsPage() {
           {/* VCTB */}
           <div className="rounded-3xl border border-[#071a52] bg-white p-6 shadow-lg md:p-8">
 
-            <div className="mb-8 flex items-center gap-6">
+            <div className="mb-8 flex flex-col items-center gap-6 text-center md:flex-row md:text-left">
 
               <Image
                 src="/competitions/vctb.png"
