@@ -153,8 +153,22 @@ export default function HomePage() {
       </section>
 
       {/* CLUB AREAS */}
-      <section id="club" className="px-4 py-16 md:px-6 md:py-24">
-        <div className="mx-auto max-w-7xl">
+      <section
+  id="club"
+  className="relative overflow-hidden px-4 py-16 md:px-6 md:py-24"
+>
+  {/* BACKGROUND IMAGE */}
+<div className="absolute inset-0">
+  <Image
+    src="/home/club-bg.jpg"
+    alt="Club Background"
+    fill
+    className="object-cover opacity-15"
+  />
+
+  <div className="absolute inset-0 bg-[#eef2ff]/88 backdrop-blur-[1px]" />
+</div>
+        <div className="relative z-10 mx-auto max-w-7xl">
 
           <h2 className="mb-12 text-4xl font-extrabold md:text-5xl">
             Club Areas
