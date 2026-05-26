@@ -2,13 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 const upcomingFixtures = [
-  {
-    date: "Sunday 24 May 2026",
-    team1: "A9 CC - 1st XI",
-    team2: "Spiders Sports Club UK - 1st XI",
-    venue: "Joseph Hood Recreation Ground, Morden",
-    time: "13:00",
-  },
+ 
   {
     date: "Sunday 31 May 2026",
     team1: "Yarl Gents CC - 1st XI",
@@ -30,10 +24,24 @@ const upcomingFixtures = [
     venue: "Crown Taverners Cricket Club",
     time: "13:00",
   },
+  {
+    date: "Sunday 21 June 2026",
+    team1: "Spiders Sports Club UK - 1st XI",
+    team2: "BEXLEY TAMILS CC",
+    venue: "Crown Taverners Cricket Club",
+    time: "13:00",
+  },
 ];
 
 const results = [
   {
+    date: "Sunday 24 May 2026",
+    result: "SPIDERS SPORTS CLUB UK WON BY 8 WICKETS",
+    score1: "149/8 (40.0)" ,
+    score2: "150/2 (16.0)",
+    team1: "A9 CC - 1st XI",
+    team2: "SPIDERS SPORTS CLUB UK",
+  },{
     date: "Sunday 17 May 2026",
     result: "SPIDERS SPORTS CLUB UK WON BY 200 RUNS",
     score1: "366 All Out (36.4)",
@@ -57,6 +65,7 @@ const results = [
     team1: "Spiders Sports Club UK",
     team2: "Bexley Tamils CC",
   },
+  
 ];
 
 export default function FixturesPage() {

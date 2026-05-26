@@ -17,7 +17,11 @@ export const metadata: Metadata = {
   description: "Official website of Spiders Sports Club UK",
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo.png",
+     icon: [
+      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/logo.png",
   },
   openGraph: {
     title: "Spiders Sports Club UK",
