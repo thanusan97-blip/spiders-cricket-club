@@ -122,8 +122,8 @@ export default function CompetitionsPage() {
                 <Image
                   src="/competitions/vctb.png"
                   alt="VCTB"
-                  width={90}
-                  height={90}
+                  width={110}
+                  height={110}
                   className="rounded-2xl object-contain"
                 />
 
