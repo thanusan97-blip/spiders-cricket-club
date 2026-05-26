@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function CompetitionsPage() {
   return (
-    <main className="min-h-screen bg-[#eef2ff] px-6 py-24 text-[#071a52]">
+    <main className="min-h-screen bg-[#eef2ff] px-4 py-16 text-[#071a52] md:px-6 md:py-24">
 
       <div className="mx-auto max-w-7xl">
 
@@ -14,27 +14,27 @@ export default function CompetitionsPage() {
           ← Back to Home
         </Link>
 
-        <h1 className="mb-16 text-6xl font-extrabold">
+        <h1 className="mb-12 text-4xl font-extrabold md:mb-16 md:text-6xl">
           Competitions
         </h1>
 
-        <div className="grid gap-10 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-2">
 
           {/* BTCL */}
-          <div className="rounded-3xl border border-[#071a52] bg-white p-8 shadow-lg">
+          <div className="rounded-3xl border border-[#071a52] bg-white p-6 shadow-lg md:p-8">
 
-            <div className="mb-8 flex items-center gap-6">
+            <div className="mb-8 flex flex-col items-center gap-6 text-center md:flex-row md:text-left">
 
               <Image
                 src="/competitions/btcl.png"
                 alt="BTCL"
-                width={120}
-                height={120}
+                width={90}
+                height={90}
                 className="rounded-2xl object-contain"
               />
 
               <div>
-                <h2 className="text-4xl font-extrabold">
+                <h2 className="text-3xl font-extrabold md:text-4xl">
                   British Tamil Cricket League (BTCL)
                 </h2>
 
@@ -49,7 +49,7 @@ export default function CompetitionsPage() {
 
               <div className="rounded-3xl border border-[#071a52] p-6">
 
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl font-bold md:text-3xl">
                   Season 2026
                 </h3>
 
@@ -69,7 +69,7 @@ export default function CompetitionsPage() {
 
               <div className="rounded-3xl border border-[#071a52] p-6">
 
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl font-bold md:text-3xl">
                   Season 2025
                 </h3>
 
@@ -88,7 +88,7 @@ export default function CompetitionsPage() {
 
               <div className="rounded-3xl border border-[#071a52] p-6">
 
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl font-bold md:text-3xl">
                   Season 2024
                 </h3>
 
@@ -109,7 +109,7 @@ export default function CompetitionsPage() {
           </div>
 
           {/* VCTB */}
-          <div className="rounded-3xl border border-[#071a52] bg-white p-8 shadow-lg">
+          <div className="rounded-3xl border border-[#071a52] bg-white p-6 shadow-lg md:p-8">
 
             <div className="mb-8 flex items-center gap-6">
 
@@ -122,7 +122,7 @@ export default function CompetitionsPage() {
               />
 
               <div>
-                <h2 className="text-4xl font-extrabold">
+                <h2 className="text-3xl font-extrabold md:text-4xl">
                   Vadamaradchy Champion T10 Blast (VCTB)
                 </h2>
 
@@ -137,7 +137,7 @@ export default function CompetitionsPage() {
 
               <div className="rounded-3xl border border-[#071a52] p-6">
 
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl font-bold md:text-3xl">
                   Season 2026
                 </h3>
 
@@ -153,7 +153,7 @@ export default function CompetitionsPage() {
 
               <div className="rounded-3xl border border-[#071a52] p-6">
 
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl font-bold md:text-3xl">
                   Season 2025
                 </h3>
 
@@ -172,7 +172,7 @@ export default function CompetitionsPage() {
 
               <div className="rounded-3xl border border-[#071a52] p-6">
 
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl font-bold md:text-3xl">
                   Season 2024
                 </h3>
 
