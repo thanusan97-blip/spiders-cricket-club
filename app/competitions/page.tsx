@@ -58,7 +58,7 @@ export default function CompetitionsPage() {
 
           {/* VCTB */}
           <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/20 bg-white/55 p-6 shadow-2xl backdrop-blur-sm md:p-8">
-            <Image src="/competitions/vctb-bg.jpg" alt="VCTB Background" fill className="object-cover opacity-50" />
+            <Image src="/competitions/vctb-bg.jpeg" alt="VCTB Background" fill className="object-cover opacity-50" />
             <div className="absolute inset-0 bg-white/35" />
 
             <div className="relative z-10">
