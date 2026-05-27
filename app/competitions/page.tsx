@@ -3,188 +3,90 @@ import Image from "next/image";
 
 export default function CompetitionsPage() {
   return (
-    <main className="min-h-screen bg-[#eef2ff] px-4 py-16 text-[#071a52] md:px-6 md:py-24">
-      <div className="mx-auto max-w-7xl">
-        <Link
-          href="/"
-          className="mb-10 inline-block font-semibold hover:underline"
-        >
+    <main className="relative min-h-screen overflow-hidden px-4 py-6 text-[#071a52] md:px-6">
+      <Image
+        src="/competitions/main-bg.jpg"
+        alt="Competitions Background"
+        fill
+        priority
+        className="object-cover"
+      />
+
+      <div className="absolute inset-0 bg-white/45" />
+
+      <div className="relative z-10 mx-auto max-w-6xl scale-[0.9] origin-top">
+        <Link href="/" className="mb-8 inline-block font-semibold hover:underline">
           ← Back to Home
         </Link>
 
-        <h1 className="mb-12 text-4xl font-extrabold md:mb-16 md:text-6xl">
+        <h1 className="mb-10 text-5xl font-extrabold md:text-7xl">
           Competitions
         </h1>
 
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* BTCL */}
-          <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/30 shadow-2xl">
-            <Image
-              src="/competitions/btcl-bg.jpg"
-              alt="BTCL Background"
-              fill
-              className="object-cover"
-            />
+          <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/20 bg-white/55 p-6 shadow-2xl backdrop-blur-sm md:p-8">
+            <Image src="/competitions/btcl-bg.jpg" alt="BTCL Background" fill className="object-cover opacity-50" />
+            <div className="absolute inset-0 bg-white/35" />
 
-            <div className="absolute inset-0 bg-white/65 backdrop-blur-[1px]" />
-
-            <div className="relative z-10 p-6 md:p-8">
+            <div className="relative z-10">
               <div className="mb-8 flex flex-col items-center gap-6 text-center md:flex-row md:text-left">
-                <Image
-                  src="/competitions/btcl.png"
-                  alt="BTCL"
-                  width={90}
-                  height={90}
-                  className="rounded-2xl object-contain"
-                />
-
+                <Image src="/competitions/btcl.png" alt="BTCL" width={90} height={90} className="rounded-2xl object-contain" />
                 <div>
-                  <h2 className="text-3xl font-extrabold md:text-4xl">
-                    British Tamil Cricket League (BTCL)
-                  </h2>
-
-                  <p className="mt-3 text-lg text-slate-700 md:text-xl">
-                    Official BTCL league competitions.
-                  </p>
+                  <h2 className="text-3xl font-extrabold md:text-4xl">British Tamil Cricket League (BTCL)</h2>
+                  <p className="mt-3 text-lg text-slate-700 md:text-xl">Official BTCL league competitions.</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="rounded-3xl border border-[#071a52]/40 bg-white/75 p-6 shadow-md backdrop-blur-sm">
-                  <h3 className="text-2xl font-bold md:text-3xl">
-                    Season 2026
-                  </h3>
-
-                  <p className="mt-3 text-lg">
-                    Division Challenge - Ongoing
-                  </p>
-
-                  <a
-                    href="https://btcl.play-cricket.com/website/division/137686"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-block text-lg font-bold text-red-600"
-                  >
-                    View live BTCL table →
-                  </a>
-                </div>
-
-                <div className="rounded-3xl border border-[#071a52]/40 bg-white/75 p-6 shadow-md backdrop-blur-sm">
-                  <h3 className="text-2xl font-bold md:text-3xl">
-                    Season 2025
-                  </h3>
-
-                  <p className="mt-3 text-lg">
-                    Division Classic and Chera B Group
-                  </p>
-
-                  <a
-                    href="/competitions/2025"
-                    className="mt-4 inline-block text-lg font-bold"
-                  >
-                    Open 2025 tables →
-                  </a>
-                </div>
-
-                <div className="rounded-3xl border border-[#071a52]/40 bg-white/75 p-6 shadow-md backdrop-blur-sm">
-                  <h3 className="text-2xl font-bold md:text-3xl">
-                    Season 2024
-                  </h3>
-
-                  <p className="mt-3 text-lg">
-                    Division Platinum
-                  </p>
-
-                  <a
-                    href="/competitions/2024"
-                    className="mt-4 inline-block text-lg font-bold"
-                  >
-                    Open 2024 table →
-                  </a>
-                </div>
+              <div className="space-y-5">
+                {[
+                  ["Season 2026", "Division Challenge - Ongoing", "View live BTCL table →", "https://btcl.play-cricket.com/website/division/137686", "red"],
+                  ["Season 2025", "Division Classic and Chera B Group", "Open 2025 tables →", "/competitions/2025", ""],
+                  ["Season 2024", "Division Platinum", "Open 2024 table →", "/competitions/2024", ""],
+                ].map(([season, text, label, href, color]) => (
+                  <div key={season} className="rounded-3xl border border-[#071a52]/20 bg-white/75 p-6 shadow-md backdrop-blur-sm">
+                    <h3 className="text-2xl font-bold md:text-3xl">{season}</h3>
+                    <p className="mt-3 text-lg">{text}</p>
+                    <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className={`mt-4 inline-block text-lg font-bold ${color === "red" ? "text-red-600" : ""}`}>
+                      {label}
+                    </a>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
 
           {/* VCTB */}
-          <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/30 shadow-2xl">
-            <Image
-              src="/competitions/vctb-bg.jpg"
-              alt="VCTB Background"
-              fill
-              className="object-cover"
-            />
+          <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/20 bg-white/55 p-6 shadow-2xl backdrop-blur-sm md:p-8">
+            <Image src="/competitions/vctb-bg.jpg" alt="VCTB Background" fill className="object-cover opacity-50" />
+            <div className="absolute inset-0 bg-white/35" />
 
-            <div className="absolute inset-0 bg-white/65 backdrop-blur-[1px]" />
-
-            <div className="relative z-10 p-6 md:p-8">
+            <div className="relative z-10">
               <div className="mb-8 flex flex-col items-center gap-6 text-center md:flex-row md:text-left">
-                <Image
-                  src="/competitions/vctb.png"
-                  alt="VCTB"
-                  width={130}
-                  height={130}
-                  className="rounded-2xl object-contain"
-                />
-
+                <Image src="/competitions/vctb.png" alt="VCTB" width={110} height={110} className="rounded-2xl object-contain" />
                 <div>
-                  <h2 className="text-3xl font-extrabold md:text-4xl">
-                    Vadamaradchy Champion T10 Blast (VCTB)
-                  </h2>
-
-                  <p className="mt-3 text-lg text-slate-700 md:text-xl">
-                    VCTB tournament competitions.
-                  </p>
+                  <h2 className="text-3xl font-extrabold md:text-4xl">Vadamaradchy Champion T10 Blast (VCTB)</h2>
+                  <p className="mt-3 text-lg text-slate-700 md:text-xl">VCTB tournament competitions.</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="rounded-3xl border border-[#071a52]/40 bg-white/75 p-6 shadow-md backdrop-blur-sm">
-                  <h3 className="text-2xl font-bold md:text-3xl">
-                    Season 2026
-                  </h3>
-
-                  <p className="mt-3 text-lg">
-                    Tournament coming soon
-                  </p>
-
-                  <span className="mt-4 inline-block text-lg font-bold text-slate-400">
-                    Coming Soon
-                  </span>
+              <div className="space-y-5">
+                <div className="rounded-3xl border border-[#071a52]/20 bg-white/75 p-6 shadow-md backdrop-blur-sm">
+                  <h3 className="text-2xl font-bold md:text-3xl">Season 2026</h3>
+                  <p className="mt-3 text-lg">Tournament coming soon</p>
+                  <span className="mt-4 inline-block text-lg font-bold text-slate-400">Coming Soon</span>
                 </div>
 
-                <div className="rounded-3xl border border-[#071a52]/40 bg-white/75 p-6 shadow-md backdrop-blur-sm">
-                  <h3 className="text-2xl font-bold md:text-3xl">
-                    Season 2025
-                  </h3>
-
-                  <p className="mt-3 text-lg">
-                    VCTB Tournament 2025
-                  </p>
-
-                  <a
-                    href="/competitions/vctb2025"
-                    className="mt-4 inline-block text-lg font-bold"
-                  >
-                    Open 2025 competition →
-                  </a>
+                <div className="rounded-3xl border border-[#071a52]/20 bg-white/75 p-6 shadow-md backdrop-blur-sm">
+                  <h3 className="text-2xl font-bold md:text-3xl">Season 2025</h3>
+                  <p className="mt-3 text-lg">VCTB Tournament 2025</p>
+                  <a href="/competitions/vctb2025" className="mt-4 inline-block text-lg font-bold">Open 2025 competition →</a>
                 </div>
 
-                <div className="rounded-3xl border border-[#071a52]/40 bg-white/75 p-6 shadow-md backdrop-blur-sm">
-                  <h3 className="text-2xl font-bold md:text-3xl">
-                    Season 2024
-                  </h3>
-
-                  <p className="mt-3 text-lg">
-                    VCTB Tournament 2024
-                  </p>
-
-                  <a
-                    href="/competitions/vctb2024"
-                    className="mt-4 inline-block text-lg font-bold"
-                  >
-                    Open 2024 competition →
-                  </a>
+                <div className="rounded-3xl border border-[#071a52]/20 bg-white/75 p-6 shadow-md backdrop-blur-sm">
+                  <h3 className="text-2xl font-bold md:text-3xl">Season 2024</h3>
+                  <p className="mt-3 text-lg">VCTB Tournament 2024</p>
+                  <a href="/competitions/vctb2024" className="mt-4 inline-block text-lg font-bold">Open 2024 competition →</a>
                 </div>
               </div>
             </div>
