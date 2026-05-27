@@ -157,7 +157,7 @@ export default function HomePage() {
       {/* CLUB AREAS */}
       <section
         id="club"
-        className="relative overflow-hidden px-4 py-16 md:px-6 md:py-24"
+        className="relative overflow-hidden px-4 py-10 md:px-6 md:py-16"
       >
         <div className="absolute inset-0">
           <Image
@@ -169,7 +169,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px]" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="relative z-10 mx-auto max-w-6xl scale-[0.92] origin-top">
           <h2 className="text-5xl font-extrabold text-[#061b52] md:text-6xl">
             Club Areas
           </h2>
@@ -183,12 +183,12 @@ export default function HomePage() {
             Explore everything about Spiders Sports Club UK.
           </p>
 
-          <div className="mt-10 grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {clubAreas.map((item) => (
               <Link
                 key={item.title}
                 href={item.link}
-                className="group relative min-h-[300px] overflow-hidden rounded-3xl border border-blue-200/70 bg-white/80 p-8 shadow-xl shadow-blue-900/10 transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                className="group relative min-h-[230px] overflow-hidden rounded-3xl border border-blue-200/70 bg-white/75 p-6 shadow-xl shadow-blue-900/10 transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/70" />
 
@@ -197,11 +197,11 @@ export default function HomePage() {
                 </div>
 
                 <div className="relative z-10 flex h-full flex-col">
-                  <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-blue-200 bg-blue-100/80 text-4xl shadow-md">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-blue-200 bg-blue-100/80 text-3xl shadow-md">
                     {item.icon}
                   </div>
 
-                  <h3 className="text-2xl font-extrabold text-[#061b52] md:text-3xl">
+                  <h3 className="text-xl font-extrabold text-[#061b52] md:text-2xl">
                     {item.title}
                   </h3>
 
