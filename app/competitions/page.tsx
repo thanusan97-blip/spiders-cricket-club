@@ -12,18 +12,18 @@ export default function CompetitionsPage() {
         className="object-cover"
       />
 
-      <div className="absolute inset-0 bg-white/45" />
+      <div className="absolute inset-0 bg-white/25 backdrop-blur-[1px]" />
 
-      <div className="relative z-10 mx-auto max-w-6xl scale-[0.9] origin-top">
+      <div className="relative z-10 mx-auto max-w-3xl scale-[0.66] origin-top">
         <Link href="/" className="mb-8 inline-block font-semibold hover:underline">
           ← Back to Home
         </Link>
 
-        <h1 className="mb-10 text-5xl font-extrabold md:text-7xl">
+        <h1 className="mb-4 text-3xl font-extrabold md:text-5xl">
           Competitions
         </h1>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2">
           {/* BTCL */}
           <section className="relative overflow-hidden rounded-3xl border border-[#071a52]/20 bg-white/55 p-6 shadow-2xl backdrop-blur-sm md:p-8">
             <Image src="/competitions/btcl-bg.jpg" alt="BTCL Background" fill className="object-cover opacity-50" />
