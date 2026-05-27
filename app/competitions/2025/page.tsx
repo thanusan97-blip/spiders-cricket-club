@@ -117,6 +117,38 @@ export default function Competition2025() {
                   <td className="p-4">0.15</td>
                   <td className="p-4">174</td>
                 </tr>
+                <tr className="border-t">
+                <td className="p-4">6</td>
+                <td className="p-4">Manipay Parish Sports Club CC - Blue</td>
+                <td className="p-4">14</td>
+                <td className="p-4">5</td>
+                <td className="p-4">8</td>
+                <td className="p-4">61</td>
+                <td className="p-4">-0.07</td>
+                <td className="p-4">171</td>
+              </tr>
+
+              <tr className="border-t">
+                <td className="p-4">7</td>
+                <td className="p-4">Young Royals CC - B</td>
+                <td className="p-4">14</td>
+                <td className="p-4">4</td>
+                <td className="p-4">8</td>
+                <td className="p-4">46</td>
+                <td className="p-4">-1.43</td>
+                <td className="p-4">136</td>
+              </tr>
+
+              <tr className="border-t">
+                <td className="p-4">8</td>
+                <td className="p-4">KPCCS - 1st XI</td>
+                <td className="p-4">14</td>
+                <td className="p-4">2</td>
+                <td className="p-4">10</td>
+                <td className="p-4">57</td>
+                <td className="p-4">-2.33</td>
+                <td className="p-4">127</td>
+              </tr>
 
               </tbody>
             </table>
