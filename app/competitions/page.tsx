@@ -14,7 +14,7 @@ export default function CompetitionsPage() {
 
       <div className="absolute inset-0 bg-white/25 backdrop-blur-[1px]" />
 
-      <div className="relative z-10 mx-auto max-w-3xl scale-[0.66] origin-top">
+      <div className="relative z-10 mx-auto max-w-5xl scale-[0.66] origin-top">
         <Link href="/" className="mb-8 inline-block font-semibold hover:underline">
           ← Back to Home
         </Link>
