@@ -169,7 +169,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px]" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-5xl scale-[0.88] origin-top">
+        <div className="relative z-10 mx-auto max-w-4xl scale-[0.82] origin-top">
           <h2 className="text-5xl font-extrabold text-[#061b52] md:text-6xl">
             Club Areas
           </h2>
@@ -183,7 +183,7 @@ export default function HomePage() {
             Explore everything about Spiders Sports Club UK.
           </p>
 
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {clubAreas.map((item) => (
               <Link
                 key={item.title}
