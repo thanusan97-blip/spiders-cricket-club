@@ -155,11 +155,11 @@ export default function HallOfFamePage() {
     src="/hall-of-fame/hof-bg.jpg"
     alt="Hall of Fame Background"
     fill
-    className="object-cover opacity-15"
+    className="object-cover opacity-60"
   />
 
   {/* Overlay */}
-  <div className="absolute inset-0 bg-white/70" />
+  <div className="absolute inset-0 bg-white/35 backdrop-blur-[1px]" />
 
   {/* Content */}
   <div className="relative z-10">
