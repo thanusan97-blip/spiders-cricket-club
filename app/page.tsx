@@ -157,7 +157,7 @@ export default function HomePage() {
       {/* CLUB AREAS */}
       <section
         id="club"
-        className="relative overflow-hidden px-4 py-10 md:px-6 md:py-16"
+        className="relative overflow-hidden px-4 py-6 md:px-6 md:py-10"
       >
         <div className="absolute inset-0">
           <Image
@@ -169,7 +169,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px]" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-6xl scale-[0.92] origin-top">
+        <div className="relative z-10 mx-auto max-w-5xl scale-[0.88] origin-top">
           <h2 className="text-5xl font-extrabold text-[#061b52] md:text-6xl">
             Club Areas
           </h2>
@@ -188,7 +188,7 @@ export default function HomePage() {
               <Link
                 key={item.title}
                 href={item.link}
-                className="group relative min-h-[230px] overflow-hidden rounded-3xl border border-blue-200/70 bg-white/75 p-6 shadow-xl shadow-blue-900/10 transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                className="group relative min-h-[210px] overflow-hidden rounded-3xl border border-blue-200/70 bg-white/75 p-6 shadow-xl shadow-blue-900/10 transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/70" />
 
