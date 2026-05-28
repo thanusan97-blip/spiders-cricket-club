@@ -8,10 +8,10 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 const images = Array.from({ length: 29 }, (_, i) => ({
-  src: `/gallery/vctb/2025/${i + 1}.jpeg`,
+  src: `/gallery/btcl/2026/${i + 1}.jpeg`,
 }));
 
-export default function VCTB2025Gallery() {
+export default function BTCL2026Gallery() {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
 
@@ -26,7 +26,7 @@ export default function VCTB2025Gallery() {
         </Link>
 
         <h1 className="mt-8 text-5xl font-black text-[#071a52] md:text-6xl">
-          VCTB 2025
+          BTCL 2026
         </h1>
 
         <p className="mt-4 text-xl text-slate-600">
@@ -46,7 +46,7 @@ export default function VCTB2025Gallery() {
               <div className="relative h-72 w-full">
                 <Image
                   src={image.src}
-                  alt={`VCTB 2025 ${i + 1}`}
+                  alt={`BTCL 2026 ${i + 1}`}
                   fill
                   className="object-cover transition duration-500 group-hover:scale-110"
                 />
