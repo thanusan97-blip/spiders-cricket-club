@@ -152,10 +152,10 @@ export default function HallOfFamePage() {
 
   {/* Background Image */}
   <Image
-    src="/hall-of-fame/hof-bg.jpg"
+    src="/hall-of-fame/hof-bg.jpeg"
     alt="Hall of Fame Background"
     fill
-    className="object-cover opacity-60"
+    className="object-cover opacity-80"
   />
 
   {/* Overlay */}

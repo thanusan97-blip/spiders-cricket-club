@@ -1,67 +1,57 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
-const galleryImages = [
-  "/gallery/photo1.jpeg",
-  "/gallery/photo2.jpeg",
-  "/gallery/photo3.jpeg",
-  "/gallery/photo4.jpeg",
-  "/gallery/photo5.jpeg",
-  "/gallery/photo6.jpeg",
+const albums = [
+  { title: "BTCL 2026", category: "btcl", year: "2026", cover: "/gallery/btcl/2026/cover.jpg" },
+  { title: "BTCL 2025", category: "btcl", year: "2025", cover: "/gallery/btcl/2025/cover.jpg" },
+  { title: "BTCL 2024", category: "btcl", year: "2024", cover: "/gallery/btcl/2024/cover.jpg" },
+  { title: "VCTB 2026", category: "vctb", year: "2026", cover: "/gallery/vctb/2026/cover.jpg" },
+  { title: "VCTB 2025", category: "vctb", year: "2025", cover: "/gallery/vctb/2025/cover.jpg" },
+  { title: "VCTB 2024", category: "vctb", year: "2024", cover: "/gallery/vctb/2024/cover.jpg" },
+  { title: "ROS CPL 2026", category: "ros-cpl", year: "2026", cover: "/gallery/ros-cpl/2026/cover.jpg" },
+  { title: "Ponmaalai Pozhudhu 2024", category: "ponmaalai-pozhudhu", year: "2024", cover: "/gallery/ponmaalai-pozhudhu/2024/cover.jpg" },
 ];
 
 export default function GalleryPage() {
   return (
-    <main className="min-h-screen bg-[#eef2ff] px-6 py-24 text-[#071a52]">
-
+    <main className="min-h-screen bg-[#eef2ff] px-4 py-12 text-[#071a52] md:px-6 md:py-20">
       <div className="mx-auto max-w-7xl">
-
-        <Link
-          href="/"
-          className="mb-10 inline-block font-semibold hover:underline"
-        >
+        <Link href="/" className="font-bold hover:underline">
           ← Back to Home
         </Link>
 
-        <h1 className="text-5xl font-extrabold">
-          Club Gallery
+        <h1 className="mt-8 text-5xl font-black md:text-6xl">
+          Gallery
         </h1>
 
-        <p className="mt-4 text-2xl text-slate-600">
-          Match day photos and club memories.
+        <p className="mt-4 text-xl text-slate-600">
+          Browse photos by competition and season.
         </p>
 
-        <div className="mt-16 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-
-          {galleryImages.map((image, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-3xl border border-[#071a52] bg-white shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {albums.map((album) => (
+            <Link
+              key={album.title}
+              href={`/gallery/${album.category}/${album.year}`}
+              className="group overflow-hidden rounded-3xl bg-white shadow-xl transition hover:-translate-y-2 hover:shadow-2xl"
             >
-
-              <Image
-                src={image}
-                alt={`Gallery ${index + 1}`}
-                width={500}
-                height={350}
-                className="h-[300px] w-full object-cover"
-              />
-
-              <div className="p-6">
-                <h2 className="text-2xl font-bold">
-                  Spiders Sports Club UK
-                </h2>
-
-                <p className="mt-2 text-lg text-slate-600">
-                  Club gallery image {index + 1}
-                </p>
+              <div className="relative h-56 w-full">
+                <Image
+                  src={album.cover}
+                  alt={album.title}
+                  fill
+                  className="object-cover transition duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/30" />
+                <div className="absolute bottom-0 p-5">
+                  <h2 className="text-3xl font-black text-white">
+                    {album.title}
+                  </h2>
+                </div>
               </div>
-
-            </div>
+            </Link>
           ))}
-
         </div>
-
       </div>
     </main>
   );
