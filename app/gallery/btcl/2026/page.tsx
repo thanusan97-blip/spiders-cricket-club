@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const images = Array.from({ length: 29 }, (_, i) => ({
+const images = Array.from({ length: 6 }, (_, i) => ({
   src: `/gallery/btcl/2026/${i + 1}.jpeg`,
 }));
 
