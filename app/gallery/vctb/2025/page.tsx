@@ -3,21 +3,20 @@ import Link from "next/link";
 
 const images = Array.from({ length: 29 }, (_, i) => ({
   src: `/gallery/vctb/2025/${i + 1}.jpeg`,
-  alt: `VCTB 2025 Photo ${i + 1}`,
 }));
 
 export default function VCTB2025Gallery() {
   return (
-    <main className="min-h-screen bg-[#eef2ff] px-4 py-12 text-[#071a52] md:px-6 md:py-20">
+    <main className="min-h-screen bg-[#eef2ff] px-4 py-12 md:px-6 md:py-20">
       <div className="mx-auto max-w-7xl">
         <Link
           href="/gallery"
-          className="font-bold hover:underline"
+          className="font-bold text-[#071a52] hover:underline"
         >
           ← Back to Gallery
         </Link>
 
-        <h1 className="mt-8 text-5xl font-black md:text-6xl">
+        <h1 className="mt-8 text-5xl font-black text-[#071a52] md:text-6xl">
           VCTB 2025
         </h1>
 
@@ -29,14 +28,14 @@ export default function VCTB2025Gallery() {
           {images.map((image, index) => (
             <div
               key={index}
-              className="group overflow-hidden rounded-3xl bg-white shadow-xl"
+              className="overflow-hidden rounded-3xl bg-white shadow-xl"
             >
               <div className="relative h-72 w-full">
                 <Image
                   src={image.src}
-                  alt={image.alt}
+                  alt={`Photo ${index + 1}`}
                   fill
-                  className="object-cover transition duration-500 group-hover:scale-110"
+                  className="object-cover"
                 />
               </div>
             </div>
