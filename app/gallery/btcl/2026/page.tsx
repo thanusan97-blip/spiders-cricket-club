@@ -1,7 +1,47 @@
-export default function BTCL2024Gallery() {
+import Image from "next/image";
+import Link from "next/link";
+
+const images = Array.from({ length: 29 }, (_, i) => ({
+  src: `/gallery/btcl/2026/${i + 1}.jpeg`,
+}));
+
+export default function BTCL2026Gallery() {
   return (
-    <main className="min-h-screen bg-[#eef2ff] px-6 py-20 text-[#071a52]">
-      <h1 className="text-5xl font-black">BTCL 2024</h1>
+    <main className="min-h-screen bg-[#eef2ff] px-4 py-12 md:px-6 md:py-20">
+      <div className="mx-auto max-w-7xl">
+        <Link
+          href="/gallery"
+          className="font-bold text-[#071a52] hover:underline"
+        >
+          ← Back to Gallery
+        </Link>
+
+        <h1 className="mt-8 text-5xl font-black text-[#071a52] md:text-6xl">
+          BTCL 2026
+        </h1>
+
+        <p className="mt-4 text-xl text-slate-600">
+          Tournament memories and match moments.
+        </p>
+
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className="group overflow-hidden rounded-3xl bg-white shadow-xl"
+            >
+              <div className="relative h-72 w-full">
+                <Image
+                  src={image.src}
+                  alt={`BTCL 2026 ${index + 1}`}
+                  fill
+                  className="object-cover transition duration-500 group-hover:scale-110"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }
