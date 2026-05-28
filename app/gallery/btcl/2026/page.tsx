@@ -1,11 +1,20 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-const images = Array.from({ length: 6 }, (_, i) => ({
-  src: `/gallery/btcl/2026/${i + 1}.jpeg`,
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+
+const images = Array.from({ length: 29 }, (_, i) => ({
+  src: `/gallery/vctb/2025/${i + 1}.jpeg`,
 }));
 
-export default function BTCL2026Gallery() {
+export default function VCTB2025Gallery() {
+  const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+
   return (
     <main className="min-h-screen bg-[#eef2ff] px-4 py-12 md:px-6 md:py-20">
       <div className="mx-auto max-w-7xl">
@@ -17,7 +26,7 @@ export default function BTCL2026Gallery() {
         </Link>
 
         <h1 className="mt-8 text-5xl font-black text-[#071a52] md:text-6xl">
-          BTCL 2026
+          VCTB 2025
         </h1>
 
         <p className="mt-4 text-xl text-slate-600">
@@ -25,22 +34,33 @@ export default function BTCL2026Gallery() {
         </p>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {images.map((image, index) => (
-            <div
-              key={index}
+          {images.map((image, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setIndex(i);
+                setOpen(true);
+              }}
               className="group overflow-hidden rounded-3xl bg-white shadow-xl"
             >
               <div className="relative h-72 w-full">
                 <Image
                   src={image.src}
-                  alt={`BTCL 2026 ${index + 1}`}
+                  alt={`VCTB 2025 ${i + 1}`}
                   fill
                   className="object-cover transition duration-500 group-hover:scale-110"
                 />
               </div>
-            </div>
+            </button>
           ))}
         </div>
+
+        <Lightbox
+          open={open}
+          close={() => setOpen(false)}
+          index={index}
+          slides={images}
+        />
       </div>
     </main>
   );
