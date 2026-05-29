@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Script from "next/script";
+
 
 const upcomingFixtures = [
   {
@@ -97,28 +97,23 @@ export default function FixturesPage() {
           </p>
 
           {/* LIVE SCORE */}
-          <section className="mt-10 rounded-3xl border border-[#071a52]/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm md:p-8">
-            <h2 className="text-3xl font-black md:text-4xl">Live Score</h2>
+<section className="mt-10 rounded-3xl border border-[#071a52]/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm md:p-8">
+  <h2 className="text-3xl font-black md:text-4xl">
+    Live Score
+  </h2>
 
-            <p className="mt-3 text-slate-700">
-              Follow today&apos;s live Play-Cricket scorecards.
-            </p>
+  <p className="mt-3 text-slate-700">
+    Follow today's live Play-Cricket scorecards.
+  </p>
 
-            <div className="mt-6 overflow-hidden rounded-2xl bg-white p-4 shadow-inner">
-              <a
-                style={{ display: "none" }}
-                className="lsw"
-                href="https://www.play-cricket.com/embed_widget/live_scorer_widgets?club_id=28250&days=0"
-                id="lsw_link_1526534855798"
-              />
-
-              <div
-                className="lsw-col-12 lsw_tile"
-                id="lsw_container_1526534855798"
-              />
-            </div>
-          </section>
-
+  <div className="mt-6 rounded-2xl bg-white p-4 shadow-inner">
+    <iframe
+      src="https://www.play-cricket.com/embed_widget/live_scorer_widgets?club_id=28250&days=7"
+      className="h-[500px] w-full rounded-xl border-0"
+      title="Spiders Sports Club UK Live Scores"
+    />
+  </div>
+</section>
           {/* UPCOMING FIXTURES */}
           <section className="mt-12">
             <h2 className="text-4xl font-black">Upcoming Fixtures</h2>
@@ -209,10 +204,7 @@ export default function FixturesPage() {
         </div>
       </div>
 
-      <Script
-        src="https://www.play-cricket.com/live_scorer.js"
-        strategy="afterInteractive"
-      />
+      
     </main>
   );
 }
