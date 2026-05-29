@@ -42,9 +42,26 @@ export default function VCTB2025Page() {
   return (
     <main className="min-h-screen bg-[#eef2ff] px-4 py-10 text-[#071a52] md:px-6 md:py-20">
       <div className="mx-auto max-w-7xl">
-        <Link href="/competitions" className="font-bold hover:underline">
-          ← Back to Competitions
-        </Link>
+        <div className="flex flex-wrap items-center gap-2 text-sm font-bold md:text-base">
+  <Link href="/" className="text-slate-500 hover:text-[#071a52] hover:underline">
+    Home
+  </Link>
+
+  <span className="text-slate-400">›</span>
+
+  <Link
+    href="/competitions"
+    className="text-slate-500 hover:text-[#071a52] hover:underline"
+  >
+    Competitions
+  </Link>
+
+  <span className="text-slate-400">›</span>
+
+  <span className="text-[#071a52]">
+    VCTB 2025
+  </span>
+</div>
 
         <section className="relative mt-6 overflow-hidden rounded-3xl pb-10 shadow-lg md:mt-8 md:pb-20">
           <Image
