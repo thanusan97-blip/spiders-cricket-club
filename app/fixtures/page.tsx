@@ -78,7 +78,7 @@ export default function FixturesPage() {
           className="h-full w-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-[#eef2ff]/85 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/25 backdrop-blur-[1px]" />
       </div>
 
       {/* Content */}
