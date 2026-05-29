@@ -1,10 +1,31 @@
+import Link from "next/link";
+
 export default function Statistics2025() {
   return (
     <main className="min-h-screen bg-[#f5f7fb] px-6 py-10 text-[#071a52]">
       <div className="mx-auto max-w-7xl">
-        <a href="/statistics" className="font-bold hover:underline">
-          ← Back to Statistics
-        </a>
+        {/* BREADCRUMB */}
+        <div className="flex flex-wrap items-center gap-2 text-sm font-bold md:text-base">
+          <Link
+            href="/"
+            className="text-slate-500 hover:text-[#071a52] hover:underline"
+          >
+            Home
+          </Link>
+
+          <span className="text-slate-400">›</span>
+
+          <Link
+            href="/statistics"
+            className="text-slate-500 hover:text-[#071a52] hover:underline"
+          >
+            Statistics
+          </Link>
+
+          <span className="text-slate-400">›</span>
+
+          <span className="text-[#071a52]">Season 2025</span>
+        </div>
 
         <h1 className="mt-8 text-6xl font-black">Season 2025 Statistics</h1>
 
@@ -92,10 +113,7 @@ function StatsTable({
 
           <tbody>
             {rows.map((row) => (
-              <tr
-                key={`${title}-${row[0]}`}
-                className="border-t hover:bg-slate-50"
-              >
+              <tr key={`${title}-${row[0]}`} className="border-t hover:bg-slate-50">
                 {row.map((cell, index) => (
                   <td
                     key={`${title}-${row[0]}-${index}`}
