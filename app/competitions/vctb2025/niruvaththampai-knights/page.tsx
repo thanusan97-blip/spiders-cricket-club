@@ -55,7 +55,7 @@ export default function NiruvaththampaiKnightsPage() {
   <span className="text-slate-400">›</span>
 
   <span className="font-semibold text-[#071a52]">
-    Thunnalai Royals
+    Niruvaththampai Knights
   </span>
 </div>
 
