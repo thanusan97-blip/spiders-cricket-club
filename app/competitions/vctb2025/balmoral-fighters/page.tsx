@@ -25,12 +25,38 @@ export default function BalmoralFightersPage() {
     <main className="min-h-screen bg-[#eef2ff] px-6 py-20 text-[#071a52]">
       <div className="mx-auto max-w-6xl">
 
-        <Link
-          href="/competitions/vctb2025"
-          className="font-bold hover:underline"
-        >
-          ← Back to VCTB 2025
-        </Link>
+        <div className="flex flex-wrap items-center gap-2 text-sm md:text-base">
+  <Link
+    href="/"
+    className="text-slate-500 hover:text-[#071a52] hover:underline"
+  >
+    Home
+  </Link>
+
+  <span className="text-slate-400">›</span>
+
+  <Link
+    href="/competitions"
+    className="text-slate-500 hover:text-[#071a52] hover:underline"
+  >
+    Competitions
+  </Link>
+
+  <span className="text-slate-400">›</span>
+
+  <Link
+    href="/competitions/vctb2025"
+    className="text-slate-500 hover:text-[#071a52] hover:underline"
+  >
+    VCTB 2025
+  </Link>
+
+  <span className="text-slate-400">›</span>
+
+  <span className="font-semibold text-[#071a52]">
+    Balmoral Fighters
+  </span>
+</div>
 
         <section className="mt-10 rounded-3xl bg-white p-10 shadow-lg">
 
