@@ -2,38 +2,134 @@ import Link from "next/link";
 import Image from "next/image";
 
 const players = [
-  "Haseeb Ali",
-  "Donald Croos",
-  "Thiruchselvam Arulprakash",
-  "Satheeshram Chandrasegarem",
-  "Prashant Gawali",
-  "Vithushan Jegatheeswaran",
-  "Piratheepan Kailayapillai",
-  "Manoj Krishnasamy",
-  "Kajendran Patkunarasa",
-  "Divakar Rajendiran",
-  "Jeevachandra Ramajayam",
-  "Birunthaban Selvakumar",
-  "Thanusan Shanthakumar",
-  "Sujanthiran Sritharan",
-  "Thakeesan Thiraviyarasa",
-  "Balaguru Thiruveragan",
-  "Dilrooban Yogarajah",
-  "Praveen Kumar Croos Anthonimuthu",
-  "Nirojan Arulnathan",
-  "Theepalaxshan Arunagiry",
-  "Ronald Ettienne",
-  "Premkumar Coonghe Juthathatheyhu",
-  "Prashanth Krishnakumar",
-  "Thinesh Param",
-  "Vijitharan Pulendran",
-  "Jeeva CR",
-  "Shuluckson Sathiyaseelan",
-  "Rexsan Shanthakumar",
-  "Dinesh Srikantharanganathan",
-  "Ajanthan Thiraviyarasa",
-  "Thuvarakan Thiraviyarasa",
-  "Vijitharan Vijayarathnam",
+  {
+    name: "Haseeb Ali",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Donald Croos",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Thiruchselvam Arulprakash",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Satheeshram Chandrasegarem",
+    profile: "All Rounder – Right arm batsman, Right arm medium",
+  },
+  {
+    name: "Prashant Gawali",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Vithushan Jegatheeswaran",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Piratheepan Kailayapillai",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Manoj Krishnasamy",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Kajendran Patkunarasa",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Divakar Rajendiran",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Jeevachandra Ramajayam",
+    profile: "Right arm batsman, Wicket Keeper",
+  },
+  {
+    name: "Birunthaban Selvakumar",
+    profile: "All Rounder – Left arm batsman, Left arm medium fast bowling",
+  },
+  {
+    name: "Thanusan Shanthakumar",
+    profile: "Right arm batsman, Wicket Keeper",
+  },
+  {
+    name: "Sujanthiran Sritharan",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Thakeesan Thiraviyarasa",
+    profile: "All Rounder – Right arm batsman, Right arm Leg Spin",
+  },
+  {
+    name: "Balaguru Thiruveragan",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Dilrooban Yogarajah",
+    profile: "All Rounder – Right arm batsman, Right arm Leg Spin",
+  },
+  {
+    name: "Praveen Kumar Croos Anthonimuthu",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Nirojan Arulnathan",
+    profile: "Bowler – Left arm Off Spin",
+  },
+  {
+    name: "Theepalaxshan Arunagiry",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Ronald Ettienne",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Premkumar Coonghe Juthathatheyhu",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Prashanth Krishnakumar",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Thinesh Param",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Vijitharan Pulendran",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Jeeva CR",
+    profile: "Right arm batsman, Wicket Keeper",
+  },
+  {
+    name: "Shuluckson Sathiyaseelan",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Rexsan Shanthakumar",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Dinesh Srikantharanganathan",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Ajanthan Thiraviyarasa",
+    profile: "All Rounder – Right arm batsman, Right arm medium fast bowling",
+  },
+  {
+    name: "Thuvarakan Thiraviyarasa",
+    profile: "Right arm batsman",
+  },
+  {
+    name: "Vijitharan Vijayarathnam",
+    profile: "Bowler – Right arm Leg Spin",
+  },
 ];
 
 function slugify(name: string) {
@@ -45,8 +141,13 @@ export default function TeamPage() {
     <main className="min-h-screen bg-[#eef2ff] text-[#071a52]">
       <section className="bg-[#071a52] px-6 py-16 text-white">
         <div className="mx-auto max-w-7xl">
-          <Link href="/" className="font-bold">← Back to Home</Link>
-          <h1 className="mt-8 text-6xl font-extrabold">Team Information</h1>
+          <Link href="/" className="font-bold">
+            ← Back to Home
+          </Link>
+
+          <h1 className="mt-8 text-5xl font-extrabold md:text-6xl">
+            Team Information
+          </h1>
         </div>
       </section>
 
@@ -63,6 +164,7 @@ export default function TeamPage() {
 
             <div className="md:col-span-2">
               <h2 className="text-4xl font-extrabold">1st XI</h2>
+
               <p className="mt-3 text-xl text-slate-600">
                 Spiders Sports Club UK
               </p>
@@ -82,17 +184,26 @@ export default function TeamPage() {
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-8 text-5xl font-extrabold">Squad</h2>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             {players.map((player) => (
               <Link
-                key={player}
-                href={`/team/${slugify(player)}`}
-                className="flex items-center gap-4 rounded-xl bg-white p-4 font-bold text-blue-600 shadow transition hover:bg-[#071a52] hover:text-white"
+                key={player.name}
+                href={`/team/${slugify(player.name)}`}
+                className="group flex items-center gap-5 rounded-2xl bg-white p-5 shadow transition hover:-translate-y-1 hover:bg-[#071a52] hover:text-white hover:shadow-xl"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-300 text-xl">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-slate-300 text-2xl">
                   👤
                 </div>
-                {player}
+
+                <div>
+                  <h3 className="text-lg font-extrabold text-blue-600 group-hover:text-white md:text-xl">
+                    {player.name}
+                  </h3>
+
+                  <p className="mt-1 text-sm font-semibold text-slate-600 group-hover:text-blue-100 md:text-base">
+                    {player.profile}
+                  </p>
+                </div>
               </Link>
             ))}
           </div>
