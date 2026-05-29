@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Competition2025() {
   return (
@@ -19,13 +20,30 @@ export default function Competition2025() {
       {/* CONTENT */}
       <div className="relative z-10 mx-auto max-w-5xl scale-[0.88] origin-top">
 
-        {/* BACK BUTTON */}
-        <a
-          href="/competitions"
-          className="mb-8 inline-block font-bold hover:underline"
-        >
-          ← Back to Competitions
-        </a>
+       {/* BREADCRUMB */}
+<div className="mb-8 flex flex-wrap items-center gap-2 text-sm font-bold md:text-base">
+  <Link
+    href="/"
+    className="text-slate-500 hover:text-[#071a52] hover:underline"
+  >
+    Home
+  </Link>
+
+  <span className="text-slate-400">›</span>
+
+  <Link
+    href="/competitions"
+    className="text-slate-500 hover:text-[#071a52] hover:underline"
+  >
+    Competitions
+  </Link>
+
+  <span className="text-slate-400">›</span>
+
+  <span className="text-[#071a52]">
+    Season 2025
+  </span>
+</div>
 
         {/* TITLE */}
         <h1 className="text-4xl font-black md:text-6xl">
