@@ -1,8 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
+import Script from "next/script";
 
 const upcomingFixtures = [
- 
   {
     date: "Sunday 31 May 2026",
     team1: "Yarl Gents CC - 1st XI",
@@ -37,11 +36,12 @@ const results = [
   {
     date: "Sunday 24 May 2026",
     result: "SPIDERS SPORTS CLUB UK WON BY 8 WICKETS",
-    score1: "149/8 (40.0)" ,
+    score1: "149/8 (40.0)",
     score2: "150/2 (16.0)",
     team1: "A9 CC - 1st XI",
     team2: "SPIDERS SPORTS CLUB UK",
-  },{
+  },
+  {
     date: "Sunday 17 May 2026",
     result: "SPIDERS SPORTS CLUB UK WON BY 200 RUNS",
     score1: "366 All Out (36.4)",
@@ -65,169 +65,154 @@ const results = [
     team1: "Spiders Sports Club UK",
     team2: "Bexley Tamils CC",
   },
-  
 ];
 
 export default function FixturesPage() {
   return (
-    <main className="min-h-screen bg-[#eef2ff] text-[#071a52]">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-[#3b82f6] shadow-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-4">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={70}
-              height={70}
-              className="rounded-full"
-            />
+    <main className="relative min-h-screen overflow-hidden text-[#071a52]">
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <img
+          src="/competitions/stat-bg.jpg"
+          alt="Fixtures Background"
+          className="h-full w-full object-cover"
+        />
 
-            <div>
-              <h1 className="text-xl font-bold text-white md:text-3xl">
-                Spiders Sports Club UK
-              </h1>
+        <div className="absolute inset-0 bg-[#eef2ff]/85 backdrop-blur-[1px]" />
+      </div>
 
-              <p className="text-sm text-white">
-                Cricket Club • High Wycombe
-              </p>
-            </div>
+      {/* Content */}
+      <div className="relative z-10 px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <Link href="/" className="font-bold hover:underline">
+            ← Back to Home
           </Link>
 
-          <nav className="hidden gap-8 font-semibold text-white md:flex">
-            <Link href="/">Home</Link>
-            <Link href="/competitions">Competitions</Link>
-            <Link href="/statistics">Statistics</Link>
-            <Link href="/fixtures">Fixtures</Link>
-            <Link href="/gallery">Gallery</Link>
-          </nav>
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section className="bg-[#071a52] px-6 py-24 text-white">
-        <div className="mx-auto max-w-7xl">
-          <h1 className="text-5xl font-extrabold md:text-7xl">
+          <h1 className="mt-8 text-5xl font-black md:text-6xl">
             Fixtures & Results
           </h1>
 
-          <p className="mt-6 max-w-3xl text-xl text-slate-300">
-            Follow upcoming matches and latest results for Spiders Sports Club
-            UK.
+          <p className="mt-4 text-lg text-slate-700 md:text-xl">
+            Live score, upcoming fixtures and latest results.
           </p>
-        </div>
-      </section>
 
-      {/* UPCOMING FIXTURES */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-10 text-4xl font-extrabold">
-            Upcoming Fixtures
-          </h2>
+          {/* LIVE SCORE */}
+          <section className="mt-10 rounded-3xl border border-[#071a52]/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm md:p-8">
+            <h2 className="text-3xl font-black md:text-4xl">Live Score</h2>
 
-          <div className="space-y-8">
-            {upcomingFixtures.map((fixture, index) => (
+            <p className="mt-3 text-slate-700">
+              Follow today&apos;s live Play-Cricket scorecards.
+            </p>
+
+            <div className="mt-6 overflow-hidden rounded-2xl bg-white p-4 shadow-inner">
+              <a
+                style={{ display: "none" }}
+                className="lsw"
+                href="https://www.play-cricket.com/embed_widget/live_scorer_widgets?club_id=28250&days=0"
+                id="lsw_link_1526534855798"
+              />
+
               <div
-                key={index}
-                className="rounded-3xl bg-white p-8 shadow-xl"
-              >
-                <div className="mb-6 text-2xl font-bold text-[#2563eb]">
-                  {fixture.date}
-                </div>
+                className="lsw-col-12 lsw_tile"
+                id="lsw_container_1526534855798"
+              />
+            </div>
+          </section>
 
-                <div className="grid gap-6 md:grid-cols-3 md:items-center">
-                  <div>
-                    <p className="text-lg text-slate-500">
-                      {fixture.time}
-                    </p>
+          {/* UPCOMING FIXTURES */}
+          <section className="mt-12">
+            <h2 className="text-4xl font-black">Upcoming Fixtures</h2>
 
-                    <h3 className="mt-2 text-2xl font-bold">
-                      {fixture.team1}
-                    </h3>
+            <div className="mt-8 grid gap-6">
+              {upcomingFixtures.map((fixture, index) => (
+                <div
+                  key={index}
+                  className="rounded-3xl border border-[#071a52]/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl md:p-8"
+                >
+                  <div className="text-xl font-bold text-blue-700">
+                    {fixture.date}
                   </div>
 
-                  <div className="text-center">
-                    <div className="text-4xl font-extrabold text-[#2563eb]">
-                      VS
+                  <div className="mt-6 grid gap-6 md:grid-cols-3 md:items-center">
+                    <div>
+                      <p className="text-slate-600">{fixture.time}</p>
+                      <h3 className="mt-2 text-xl font-black md:text-2xl">
+                        {fixture.team1}
+                      </h3>
                     </div>
 
-                    <p className="mt-3 text-slate-500">
-                      {fixture.venue}
-                    </p>
-                  </div>
+                    <div className="text-center">
+                      <div className="text-4xl font-black text-blue-600">
+                        VS
+                      </div>
+                      <p className="mt-2 text-slate-600">{fixture.venue}</p>
+                    </div>
 
-                  <div className="text-right">
-                    <h3 className="text-2xl font-bold">
-                      {fixture.team2}
-                    </h3>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* RESULTS */}
-      <section className="bg-white px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-10 text-4xl font-extrabold">
-            Latest Results
-          </h2>
-
-          <div className="space-y-8">
-            {results.map((match, index) => (
-              <div
-                key={index}
-                className="rounded-3xl bg-[#eef2ff] p-8 shadow-xl"
-              >
-                <div className="mb-4 text-2xl font-bold text-[#2563eb]">
-                  {match.date}
-                </div>
-
-                <div className="mb-8 text-center text-2xl font-extrabold">
-                  {match.result}
-                </div>
-
-                <div className="grid gap-8 md:grid-cols-3 md:items-center">
-                  <div>
-                    <h3 className="text-2xl font-bold">
-                      {match.team1}
-                    </h3>
-
-                    <p className="mt-2 text-xl text-slate-600">
-                      {match.score1}
-                    </p>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="text-5xl font-extrabold text-[#2563eb]">
-                      VS
+                    <div className="md:text-right">
+                      <h3 className="text-xl font-black md:text-2xl">
+                        {fixture.team2}
+                      </h3>
                     </div>
                   </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
-                  <div className="text-right">
-                    <h3 className="text-2xl font-bold">
-                      {match.team2}
-                    </h3>
+          {/* RESULTS */}
+          <section className="mt-12">
+            <h2 className="text-4xl font-black">Latest Results</h2>
 
-                    <p className="mt-2 text-xl text-slate-600">
-                      {match.score2}
-                    </p>
+            <div className="mt-8 grid gap-6">
+              {results.map((match, index) => (
+                <div
+                  key={index}
+                  className="rounded-3xl border border-[#071a52]/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl md:p-8"
+                >
+                  <div className="text-xl font-bold text-blue-700">
+                    {match.date}
+                  </div>
+
+                  <div className="mt-4 rounded-2xl bg-[#071a52] px-5 py-3 text-center text-lg font-black text-white md:text-2xl">
+                    {match.result}
+                  </div>
+
+                  <div className="mt-6 grid gap-6 md:grid-cols-3 md:items-center">
+                    <div>
+                      <h3 className="text-xl font-black md:text-2xl">
+                        {match.team1}
+                      </h3>
+                      <p className="mt-2 text-lg text-slate-700">
+                        {match.score1}
+                      </p>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="text-4xl font-black text-blue-600">
+                        VS
+                      </div>
+                    </div>
+
+                    <div className="md:text-right">
+                      <h3 className="text-xl font-black md:text-2xl">
+                        {match.team2}
+                      </h3>
+                      <p className="mt-2 text-lg text-slate-700">
+                        {match.score2}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
 
-      {/* FOOTER */}
-      <footer className="bg-[#04113a] px-6 py-8 text-center text-white">
-        <p className="text-lg">
-          © 2026 Spiders Sports Club UK. All Rights Reserved.
-        </p>
-      </footer>
+      <Script
+        src="https://www.play-cricket.com/live_scorer.js"
+        strategy="afterInteractive"
+      />
     </main>
   );
 }
