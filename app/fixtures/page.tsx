@@ -96,23 +96,23 @@ export default function FixturesPage() {
             Live score, upcoming fixtures and latest results.
           </p>
 
-          {/* LIVE SCORE */}
+         {/* LIVE SCORE */}
 <section className="mt-10 rounded-3xl border border-[#071a52]/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm md:p-8">
-  <h2 className="text-3xl font-black md:text-4xl">
-    Live Score
-  </h2>
+  <h2 className="text-3xl font-black md:text-4xl">Live Score</h2>
 
   <p className="mt-3 text-slate-700">
-    Follow today's live Play-Cricket scorecards.
+    Play-Cricket does not allow the live scorecard to open inside our page, but
+    you can view the official live scores using the button below.
   </p>
 
-  <div className="mt-6 rounded-2xl bg-white p-4 shadow-inner">
-    <iframe
-      src="https://www.play-cricket.com/embed_widget/live_scorer_widgets?club_id=28250&days=7"
-      className="h-[500px] w-full rounded-xl border-0"
-      title="Spiders Sports Club UK Live Scores"
-    />
-  </div>
+  <a
+    href="https://spidersscuk.play-cricket.com/Matches"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="mt-6 inline-block rounded-2xl bg-[#071a52] px-8 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700"
+  >
+    Open Live Score Centre →
+  </a>
 </section>
           {/* UPCOMING FIXTURES */}
           <section className="mt-12">
