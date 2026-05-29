@@ -73,7 +73,7 @@ export default function FixturesPage() {
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src="/competitions/main-bg.jpg"
+          src="/competitions/fixture.jpg"
           alt="Fixtures Background"
           className="h-full w-full object-cover"
         />
