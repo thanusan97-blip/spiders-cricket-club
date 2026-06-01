@@ -2,13 +2,7 @@ import Link from "next/link";
 
 
 const upcomingFixtures = [
-  {
-    date: "Sunday 31 May 2026",
-    team1: "Yarl Gents CC - 1st XI",
-    team2: "Spiders Sports Club UK - 1st XI",
-    venue: "Old Haberdashers RFC",
-    time: "13:00",
-  },
+ 
   {
     date: "Sunday 07 June 2026",
     team1: "Kent United CC - 2nd XI",
@@ -30,9 +24,24 @@ const upcomingFixtures = [
     venue: "Crown Taverners Cricket Club",
     time: "13:00",
   },
+   {
+    date: "Sunday 28 June 2026",
+    team1: "Spiders Sports Club UK - 1st XI",
+    team2: "Vaddukoddai CC Legends",
+    venue: "Crown Taverners Cricket Club",
+    time: "13:00",
+  },
 ];
 
 const results = [
+  {
+    date: "Sunday 31 May 2026",
+    result: "Yarl Gents CC - 1st XI WON BY 4 WICKETS",
+    score1: "95/10 (18.5)",
+    score2: "96/6 (20.4)",
+    team1: "SPIDERS SPORTS CLUB UK",
+    team2: "Yarl Gents CC - 1st XI ",
+  },
   {
     date: "Sunday 24 May 2026",
     result: "SPIDERS SPORTS CLUB UK WON BY 8 WICKETS",
@@ -55,7 +64,7 @@ const results = [
     score1: "306/9 (40.0)",
     score2: "198 All Out (39.5)",
     team1: "Spiders Sports Club UK",
-    team2: "Vaddukoddai CC",
+    team2: "Vaddukoddai CC Legends",
   },
   {
     date: "Sunday 03 May 2026",
