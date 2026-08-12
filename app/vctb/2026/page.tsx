@@ -42,20 +42,16 @@ const teams = [
 
 export default function VCTB2026Page() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black text-white">
-      {/* FIXED BACKGROUND */}
-      <div className="fixed inset-0 -z-20">
-        <Image
-          src="/vctb/2026/vctb-2026-bg.png"
-          alt="VCTB 2026 Background"
-          fill
-          priority
-          className="object-cover"
-        />
-      </div>
+    <main
+      className="min-h-screen bg-cover bg-center bg-fixed text-white"
+      style={{
+        backgroundImage: "url('/vctb/2026/vctb-2026-bg.png')",
+      }}
+    >
+      {/* DARK OVERLAY + PAGE CONTENT */}
+      <div className="min-h-screen bg-black/45">
 
-      {/* DARK OVERLAY */}
-      <div className="fixed inset-0 -z-10 bg-black/65" />
+        <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
 
       {/* PAGE CONTENT */}
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
@@ -326,6 +322,8 @@ export default function VCTB2026Page() {
             </div>
           </div>
         </section>
+      </div>
+            </div>
       </div>
     </main>
   );
