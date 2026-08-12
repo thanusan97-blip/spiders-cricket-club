@@ -235,7 +235,7 @@ export default function HomePage() {
               <Image src="/sponsors/jatheesan.png" alt="Jatheesan Ltd" width={250} height={120} className="mx-auto object-contain" />
             </div>
             <div className="flex items-center justify-center rounded-3xl bg-white p-10 shadow-xl transition hover:scale-105">
-              <Image src="/sponsors/sam.jpeg" alt="Sam Accountants" width={250} height={120} className="object-contain" />
+              <Image src="/sponsors/sam.jpg" alt="Sam Accountants" width={250} height={120} className="object-contain" />
             </div>
 
             
