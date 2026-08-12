@@ -231,14 +231,14 @@ export default function HomePage() {
             <div className="flex items-center justify-center rounded-3xl bg-white p-10 shadow-xl transition hover:scale-105">
               <Image src="/sponsors/kiwikmart.png" alt="Kiwikmart" width={250} height={120} className="object-contain" />
             </div>
-
-            <div className="flex items-center justify-center rounded-3xl bg-white p-10 shadow-xl transition hover:scale-105">
-              <Image src="/sponsors/twenty20.png" alt="Twenty20 Estates" width={250} height={120} className="object-contain" />
-            </div>
-
             <div className="rounded-3xl bg-white p-6 shadow-lg transition hover:scale-105">
               <Image src="/sponsors/jatheesan.png" alt="Jatheesan Ltd" width={250} height={120} className="mx-auto object-contain" />
             </div>
+            <div className="flex items-center justify-center rounded-3xl bg-white p-10 shadow-xl transition hover:scale-105">
+              <Image src="/sponsors/sam.jpeg" alt="Sam Accountants" width={250} height={120} className="object-contain" />
+            </div>
+
+            
           </div>
         </div>
       </section>
