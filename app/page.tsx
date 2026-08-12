@@ -23,11 +23,11 @@ const clubAreas = [
     link: "/statistics",
   },
   {
-    title: "Fixtures",
-    text: "View latest fixtures, results and upcoming matches.",
-    button: "See Fixtures",
-    icon: "📅",
-    link: "/fixtures",
+    title: "VCTB",
+    text: "Explore VCTB 2026, 2025 and 2024 tournaments.",
+    button: "Explore VCTB",
+    icon: "🏏",
+    link: "/vctb",
   },
   {
     title: "Team",
@@ -90,7 +90,7 @@ export default function HomePage() {
             <a href="/">Home</a>
             <Link href="/competitions">Competitions</Link>
             <Link href="/statistics">Statistics</Link>
-            <Link href="/fixtures">Fixtures</Link>
+            <Link href="/vctb">VCTB</Link>
             <Link href="/team">Team</Link>
             <Link href="/gallery">Gallery</Link>
             <a href="#sponsors">Sponsors</a>
@@ -110,7 +110,7 @@ export default function HomePage() {
             <a href="/" onClick={() => setMenuOpen(false)}>Home</a>
             <Link href="/competitions" onClick={() => setMenuOpen(false)}>Competitions</Link>
             <Link href="/statistics" onClick={() => setMenuOpen(false)}>Statistics</Link>
-            <Link href="/fixtures" onClick={() => setMenuOpen(false)}>Fixtures</Link>
+            <Link href="/vctb" onClick={() => setMenuOpen(false)}>VCTB</Link>
             <Link href="/team" onClick={() => setMenuOpen(false)}>Team</Link>
             <Link href="/gallery" onClick={() => setMenuOpen(false)}>Gallery</Link>
             <a href="#sponsors" onClick={() => setMenuOpen(false)}>Sponsors</a>
