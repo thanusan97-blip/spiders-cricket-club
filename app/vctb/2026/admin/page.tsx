@@ -20,6 +20,13 @@ const teams = [
   "Vallvai Blues SC UK",
 ];
 
+const playerRoles = [
+  "Batsman",
+  "Bowler",
+  "All-Rounder",
+  "Wicket Keeper",
+];
+
 export default function VCTB2026AdminPage() {
   const supabase = createClient();
 
@@ -31,6 +38,7 @@ export default function VCTB2026AdminPage() {
   const [playerId, setPlayerId] = useState("");
   const [player, setPlayer] = useState<Player | null>(null);
 
+  const [role, setRole] = useState("");
   const [team, setTeam] = useState("");
   const [points, setPoints] = useState("");
 
@@ -78,6 +86,7 @@ export default function VCTB2026AdminPage() {
     setUserEmail(null);
     setPlayer(null);
     setPlayerId("");
+    setRole("");
     setTeam("");
     setPoints("");
     setMessage("Logged out.");
@@ -92,6 +101,7 @@ export default function VCTB2026AdminPage() {
     setLoading(true);
     setMessage("");
     setPlayer(null);
+    setRole("");
 
     const { data, error } = await supabase
       .from("players")
@@ -106,12 +116,23 @@ export default function VCTB2026AdminPage() {
     }
 
     setPlayer(data);
+
+    // Automatically use the existing role if the player already has one
+    if (data.role) {
+      setRole(data.role);
+    }
+
     setLoading(false);
   }
 
   async function signPlayer() {
     if (!player) {
       setMessage("Find a player first.");
+      return;
+    }
+
+    if (!role) {
+      setMessage("Select the player's role.");
       return;
     }
 
@@ -143,6 +164,7 @@ export default function VCTB2026AdminPage() {
 
     const { error } = await supabase.from("auction_signings").insert({
       player_id: player.player_id,
+      role,
       team,
       points: Number(points),
     });
@@ -154,11 +176,14 @@ export default function VCTB2026AdminPage() {
     }
 
     setMessage(
-      `✅ ${player.name} signed by ${team} for ${Number(points).toLocaleString()} points.`
+      `✅ ${player.name} signed by ${team} as ${role} for ${Number(
+        points
+      ).toLocaleString()} points.`
     );
 
     setPlayerId("");
     setPlayer(null);
+    setRole("");
     setTeam("");
     setPoints("");
     setLoading(false);
@@ -245,6 +270,8 @@ export default function VCTB2026AdminPage() {
   return (
     <main className="min-h-screen bg-black px-4 py-10 text-white">
       <div className="mx-auto max-w-3xl">
+
+        {/* HEADER */}
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
@@ -262,13 +289,16 @@ export default function VCTB2026AdminPage() {
 
           <button
             onClick={handleLogout}
-            className="rounded-xl border border-red-500/40 px-4 py-2 text-sm font-bold text-red-400"
+            className="rounded-xl border border-red-500/40 px-4 py-2 text-sm font-bold text-red-400 transition hover:bg-red-500/10"
           >
             LOG OUT
           </button>
         </div>
 
+        {/* CONTROL BOX */}
         <div className="rounded-3xl border border-yellow-500/20 bg-zinc-950 p-6 md:p-8">
+
+          {/* PLAYER ID */}
           <label className="text-xs font-black uppercase tracking-[0.2em] text-yellow-400">
             Player ID
           </label>
@@ -286,12 +316,13 @@ export default function VCTB2026AdminPage() {
               type="button"
               onClick={findPlayer}
               disabled={loading}
-              className="rounded-xl bg-white px-5 py-3 font-black text-black"
+              className="rounded-xl bg-white px-5 py-3 font-black text-black transition hover:bg-yellow-400"
             >
               FIND
             </button>
           </div>
 
+          {/* FOUND PLAYER */}
           {player && (
             <div className="mt-6 flex items-center gap-4 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4">
               <img
@@ -309,13 +340,44 @@ export default function VCTB2026AdminPage() {
                   {player.name}
                 </h2>
 
-                <p className="text-sm text-white/60">
-                  {player.role || "Player"}
-                </p>
+                {player.role && (
+                  <p className="mt-1 text-sm text-white/60">
+                    Existing role: {player.role}
+                  </p>
+                )}
               </div>
             </div>
           )}
 
+          {/* PLAYER ROLE */}
+          <div className="mt-7">
+            <label className="text-xs font-black uppercase tracking-[0.2em] text-yellow-400">
+              Player Role
+            </label>
+
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="mt-3 w-full rounded-xl border border-white/20 bg-black px-4 py-3 outline-none focus:border-yellow-400"
+            >
+              <option value="">Select Player Role</option>
+
+              {playerRoles.map((roleName) => (
+                <option key={roleName} value={roleName}>
+                  {roleName}
+                </option>
+              ))}
+            </select>
+
+            {player?.role && (
+              <p className="mt-2 text-xs text-white/40">
+                Existing player-table role has been selected automatically.
+                You can change it if required.
+              </p>
+            )}
+          </div>
+
+          {/* TEAM */}
           <div className="mt-7">
             <label className="text-xs font-black uppercase tracking-[0.2em] text-yellow-400">
               Team
@@ -336,6 +398,7 @@ export default function VCTB2026AdminPage() {
             </select>
           </div>
 
+          {/* AUCTION POINTS */}
           <div className="mt-7">
             <label className="text-xs font-black uppercase tracking-[0.2em] text-yellow-400">
               Auction Points
@@ -351,6 +414,7 @@ export default function VCTB2026AdminPage() {
             />
           </div>
 
+          {/* SIGN BUTTON */}
           <button
             type="button"
             onClick={signPlayer}
@@ -360,11 +424,13 @@ export default function VCTB2026AdminPage() {
             {loading ? "PROCESSING..." : "🏏 SIGN PLAYER"}
           </button>
 
+          {/* MESSAGE */}
           {message && (
             <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4 text-center font-semibold">
               {message}
             </div>
           )}
+
         </div>
       </div>
     </main>
