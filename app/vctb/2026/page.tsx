@@ -1,5 +1,25 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+
+type Player = {
+  player_id: string;
+  name: string;
+  role: string | null;
+  photo_url: string | null;
+};
+
+type AuctionSigning = {
+  id: number;
+  created_at: string;
+  player_id: string;
+  team: string;
+  points: number;
+  player?: Player;
+};
 
 const teams = [
   {
@@ -41,10 +61,102 @@ const teams = [
 ];
 
 export default function VCTB2026Page() {
+  const supabase = useMemo(() => createClient(), []);
+
+  const [auctionSignings, setAuctionSignings] = useState<AuctionSigning[]>([]);
+  const [loadingSignings, setLoadingSignings] = useState(true);
+
+  const loadAuctionSignings = useCallback(async () => {
+    const { data: signingData, error: signingError } = await supabase
+      .from("auction_signings")
+      .select("id, created_at, player_id, team, points")
+      .order("created_at", { ascending: true });
+
+    if (signingError) {
+      console.error("Auction signings error:", signingError);
+      setLoadingSignings(false);
+      return;
+    }
+
+    if (!signingData || signingData.length === 0) {
+      setAuctionSignings([]);
+      setLoadingSignings(false);
+      return;
+    }
+
+    const playerIds = [
+      ...new Set(signingData.map((signing) => signing.player_id)),
+    ];
+
+    const { data: playerData, error: playerError } = await supabase
+      .from("players")
+      .select("player_id, name, role, photo_url")
+      .in("player_id", playerIds);
+
+    if (playerError) {
+      console.error("Players error:", playerError);
+      setAuctionSignings(signingData);
+      setLoadingSignings(false);
+      return;
+    }
+
+    const playerMap = new Map<string, Player>();
+
+    (playerData || []).forEach((player) => {
+      playerMap.set(player.player_id, player);
+    });
+
+    const combinedData: AuctionSigning[] = signingData.map((signing) => ({
+      ...signing,
+      player: playerMap.get(signing.player_id),
+    }));
+
+    setAuctionSignings(combinedData);
+    setLoadingSignings(false);
+  }, [supabase]);
+
+  useEffect(() => {
+    loadAuctionSignings();
+
+    const channel = supabase
+      .channel("vctb-2026-auction-live")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "auction_signings",
+        },
+        () => {
+          loadAuctionSignings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, loadAuctionSignings]);
+
+  function getPlayerPhoto(playerId: string, photoUrl?: string | null) {
+    if (photoUrl) {
+      return photoUrl;
+    }
+
+    const { data } = supabase.storage
+      .from("player-photos")
+      .getPublicUrl(`${playerId}.jpg`);
+
+    return data.publicUrl;
+  }
+
+  function getTeamSignings(teamName: string) {
+    return auctionSignings.filter((signing) => signing.team === teamName);
+  }
+
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
-
         {/* BREADCRUMB */}
         <div className="mb-8 flex flex-wrap gap-2 text-sm font-semibold text-white/80 md:text-base">
           <Link
@@ -87,7 +199,6 @@ export default function VCTB2026Page() {
           {/* HERO CONTENT */}
           <div className="relative z-10 p-6 md:p-10">
             <div className="grid items-center gap-8 lg:grid-cols-[260px_1fr]">
-
               {/* VCTB LOGO */}
               <div className="flex justify-center">
                 <div className="bg-white p-3 shadow-2xl">
@@ -104,7 +215,6 @@ export default function VCTB2026Page() {
 
               {/* HERO INFORMATION */}
               <div className="text-center lg:text-left">
-
                 <p className="text-sm font-black uppercase tracking-[0.35em] text-yellow-400 md:text-base">
                   KWIK MART PRESENTS
                 </p>
@@ -119,7 +229,6 @@ export default function VCTB2026Page() {
 
                 {/* DATE + TIME */}
                 <div className="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
-
                   <div className="rounded-full border border-yellow-400/50 bg-black/75 px-5 py-3 font-bold">
                     📅 14 August 2026
                   </div>
@@ -127,14 +236,12 @@ export default function VCTB2026Page() {
                   <div className="rounded-full border border-yellow-400/50 bg-black/75 px-5 py-3 font-bold">
                     🕡 6:30 PM
                   </div>
-
                 </div>
 
                 <p className="mt-6 max-w-3xl text-base leading-7 text-white/90 md:text-lg">
                   Follow the VCTB Edition 3.0 player auction and see each
                   team squad develop as players are selected.
                 </p>
-
               </div>
             </div>
           </div>
@@ -145,21 +252,24 @@ export default function VCTB2026Page() {
         {/* ===================================================== */}
 
         <section className="mt-8 rounded-3xl border border-red-500/40 bg-gradient-to-r from-red-950/80 via-red-950/60 to-red-950/80 p-6 text-center shadow-xl">
-
           <div className="flex items-center justify-center gap-3">
-
             <span className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
 
             <h2 className="text-xl font-black uppercase tracking-wide md:text-2xl">
               Auction Centre
             </h2>
-
           </div>
 
           <p className="mt-3 text-white/75">
-            Team squads will be updated during the auction.
+            Team squads will be updated live during the auction.
           </p>
 
+          {auctionSignings.length > 0 && (
+            <p className="mt-2 text-sm font-bold text-yellow-400">
+              {auctionSignings.length} Auction{" "}
+              {auctionSignings.length === 1 ? "Signing" : "Signings"} Confirmed
+            </p>
+          )}
         </section>
 
         {/* ===================================================== */}
@@ -167,9 +277,7 @@ export default function VCTB2026Page() {
         {/* ===================================================== */}
 
         <section className="mt-12">
-
           <div className="mb-6">
-
             <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
               Partners
             </p>
@@ -177,14 +285,11 @@ export default function VCTB2026Page() {
             <h2 className="mt-2 text-3xl font-black md:text-4xl">
               Tournament Sponsors
             </h2>
-
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
-
             {/* KWIK MART */}
             <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1">
-
               <p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">
                 Title Sponsor
               </p>
@@ -196,12 +301,10 @@ export default function VCTB2026Page() {
                 height={120}
                 className="object-contain"
               />
-
             </div>
 
             {/* JATHEESAN */}
             <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1">
-
               <p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">
                 Gold Sponsor
               </p>
@@ -213,12 +316,10 @@ export default function VCTB2026Page() {
                 height={120}
                 className="object-contain"
               />
-
             </div>
 
             {/* SAM */}
             <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1">
-
               <p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">
                 Powered By
               </p>
@@ -230,9 +331,7 @@ export default function VCTB2026Page() {
                 height={120}
                 className="object-contain"
               />
-
             </div>
-
           </div>
         </section>
 
@@ -241,9 +340,7 @@ export default function VCTB2026Page() {
         {/* ===================================================== */}
 
         <section className="mt-16">
-
           <div className="mb-8">
-
             <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
               VCTB Edition 3.0
             </p>
@@ -253,139 +350,187 @@ export default function VCTB2026Page() {
             </h2>
 
             <p className="mt-3 max-w-3xl text-white/70">
-              Retained players will be confirmed and auction signings
-              will be added as the event progresses.
+              Retained players will be confirmed and auction signings will
+              appear live as the event progresses.
             </p>
-
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {teams.map((team) => {
+              const teamSignings = getTeamSignings(team.name);
+              const currentSquad =
+                team.retained.length + teamSignings.length;
 
-            {teams.map((team) => (
+              return (
+                <article
+                  key={team.name}
+                  className="overflow-hidden rounded-[28px] border border-yellow-400/30 bg-[#080808] shadow-2xl transition duration-300 hover:-translate-y-1 hover:border-yellow-400/60"
+                >
+                  {/* TEAM HEADER */}
+                  <div className="border-b border-yellow-400/20 bg-gradient-to-r from-yellow-500/20 via-[#111]/80 to-red-600/15 p-6">
+                    <div className="flex items-center gap-5">
+                      {/* TEAM LOGO */}
+                      <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white p-2 shadow-xl">
+                        <Image
+                          src={team.logo}
+                          alt={team.name}
+                          width={90}
+                          height={90}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
 
-              <article
-                key={team.name}
-                className="overflow-hidden rounded-[28px] border border-yellow-400/30 bg-[#080808] shadow-2xl transition duration-300 hover:-translate-y-1 hover:border-yellow-400/60"
-              >
+                      {/* TEAM NAME */}
+                      <div>
+                        <h3 className="text-xl font-black uppercase leading-tight md:text-2xl">
+                          {team.name}
+                        </h3>
 
-                {/* TEAM HEADER */}
-                <div className="border-b border-yellow-400/20 bg-gradient-to-r from-yellow-500/20 via-[#111]/80 to-red-600/15 p-6">
-
-                  <div className="flex items-center gap-5">
-
-                    {/* TEAM LOGO */}
-                    <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white p-2 shadow-xl">
-
-                      <Image
-                        src={team.logo}
-                        alt={team.name}
-                        width={90}
-                        height={90}
-                        className="h-full w-full object-contain"
-                      />
-
+                        <p className="mt-2 text-xs font-bold uppercase tracking-widest text-yellow-400">
+                          VCTB 2026
+                        </p>
+                      </div>
                     </div>
+                  </div>
 
-                    {/* TEAM NAME */}
+                  {/* TEAM DETAILS */}
+                  <div className="p-6">
+                    {/* OWNER */}
                     <div>
-
-                      <h3 className="text-xl font-black uppercase leading-tight md:text-2xl">
-                        {team.name}
-                      </h3>
-
-                      <p className="mt-2 text-xs font-bold uppercase tracking-widest text-yellow-400">
-                        VCTB 2026
+                      <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
+                        Owner
                       </p>
 
+                      <p className="mt-2 text-lg font-bold">
+                        {team.owner}
+                      </p>
                     </div>
 
-                  </div>
-                </div>
+                    {/* RETAINED PLAYERS */}
+                    <div className="mt-7">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
+                          Retained Players
+                        </p>
 
-                {/* TEAM DETAILS */}
-                <div className="p-6">
+                        <span className="whitespace-nowrap rounded-full bg-yellow-400/15 px-3 py-1 text-xs font-bold text-yellow-300">
+                          {team.retained.length} Players
+                        </span>
+                      </div>
 
-                  {/* OWNER */}
-                  <div>
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        {team.retained.map((player) => (
+                          <div
+                            key={player}
+                            className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold"
+                          >
+                            ⭐ {player}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
-                    <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
-                      Owner
-                    </p>
+                    {/* ================================================= */}
+                    {/* LIVE AUCTION SIGNINGS */}
+                    {/* ================================================= */}
 
-                    <p className="mt-2 text-lg font-bold">
-                      {team.owner}
-                    </p>
+                    <div className="mt-7">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
+                          Auction Signings
+                        </p>
 
-                  </div>
+                        {teamSignings.length > 0 && (
+                          <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-bold text-red-300">
+                            {teamSignings.length}{" "}
+                            {teamSignings.length === 1
+                              ? "Signing"
+                              : "Signings"}
+                          </span>
+                        )}
+                      </div>
 
-                  {/* RETAINED PLAYERS */}
-                  <div className="mt-7">
+                      {loadingSignings ? (
+                        <div className="mt-4 rounded-2xl border border-dashed border-white/10 bg-white/5 p-5 text-center">
+                          <p className="font-semibold text-white/50">
+                            Loading auction signings...
+                          </p>
+                        </div>
+                      ) : teamSignings.length === 0 ? (
+                        <div className="mt-4 rounded-2xl border border-dashed border-red-400/30 bg-red-950/20 p-5 text-center">
+                          <p className="font-semibold text-white/60">
+                            Waiting for Auction Night...
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="mt-4 space-y-3">
+                          {teamSignings.map((signing) => {
+                            const player = signing.player;
 
-                    <div className="flex items-center justify-between gap-4">
+                            return (
+                              <div
+                                key={signing.id}
+                                className="flex items-center gap-3 rounded-2xl border border-red-400/20 bg-gradient-to-r from-red-950/40 to-white/5 p-3"
+                              >
+                                {/* PLAYER PHOTO */}
+                                <img
+                                  src={getPlayerPhoto(
+                                    signing.player_id,
+                                    player?.photo_url
+                                  )}
+                                  alt={player?.name || signing.player_id}
+                                  className="h-14 w-14 shrink-0 rounded-full border-2 border-yellow-400 object-cover"
+                                />
 
-                      <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
-                        Retained Players
-                      </p>
+                                {/* PLAYER DETAILS */}
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate font-black text-white">
+                                    {player?.name ||
+                                      `Player ${signing.player_id}`}
+                                  </p>
 
-                      <span className="whitespace-nowrap rounded-full bg-yellow-400/15 px-3 py-1 text-xs font-bold text-yellow-300">
-                        4 Players
+                                  <p className="mt-0.5 text-xs text-white/60">
+                                    {player?.role || "Player"}
+                                  </p>
+
+                                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/40">
+                                    Player #{signing.player_id}
+                                  </p>
+                                </div>
+
+                                {/* POINTS */}
+                                <div className="shrink-0 text-right">
+                                  <p className="text-lg font-black text-yellow-400">
+                                    {Number(
+                                      signing.points
+                                    ).toLocaleString()}
+                                  </p>
+
+                                  <p className="text-[10px] font-bold uppercase tracking-wider text-yellow-400/70">
+                                    Points
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CURRENT SQUAD */}
+                    <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+                      <span className="text-sm text-white/60">
+                        Current Squad
                       </span>
 
+                      <span className="text-lg font-black text-yellow-400">
+                        {currentSquad} Players
+                      </span>
                     </div>
-
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-
-                      {team.retained.map((player) => (
-
-                        <div
-                          key={player}
-                          className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold"
-                        >
-                          ⭐ {player}
-                        </div>
-
-                      ))}
-
-                    </div>
-
                   </div>
-
-                  {/* AUCTION SIGNINGS */}
-                  <div className="mt-7">
-
-                    <p className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
-                      Auction Signings
-                    </p>
-
-                    <div className="mt-4 rounded-2xl border border-dashed border-red-400/30 bg-red-950/20 p-5 text-center">
-
-                      <p className="font-semibold text-white/60">
-                        Waiting for Auction Night...
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  {/* CURRENT SQUAD */}
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
-
-                    <span className="text-sm text-white/60">
-                      Current Squad
-                    </span>
-
-                    <span className="text-lg font-black text-yellow-400">
-                      4 Players
-                    </span>
-
-                  </div>
-
-                </div>
-
-              </article>
-
-            ))}
-
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -394,7 +539,6 @@ export default function VCTB2026Page() {
         {/* ===================================================== */}
 
         <section className="mt-16 rounded-[30px] border border-yellow-400/30 bg-[#080808] p-7 shadow-2xl md:p-10">
-
           <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
             VCTB 2026
           </p>
@@ -404,10 +548,8 @@ export default function VCTB2026Page() {
           </h2>
 
           <div className="mt-7 grid gap-4 md:grid-cols-2">
-
             {/* RULE 1 */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-
               <p className="text-4xl font-black text-yellow-400">
                 4
               </p>
@@ -415,27 +557,21 @@ export default function VCTB2026Page() {
               <p className="mt-2 text-white/70">
                 Retained players permitted per team.
               </p>
-
             </div>
 
             {/* RULE 2 */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-
               <p className="text-4xl font-black text-yellow-400">
                 5
               </p>
 
               <p className="mt-2 text-white/70">
-                If an owner is playing, the squad may include
-                4 retained players plus 1 playing owner.
+                If an owner is playing, the squad may include 4 retained
+                players plus 1 playing owner.
               </p>
-
             </div>
-
           </div>
-
         </section>
-
       </div>
     </main>
   );
