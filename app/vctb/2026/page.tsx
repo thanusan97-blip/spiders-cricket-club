@@ -371,6 +371,16 @@ export default function VCTB2026Page() {
   // PAGE
   // =====================================================
 
+
+  const latestSigning =
+    auctionSignings.length > 0
+      ? auctionSignings[auctionSignings.length - 1]
+      : null;
+
+  const recentSignings = [...auctionSignings]
+    .slice(-5)
+    .reverse();
+
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
@@ -467,27 +477,183 @@ export default function VCTB2026Page() {
         </section>
 
         {/* ===================================================== */}
-        {/* AUCTION CENTRE */}
+        {/* LIVE AUCTION CENTRE */}
         {/* ===================================================== */}
 
-        <section className="mt-8 rounded-3xl border border-red-500/40 bg-gradient-to-r from-red-950/80 via-red-950/60 to-red-950/80 p-6 text-center shadow-xl">
-          <div className="flex items-center justify-center gap-3">
-            <span className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
+        <section className="mt-8 overflow-hidden rounded-[30px] border border-red-500/50 bg-gradient-to-br from-red-950/80 via-black to-black shadow-2xl">
 
-            <h2 className="text-xl font-black uppercase tracking-wide md:text-2xl">
-              Auction Centre
-            </h2>
+          {/* HEADER */}
+          <div className="border-b border-red-500/30 bg-red-950/50 px-6 py-5 text-center">
+            <div className="flex items-center justify-center gap-3">
+              <span className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
+
+              <h2 className="text-2xl font-black uppercase tracking-wide md:text-3xl">
+                Live Auction Centre
+              </h2>
+            </div>
+
+            <p className="mt-2 text-sm text-white/60">
+              Live VCTB 2026 player auction updates
+            </p>
           </div>
 
-          <p className="mt-3 text-white/75">
-            Team squads will be updated live during the auction.
-          </p>
+          {/* NO SIGNINGS YET */}
+          {!latestSigning ? (
+            <div className="p-8 text-center md:p-12">
+              <p className="text-xl font-black text-white/70">
+                Waiting for the first signing...
+              </p>
 
-          {auctionSignings.length > 0 && (
-            <p className="mt-2 text-sm font-bold text-yellow-400">
-              {auctionSignings.length} Auction{" "}
-              {auctionSignings.length === 1 ? "Signing" : "Signings"} Confirmed
-            </p>
+              <p className="mt-2 text-sm text-white/40">
+                New auction signings will appear here automatically.
+              </p>
+            </div>
+          ) : (
+            <div className="p-6 md:p-8">
+
+              {/* LATEST SIGNING */}
+              <div className="rounded-[26px] border border-yellow-400/40 bg-gradient-to-r from-yellow-500/10 via-red-950/40 to-black p-5 md:p-7">
+
+                <p className="mb-5 text-center text-xs font-black uppercase tracking-[0.3em] text-yellow-400">
+                  🔥 Latest Signing
+                </p>
+
+                <div className="flex flex-col items-center gap-6 md:flex-row">
+
+                  <img
+                    src={encodeURI(
+                      getAuctionPlayerPhoto(
+                        latestSigning.player_id,
+                        latestSigning.player?.photo_url
+                      )
+                    )}
+                    alt={
+                      latestSigning.player?.name ||
+                      `Player ${latestSigning.player_id}`
+                    }
+                    className="h-28 w-28 shrink-0 rounded-full border-4 border-yellow-400 object-cover shadow-xl md:h-32 md:w-32"
+                  />
+
+                  <div className="min-w-0 flex-1 text-center md:text-left">
+
+                    <p className="text-xs font-black uppercase tracking-widest text-yellow-400">
+                      {latestSigning.player_id}
+                    </p>
+
+                    <h3 className="mt-2 text-2xl font-black md:text-4xl">
+                      {latestSigning.player?.name ||
+                        `Player ${latestSigning.player_id}`}
+                    </h3>
+
+                    {(latestSigning.role ||
+                      latestSigning.player?.role) && (
+                      <p className="mt-2 text-lg font-semibold text-white/60">
+                        {latestSigning.role ||
+                          latestSigning.player?.role}
+                      </p>
+                    )}
+
+                    <div className="mt-5 flex flex-wrap justify-center gap-3 md:justify-start">
+
+                      <div className="rounded-full border border-red-500/40 bg-red-950/60 px-5 py-2">
+                        <span className="text-xs font-bold uppercase text-white/50">
+                          Team
+                        </span>
+
+                        <p className="font-black text-white">
+                          {latestSigning.team}
+                        </p>
+                      </div>
+
+                      <div className="rounded-full border border-yellow-400/40 bg-yellow-400/10 px-5 py-2">
+                        <span className="text-xs font-bold uppercase text-yellow-400/70">
+                          Sold For
+                        </span>
+
+                        <p className="font-black text-yellow-400">
+                          {Number(
+                            latestSigning.points
+                          ).toLocaleString()}{" "}
+                          Points
+                        </p>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* RECENT SIGNINGS */}
+              <div className="mt-8">
+
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-sm font-black uppercase tracking-[0.25em] text-white/70">
+                    Recent Signings
+                  </h3>
+
+                  <span className="rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-bold text-yellow-400">
+                    {auctionSignings.length} Confirmed
+                  </span>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                  {recentSignings.map((signing) => (
+                    <div
+                      key={signing.id}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                    >
+
+                      <div className="flex items-center gap-3">
+
+                        <img
+                          src={encodeURI(
+                            getAuctionPlayerPhoto(
+                              signing.player_id,
+                              signing.player?.photo_url
+                            )
+                          )}
+                          alt={
+                            signing.player?.name ||
+                            signing.player_id
+                          }
+                          className="h-12 w-12 shrink-0 rounded-full border-2 border-yellow-400 object-cover"
+                        />
+
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-black">
+                            {signing.player?.name ||
+                              `Player ${signing.player_id}`}
+                          </p>
+
+                          {(signing.role ||
+                            signing.player?.role) && (
+                            <p className="truncate text-xs text-white/50">
+                              {signing.role ||
+                                signing.player?.role}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 border-t border-white/10 pt-3">
+
+                        <p className="truncate text-xs font-bold text-red-300">
+                          {signing.team}
+                        </p>
+
+                        <p className="mt-1 text-lg font-black text-yellow-400">
+                          {Number(
+                            signing.points
+                          ).toLocaleString()}{" "}
+                          pts
+                        </p>
+
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </section>
 
