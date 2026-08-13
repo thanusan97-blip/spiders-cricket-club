@@ -12,11 +12,18 @@ type Player = {
   photo_url: string | null;
 };
 
+type RetainedPlayerRef = {
+  playerId: string;
+  photoCode: string;
+  name: string;
+};
+
 type AuctionSigning = {
   id: number;
   created_at: string;
   player_id: string;
   team: string;
+  role: string | null;
   points: number;
   player?: Player;
 };
@@ -26,37 +33,163 @@ const teams = [
     name: "Aathiyadi Super Kings",
     owner: "Jatheesan Arulanantham",
     logo: "/vctb/2026/teams/aathiyadi.png",
-    retained: ["Player A", "Player B", "Player C", "Player D"],
+    retained: [
+      {
+        playerId: "6",
+        photoCode: "VC 006",
+        name: "Dinalan Nallagurunathan",
+      },
+      {
+        playerId: "112",
+        photoCode: "VC 112",
+        name: "Satheesram Chandrasegaram",
+      },
+      {
+        playerId: "150",
+        photoCode: "VC 150",
+        name: "Akram Muthalib",
+      },
+      {
+        playerId: "160",
+        photoCode: "VC 160",
+        name: "Mohamed Nawazish",
+      },
+    ],
   },
+
   {
     name: "Balmoral Fighters",
     owner: "Krishanth Thayalan & Anushan Arulanantham",
     logo: "/vctb/2026/teams/balmoral.png",
-    retained: ["Player A", "Player B", "Player C", "Player D"],
+    retained: [
+      {
+        playerId: "59",
+        photoCode: "VC 059",
+        name: "Caniston Gunaratnam",
+      },
+      {
+        playerId: "91",
+        photoCode: "VC 091",
+        name: "Fazlan Mohamed",
+      },
+      {
+        playerId: "92",
+        photoCode: "VC 092",
+        name: "Visnujith Parakirama",
+      },
+      {
+        playerId: "93",
+        photoCode: "VC 093",
+        name: "Dinoshan Theivendram",
+      },
+    ],
   },
+
   {
     name: "Niruvaththampai Knights",
     owner: "Sornaraj Sornavadivel & Ranjithraj Thurairajah",
     logo: "/vctb/2026/teams/niruvaththampai.png",
-    retained: ["Player A", "Player B", "Player C", "Player D"],
+    retained: [
+      {
+        playerId: "54",
+        photoCode: "VC 054",
+        name: "Kabilraj Kanagaratnam",
+      },
+      {
+        playerId: "55",
+        photoCode: "VC 055",
+        name: "Murvin Abinash",
+      },
+      {
+        playerId: "103",
+        photoCode: "VC 103",
+        name: "Vensakar Kanthiraj",
+      },
+      {
+        playerId: "143",
+        photoCode: "VC 143",
+        name: "Anusan Theiventhiran",
+      },
+    ],
   },
+
   {
     name: "Team Tiger",
-    owner: "Sothilingam Yogeswaran",
+    owner: "Mathan",
     logo: "/vctb/2026/teams/team-tiger.png",
-    retained: ["Player A", "Player B", "Player C", "Player D"],
+    retained: [
+      {
+        playerId: "80",
+        photoCode: "VC 080",
+        name: "Pramoth Terrance",
+      },
+      {
+        playerId: "68",
+        photoCode: "VC 068",
+        name: "Ukantharasa Vinith",
+      },
+      {
+        playerId: "49",
+        photoCode: "VC 049",
+        name: "Rajee Sivalingam",
+      },
+    ],
   },
+
   {
     name: "Thunnalai Royals",
-    owner: "Sivathasan Kailasapillai & Kugan Navaratnam",
+    owner: "Navaratnam Kugan",
     logo: "/vctb/2026/teams/thunnalai.png",
-    retained: ["Player A", "Player B", "Player C", "Player D"],
+    retained: [
+      {
+        playerId: "154",
+        photoCode: "VC 154",
+        name: "Dikson Manokarasa",
+      },
+      {
+        playerId: "33",
+        photoCode: "VC 033",
+        name: "Purus Paran",
+      },
+      {
+        playerId: "25",
+        photoCode: "VC 025",
+        name: "Saranijan Gabilan",
+      },
+      {
+        playerId: "36",
+        photoCode: "VC 036",
+        name: "Riffaz Mohammed",
+      },
+    ],
   },
+
   {
     name: "Vallvai Blues SC UK",
     owner: "Valvai Blues Sports Committee",
     logo: "/vctb/2026/teams/vallvai-blues.png",
-    retained: ["Player A", "Player B", "Player C", "Player D"],
+    retained: [
+      {
+        playerId: "12",
+        photoCode: "VC 012",
+        name: "Kodeeswaran Vasthiyam Pillai",
+      },
+      {
+        playerId: "83",
+        photoCode: "VC 083",
+        name: "Dinesh Poobalasingham",
+      },
+      {
+        playerId: "134",
+        photoCode: "VC 134",
+        name: "Dilan Puviraj",
+      },
+      {
+        playerId: "167",
+        photoCode: "VC 167",
+        name: "Thishok Arasaretnam",
+      },
+    ],
   },
 ];
 
@@ -66,10 +199,58 @@ export default function VCTB2026Page() {
   const [auctionSignings, setAuctionSignings] = useState<AuctionSigning[]>([]);
   const [loadingSignings, setLoadingSignings] = useState(true);
 
+  const [retainedPlayers, setRetainedPlayers] = useState<
+    Map<string, Player>
+  >(new Map());
+
+  const [loadingRetained, setLoadingRetained] = useState(true);
+
+  // =====================================================
+  // LOAD RETAINED PLAYERS
+  // =====================================================
+
+  const loadRetainedPlayers = useCallback(async () => {
+    setLoadingRetained(true);
+
+    const retainedIds = [
+      ...new Set(
+        teams.flatMap((team) =>
+          team.retained.map((retainedPlayer) => retainedPlayer.playerId)
+        )
+      ),
+    ];
+
+    const { data, error } = await supabase
+      .from("players")
+      .select("player_id, name, role, photo_url")
+      .in("player_id", retainedIds);
+
+    if (error) {
+      console.error("Retained players error:", error);
+      setLoadingRetained(false);
+      return;
+    }
+
+    const playerMap = new Map<string, Player>();
+
+    (data || []).forEach((player) => {
+      playerMap.set(String(player.player_id), player);
+    });
+
+    setRetainedPlayers(playerMap);
+    setLoadingRetained(false);
+  }, [supabase]);
+
+  // =====================================================
+  // LOAD AUCTION SIGNINGS
+  // =====================================================
+
   const loadAuctionSignings = useCallback(async () => {
+    setLoadingSignings(true);
+
     const { data: signingData, error: signingError } = await supabase
       .from("auction_signings")
-      .select("id, created_at, player_id, team, points")
+      .select("id, created_at, player_id, team, role, points")
       .order("created_at", { ascending: true });
 
     if (signingError) {
@@ -85,7 +266,7 @@ export default function VCTB2026Page() {
     }
 
     const playerIds = [
-      ...new Set(signingData.map((signing) => signing.player_id)),
+      ...new Set(signingData.map((signing) => String(signing.player_id))),
     ];
 
     const { data: playerData, error: playerError } = await supabase
@@ -95,7 +276,14 @@ export default function VCTB2026Page() {
 
     if (playerError) {
       console.error("Players error:", playerError);
-      setAuctionSignings(signingData);
+
+      setAuctionSignings(
+        signingData.map((signing) => ({
+          ...signing,
+          player_id: String(signing.player_id),
+        }))
+      );
+
       setLoadingSignings(false);
       return;
     }
@@ -103,19 +291,25 @@ export default function VCTB2026Page() {
     const playerMap = new Map<string, Player>();
 
     (playerData || []).forEach((player) => {
-      playerMap.set(player.player_id, player);
+      playerMap.set(String(player.player_id), player);
     });
 
     const combinedData: AuctionSigning[] = signingData.map((signing) => ({
       ...signing,
-      player: playerMap.get(signing.player_id),
+      player_id: String(signing.player_id),
+      player: playerMap.get(String(signing.player_id)),
     }));
 
     setAuctionSignings(combinedData);
     setLoadingSignings(false);
   }, [supabase]);
 
+  // =====================================================
+  // INITIAL LOAD + LIVE AUCTION UPDATES
+  // =====================================================
+
   useEffect(() => {
+    loadRetainedPlayers();
     loadAuctionSignings();
 
     const channel = supabase
@@ -136,28 +330,55 @@ export default function VCTB2026Page() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, loadAuctionSignings]);
+  }, [supabase, loadAuctionSignings, loadRetainedPlayers]);
 
-  function getPlayerPhoto(playerId: string, photoUrl?: string | null) {
+  // =====================================================
+  // PHOTO HELPERS
+  // =====================================================
+
+  function getAuctionPlayerPhoto(
+    playerId: string,
+    photoUrl?: string | null
+  ) {
     if (photoUrl) {
       return photoUrl;
     }
 
-    const { data } = supabase.storage
-      .from("player-photos")
-      .getPublicUrl(`${playerId}.jpg`);
+    const number = Number(playerId);
 
-    return data.publicUrl;
+    const photoCode = Number.isNaN(number)
+      ? playerId
+      : `VC ${String(number).padStart(3, "0")}`;
+
+    return `/vctb-2026-players/${photoCode}.jpeg`;
   }
+
+  function getRetainedPhoto(photoCode: string) {
+    return `/vctb-2026-players/${photoCode}.jpeg`;
+  }
+
+  // =====================================================
+  // TEAM SIGNINGS
+  // =====================================================
 
   function getTeamSignings(teamName: string) {
-    return auctionSignings.filter((signing) => signing.team === teamName);
+    return auctionSignings.filter(
+      (signing) => signing.team === teamName
+    );
   }
+
+  // =====================================================
+  // PAGE
+  // =====================================================
 
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
+
+        {/* ===================================================== */}
         {/* BREADCRUMB */}
+        {/* ===================================================== */}
+
         <div className="mb-8 flex flex-wrap gap-2 text-sm font-semibold text-white/80 md:text-base">
           <Link
             href="/"
@@ -181,7 +402,7 @@ export default function VCTB2026Page() {
         </div>
 
         {/* ===================================================== */}
-        {/* HERO - BACKGROUND IMAGE ONLY INSIDE THIS BOX */}
+        {/* HERO */}
         {/* ===================================================== */}
 
         <section
@@ -193,12 +414,11 @@ export default function VCTB2026Page() {
             backgroundRepeat: "no-repeat",
           }}
         >
-          {/* DARK OVERLAY - ONLY INSIDE HERO */}
           <div className="absolute inset-0 bg-black/60" />
 
-          {/* HERO CONTENT */}
           <div className="relative z-10 p-6 md:p-10">
             <div className="grid items-center gap-8 lg:grid-cols-[260px_1fr]">
+
               {/* VCTB LOGO */}
               <div className="flex justify-center">
                 <div className="bg-white p-3 shadow-2xl">
@@ -213,7 +433,7 @@ export default function VCTB2026Page() {
                 </div>
               </div>
 
-              {/* HERO INFORMATION */}
+              {/* HERO TEXT */}
               <div className="text-center lg:text-left">
                 <p className="text-sm font-black uppercase tracking-[0.35em] text-yellow-400 md:text-base">
                   KWIK MART PRESENTS
@@ -227,7 +447,6 @@ export default function VCTB2026Page() {
                   Player Auction Night
                 </h2>
 
-                {/* DATE + TIME */}
                 <div className="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
                   <div className="rounded-full border border-yellow-400/50 bg-black/75 px-5 py-3 font-bold">
                     📅 14 August 2026
@@ -288,6 +507,7 @@ export default function VCTB2026Page() {
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
+
             {/* KWIK MART */}
             <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1">
               <p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">
@@ -350,14 +570,14 @@ export default function VCTB2026Page() {
             </h2>
 
             <p className="mt-3 max-w-3xl text-white/70">
-              Retained players will be confirmed and auction signings will
-              appear live as the event progresses.
+              Retained players and auction signings for VCTB 2026.
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {teams.map((team) => {
               const teamSignings = getTeamSignings(team.name);
+
               const currentSquad =
                 team.retained.length + teamSignings.length;
 
@@ -366,9 +586,14 @@ export default function VCTB2026Page() {
                   key={team.name}
                   className="overflow-hidden rounded-[28px] border border-yellow-400/30 bg-[#080808] shadow-2xl transition duration-300 hover:-translate-y-1 hover:border-yellow-400/60"
                 >
+
+                  {/* ================================================= */}
                   {/* TEAM HEADER */}
+                  {/* ================================================= */}
+
                   <div className="border-b border-yellow-400/20 bg-gradient-to-r from-yellow-500/20 via-[#111]/80 to-red-600/15 p-6">
                     <div className="flex items-center gap-5">
+
                       {/* TEAM LOGO */}
                       <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white p-2 shadow-xl">
                         <Image
@@ -393,8 +618,12 @@ export default function VCTB2026Page() {
                     </div>
                   </div>
 
+                  {/* ================================================= */}
                   {/* TEAM DETAILS */}
+                  {/* ================================================= */}
+
                   <div className="p-6">
+
                     {/* OWNER */}
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
@@ -406,7 +635,10 @@ export default function VCTB2026Page() {
                       </p>
                     </div>
 
+                    {/* ================================================= */}
                     {/* RETAINED PLAYERS */}
+                    {/* ================================================= */}
+
                     <div className="mt-7">
                       <div className="flex items-center justify-between gap-4">
                         <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
@@ -414,24 +646,70 @@ export default function VCTB2026Page() {
                         </p>
 
                         <span className="whitespace-nowrap rounded-full bg-yellow-400/15 px-3 py-1 text-xs font-bold text-yellow-300">
-                          {team.retained.length} Players
+                          {team.retained.length}{" "}
+                          {team.retained.length === 1
+                            ? "Player"
+                            : "Players"}
                         </span>
                       </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        {team.retained.map((player) => (
-                          <div
-                            key={player}
-                            className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold"
-                          >
-                            ⭐ {player}
-                          </div>
-                        ))}
+                      <div className="mt-4 space-y-3">
+                        {team.retained.map((retainedRef) => {
+                          const retainedPlayer =
+                            retainedPlayers.get(retainedRef.playerId);
+
+                          return (
+                            <div
+                              key={retainedRef.playerId}
+                              className="flex items-center gap-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-3"
+                            >
+
+                              {/* RETAINED PLAYER PHOTO */}
+                              <img
+                                src={getRetainedPhoto(
+                                  retainedRef.photoCode
+                                )}
+                                alt={
+                                  retainedPlayer?.name ||
+                                  retainedRef.name
+                                }
+                                className="h-14 w-14 shrink-0 rounded-full border-2 border-yellow-400 object-cover"
+                              />
+
+                              {/* RETAINED PLAYER DETAILS */}
+                              <div className="min-w-0 flex-1">
+
+                                <p className="font-black leading-tight text-white">
+                                  {loadingRetained
+                                    ? retainedRef.name
+                                    : retainedPlayer?.name ||
+                                      retainedRef.name}
+                                </p>
+
+                                {/* SHOW ROLE ONLY IF AVAILABLE */}
+                                {retainedPlayer?.role && (
+                                  <p className="mt-1 text-xs font-semibold text-white/60">
+                                    {retainedPlayer.role}
+                                  </p>
+                                )}
+
+                                <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/40">
+                                  {retainedRef.photoCode}
+                                </p>
+                              </div>
+
+                              {/* RETAINED STAR */}
+                              <div className="shrink-0 text-lg text-yellow-400">
+                                ⭐
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {/* ================================================= */}
-                    {/* LIVE AUCTION SIGNINGS */}
+                    {/* AUCTION SIGNINGS */}
                     {/* ================================================= */}
 
                     <div className="mt-7">
@@ -467,38 +745,48 @@ export default function VCTB2026Page() {
                           {teamSignings.map((signing) => {
                             const player = signing.player;
 
+                            const signingRole =
+                              signing.role || player?.role;
+
                             return (
                               <div
                                 key={signing.id}
                                 className="flex items-center gap-3 rounded-2xl border border-red-400/20 bg-gradient-to-r from-red-950/40 to-white/5 p-3"
                               >
-                                {/* PLAYER PHOTO */}
+
+                                {/* AUCTION PLAYER PHOTO */}
                                 <img
-                                  src={getPlayerPhoto(
+                                  src={getAuctionPlayerPhoto(
                                     signing.player_id,
                                     player?.photo_url
                                   )}
-                                  alt={player?.name || signing.player_id}
-                                  className="h-14 w-14 shrink-0 rounded-full border-2 border-yellow-400 object-cover"
+                                  alt={
+                                    player?.name ||
+                                    `Player ${signing.player_id}`
+                                  }
+                                  className="h-14 w-14 shrink-0 rounded-full border-2 border-red-400 object-cover"
                                 />
 
-                                {/* PLAYER DETAILS */}
+                                {/* AUCTION PLAYER DETAILS */}
                                 <div className="min-w-0 flex-1">
-                                  <p className="truncate font-black text-white">
+                                  <p className="font-black leading-tight text-white">
                                     {player?.name ||
                                       `Player ${signing.player_id}`}
                                   </p>
 
-                                  <p className="mt-0.5 text-xs text-white/60">
-                                    {player?.role || "Player"}
-                                  </p>
+                                  {/* ROLE FROM ADMIN SIGNING */}
+                                  {signingRole && (
+                                    <p className="mt-1 text-xs font-semibold text-white/60">
+                                      {signingRole}
+                                    </p>
+                                  )}
 
                                   <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/40">
                                     Player #{signing.player_id}
                                   </p>
                                 </div>
 
-                                {/* POINTS */}
+                                {/* AUCTION POINTS */}
                                 <div className="shrink-0 text-right">
                                   <p className="text-lg font-black text-yellow-400">
                                     {Number(
@@ -517,14 +805,18 @@ export default function VCTB2026Page() {
                       )}
                     </div>
 
+                    {/* ================================================= */}
                     {/* CURRENT SQUAD */}
+                    {/* ================================================= */}
+
                     <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
                       <span className="text-sm text-white/60">
                         Current Squad
                       </span>
 
                       <span className="text-lg font-black text-yellow-400">
-                        {currentSquad} Players
+                        {currentSquad}{" "}
+                        {currentSquad === 1 ? "Player" : "Players"}
                       </span>
                     </div>
                   </div>
@@ -548,7 +840,7 @@ export default function VCTB2026Page() {
           </h2>
 
           <div className="mt-7 grid gap-4 md:grid-cols-2">
-            {/* RULE 1 */}
+
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
               <p className="text-4xl font-black text-yellow-400">
                 4
@@ -559,7 +851,6 @@ export default function VCTB2026Page() {
               </p>
             </div>
 
-            {/* RULE 2 */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
               <p className="text-4xl font-black text-yellow-400">
                 5
