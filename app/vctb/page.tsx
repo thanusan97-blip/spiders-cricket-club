@@ -19,7 +19,7 @@ const seasons = [
     title: "VCTB 2025",
     description:
       "Explore the second edition of VCTB, including tournament information, teams and results.",
-    href: "/competitions/vctb2025",
+    href: "/vctb/2025",
     button: "OPEN 2025 SEASON",
     badge: "PAST SEASON",
     featured: false,
@@ -30,7 +30,7 @@ const seasons = [
     title: "VCTB 2024",
     description:
       "Revisit the inaugural season of the Vadamaradchy Champion T10 Blast.",
-    href: "/competitions/vctb2024",
+    href: "/vctb/2024",
     button: "OPEN 2024 SEASON",
     badge: "FIRST EDITION",
     featured: false,
@@ -40,10 +40,6 @@ const seasons = [
 export default function VCTBPage() {
   return (
     <main className="min-h-screen bg-black text-white">
-
-      {/* ===================================================== */}
-      {/* HERO */}
-      {/* ===================================================== */}
 
       <section className="relative overflow-hidden border-b border-yellow-400/20">
         <Image
@@ -55,12 +51,9 @@ export default function VCTBPage() {
         />
 
         <div className="absolute inset-0 bg-black/75" />
-
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
-
-          {/* BACK */}
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-sm font-bold text-white/70 transition hover:text-yellow-400"
@@ -69,8 +62,6 @@ export default function VCTBPage() {
           </Link>
 
           <div className="mt-10 grid items-center gap-10 lg:grid-cols-[340px_1fr]">
-
-            {/* EDITION 3 LOGO */}
             <div className="flex justify-center lg:justify-start">
               <div className="rounded-[30px] border border-yellow-400/40 bg-white p-5 shadow-2xl">
                 <Image
@@ -84,9 +75,7 @@ export default function VCTBPage() {
               </div>
             </div>
 
-            {/* HERO TEXT */}
             <div className="text-center lg:text-left">
-
               <p className="text-sm font-black uppercase tracking-[0.35em] text-yellow-400 md:text-base">
                 Spiders Sports Club UK
               </p>
@@ -106,7 +95,6 @@ export default function VCTBPage() {
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-
                 <div className="rounded-full border border-yellow-400/40 bg-black/60 px-5 py-3">
                   <p className="text-xs font-bold uppercase tracking-wider text-white/50">
                     Format
@@ -127,21 +115,14 @@ export default function VCTBPage() {
                   </p>
                   <p className="font-black text-yellow-400">2026</p>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===================================================== */}
-      {/* SEASONS */}
-      {/* ===================================================== */}
-
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-20">
-
         <div className="mb-10">
-
           <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
             VCTB History
           </p>
@@ -154,20 +135,13 @@ export default function VCTBPage() {
             Select a VCTB edition to view the tournament, teams and season
             information.
           </p>
-
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-
-          {/* ================================================= */}
-          {/* FEATURED 2026 CARD */}
-          {/* ================================================= */}
-
           <Link
             href="/vctb/2026"
             className="group relative overflow-hidden rounded-[32px] border border-yellow-400/50 bg-[#080808] shadow-2xl transition duration-300 hover:-translate-y-1 hover:border-yellow-400 lg:col-span-2"
           >
-
             <div className="absolute inset-0">
               <Image
                 src="/vctb/2026/vctb-2026-bg.png"
@@ -175,13 +149,10 @@ export default function VCTBPage() {
                 fill
                 className="object-cover opacity-30 transition duration-500 group-hover:scale-105"
               />
-
               <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-red-950/60" />
             </div>
 
             <div className="relative z-10 grid items-center gap-8 p-7 md:grid-cols-[220px_1fr_auto] md:p-10">
-
-              {/* LOGO */}
               <div className="flex justify-center md:justify-start">
                 <div className="rounded-3xl bg-white p-3 shadow-xl">
                   <Image
@@ -194,11 +165,8 @@ export default function VCTBPage() {
                 </div>
               </div>
 
-              {/* DETAILS */}
               <div className="text-center md:text-left">
-
                 <div className="flex flex-wrap justify-center gap-2 md:justify-start">
-
                   <span className="rounded-full bg-red-600 px-4 py-1.5 text-xs font-black uppercase tracking-wider">
                     Current Season
                   </span>
@@ -206,7 +174,6 @@ export default function VCTBPage() {
                   <span className="rounded-full border border-yellow-400/40 bg-yellow-400/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-yellow-400">
                     Edition 3.0
                   </span>
-
                 </div>
 
                 <p className="mt-5 text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
@@ -223,7 +190,6 @@ export default function VCTBPage() {
                 </p>
 
                 <div className="mt-5 flex flex-wrap justify-center gap-2 md:justify-start">
-
                   <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70">
                     🏏 Player Auction
                   </span>
@@ -235,24 +201,16 @@ export default function VCTBPage() {
                   <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70">
                     🔴 Live Updates
                   </span>
-
                 </div>
               </div>
 
-              {/* CTA */}
               <div className="flex justify-center">
                 <div className="rounded-2xl bg-yellow-400 px-6 py-4 text-center font-black text-black transition group-hover:bg-yellow-300">
-                  OPEN 2026
-                  <span className="ml-2">→</span>
+                  OPEN 2026 <span className="ml-2">→</span>
                 </div>
               </div>
-
             </div>
           </Link>
-
-          {/* ================================================= */}
-          {/* 2025 + 2024 CARDS */}
-          {/* ================================================= */}
 
           {seasons
             .filter((season) => !season.featured)
@@ -262,18 +220,12 @@ export default function VCTBPage() {
                 href={season.href}
                 className="group overflow-hidden rounded-[30px] border border-white/10 bg-[#080808] shadow-xl transition duration-300 hover:-translate-y-1 hover:border-yellow-400/50"
               >
-
-                {/* CARD TOP */}
                 <div className="relative overflow-hidden border-b border-white/10 p-7">
-
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-transparent to-red-600/10" />
 
                   <div className="relative z-10">
-
                     <div className="flex items-start justify-between gap-4">
-
                       <div>
-
                         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black uppercase tracking-wider text-white/60">
                           {season.badge}
                         </span>
@@ -285,7 +237,6 @@ export default function VCTBPage() {
                         <h3 className="mt-2 text-4xl font-black">
                           {season.year}
                         </h3>
-
                       </div>
 
                       <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white p-2">
@@ -297,14 +248,11 @@ export default function VCTBPage() {
                           className="object-contain"
                         />
                       </div>
-
                     </div>
                   </div>
                 </div>
 
-                {/* CARD BODY */}
                 <div className="p-7">
-
                   <h4 className="text-2xl font-black">
                     {season.title}
                   </h4>
@@ -314,7 +262,6 @@ export default function VCTBPage() {
                   </p>
 
                   <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
-
                     <span className="text-sm font-black text-yellow-400">
                       {season.button}
                     </span>
@@ -322,7 +269,6 @@ export default function VCTBPage() {
                     <span className="text-2xl text-yellow-400 transition duration-300 group-hover:translate-x-2">
                       →
                     </span>
-
                   </div>
                 </div>
               </Link>
@@ -330,44 +276,30 @@ export default function VCTBPage() {
         </div>
       </section>
 
-      {/* ===================================================== */}
-      {/* VCTB STRIP */}
-      {/* ===================================================== */}
-
       <section className="border-t border-yellow-400/20 bg-[#070707]">
-
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 text-center md:grid-cols-3 md:px-6">
-
           <div>
-            <p className="text-4xl font-black text-yellow-400">
-              3
-            </p>
+            <p className="text-4xl font-black text-yellow-400">3</p>
             <p className="mt-1 text-sm font-bold uppercase tracking-wider text-white/50">
               VCTB Editions
             </p>
           </div>
 
           <div>
-            <p className="text-4xl font-black text-yellow-400">
-              T10
-            </p>
+            <p className="text-4xl font-black text-yellow-400">T10</p>
             <p className="mt-1 text-sm font-bold uppercase tracking-wider text-white/50">
               Cricket Format
             </p>
           </div>
 
           <div>
-            <p className="text-4xl font-black text-yellow-400">
-              2026
-            </p>
+            <p className="text-4xl font-black text-yellow-400">2026</p>
             <p className="mt-1 text-sm font-bold uppercase tracking-wider text-white/50">
               Current Season
             </p>
           </div>
-
         </div>
       </section>
-
     </main>
   );
 }
