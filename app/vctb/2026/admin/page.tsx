@@ -190,8 +190,8 @@ export default function VCTB2026AdminPage() {
   }
 
   function getPlayerPhoto(player: Player) {
-    return `/vctb-2026-players/${player.player_id}.jpeg`;
-  }
+  return encodeURI(`/vctb-2026-players/${player.player_id}.jpeg`);
+}
 
   // LOGIN SCREEN
   if (!userEmail) {
