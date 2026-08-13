@@ -190,15 +190,7 @@ export default function VCTB2026AdminPage() {
   }
 
   function getPlayerPhoto(player: Player) {
-    if (player.photo_url) {
-      return player.photo_url;
-    }
-
-    const { data } = supabase.storage
-      .from("player-photos")
-      .getPublicUrl(`${player.player_id}.jpg`);
-
-    return data.publicUrl;
+    return `/vctb-2026-players/${player.player_id}.jpeg`;
   }
 
   // LOGIN SCREEN
