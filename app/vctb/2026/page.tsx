@@ -16,6 +16,7 @@ type RetainedPlayerRef = {
   playerId: string;
   photoCode: string;
   name: string;
+  role: string;
 };
 
 type AuctionSigning = {
@@ -29,168 +30,46 @@ type AuctionSigning = {
 };
 
 const teams = [
-  {
-    name: "Aathiyadi Super Kings",
-    owner: "Jatheesan Arulanantham",
-    logo: "/vctb/2026/teams/aathiyadi.png",
-    retained: [
-      {
-        playerId: "6",
-        photoCode: "VC 006",
-        name: "Dinalan Nallagurunathan",
-      },
-      {
-        playerId: "112",
-        photoCode: "VC 112",
-        name: "Satheesram Chandrasegaram",
-      },
-      {
-        playerId: "150",
-        photoCode: "VC 150",
-        name: "Akram Muthalib",
-      },
-      {
-        playerId: "160",
-        photoCode: "VC 160",
-        name: "Mohamed Nawazish",
-      },
-    ],
-  },
-
-  {
-    name: "Balmoral Fighters",
-    owner: "Krishanth Thayalan & Anushan Arulanantham",
-    logo: "/vctb/2026/teams/balmoral.png",
-    retained: [
-      {
-        playerId: "59",
-        photoCode: "VC 059",
-        name: "Caniston Gunaratnam",
-      },
-      {
-        playerId: "91",
-        photoCode: "VC 091",
-        name: "Fazlan Mohamed",
-      },
-      {
-        playerId: "92",
-        photoCode: "VC 092",
-        name: "Visnujith Parakirama",
-      },
-      {
-        playerId: "93",
-        photoCode: "VC 093",
-        name: "Dinoshan Theivendram",
-      },
-    ],
-  },
-
-  {
-    name: "Niruvaththampai Knights",
-    owner: "Sornaraj Sornavadivel & Ranjithraj Thurairajah",
-    logo: "/vctb/2026/teams/niruvaththampai.png",
-    retained: [
-      {
-        playerId: "54",
-        photoCode: "VC 054",
-        name: "Kabilraj Kanagaratnam",
-      },
-      {
-        playerId: "55",
-        photoCode: "VC 055",
-        name: "Murvin Abinash",
-      },
-      {
-        playerId: "103",
-        photoCode: "VC 103",
-        name: "Vensakar Kanthiraj",
-      },
-      {
-        playerId: "143",
-        photoCode: "VC 143",
-        name: "Anusan Theiventhiran",
-      },
-    ],
-  },
-
-  {
-    name: "Team Tiger",
-    owner: "Mathan",
-    logo: "/vctb/2026/teams/team-tiger.png",
-    retained: [
-      {
-        playerId: "80",
-        photoCode: "VC 080",
-        name: "Pramoth Terrance",
-      },
-      {
-        playerId: "68",
-        photoCode: "VC 068",
-        name: "Ukantharasa Vinith",
-      },
-      {
-        playerId: "49",
-        photoCode: "VC 049",
-        name: "Rajee Sivalingam",
-      },
-    ],
-  },
-
-  {
-    name: "Thunnalai Royals",
-    owner: "Navaratnam Kugan",
-    logo: "/vctb/2026/teams/thunnalai.png",
-    retained: [
-      {
-        playerId: "154",
-        photoCode: "VC 154",
-        name: "Dikson Manokarasa",
-      },
-      {
-        playerId: "33",
-        photoCode: "VC 033",
-        name: "Purus Paran",
-      },
-      {
-        playerId: "25",
-        photoCode: "VC 025",
-        name: "Saranijan Gabilan",
-      },
-      {
-        playerId: "36",
-        photoCode: "VC 036",
-        name: "Riffaz Mohammed",
-      },
-    ],
-  },
-
-  {
-    name: "Vallvai Blues SC UK",
-    owner: "Valvai Blues Sports Committee",
-    logo: "/vctb/2026/teams/vallvai-blues.png",
-    retained: [
-      {
-        playerId: "12",
-        photoCode: "VC 012",
-        name: "Kodeeswaran Vasthiyam Pillai",
-      },
-      {
-        playerId: "83",
-        photoCode: "VC 083",
-        name: "Dinesh Poobalasingham",
-      },
-      {
-        playerId: "134",
-        photoCode: "VC 134",
-        name: "Dilan Puviraj",
-      },
-      {
-        playerId: "167",
-        photoCode: "VC 167",
-        name: "Thishok Arasaretnam",
-      },
-    ],
-  },
+  { name: "Aathiyadi Super Kings", owner: "Jatheesan Arulanantham", logo: "/vctb/2026/teams/aathiyadi.png", retained: [
+    { playerId: "112", photoCode: "VC 112", name: "Satheesram Chandrasegaram", role: "All-Rounder" },
+    { playerId: "6", photoCode: "VC 006", name: "Dinalan Nallagurunathan", role: "All-Rounder" },
+    { playerId: "160", photoCode: "VC 160", name: "Mohamed Nawazish", role: "All-Rounder" },
+    { playerId: "150", photoCode: "VC 150", name: "Akram Muthalib", role: "Wicket Keeper" },
+  ]},
+  { name: "Balmoral Fighters", owner: "Krishanth Thayalan & Anushan Arulanantham", logo: "/vctb/2026/teams/balmoral.png", retained: [
+    { playerId: "53", photoCode: "VC 053", name: "Anushan Arulanantham", role: "All-Rounder" },
+    { playerId: "59", photoCode: "VC 059", name: "Caniston Gunaratnam", role: "All-Rounder" },
+    { playerId: "93", photoCode: "VC 093", name: "Dinoshan Theivendram", role: "All-Rounder" },
+    { playerId: "92", photoCode: "VC 092", name: "Visnujith Parakirama", role: "Bowler" },
+    { playerId: "91", photoCode: "VC 091", name: "Fazlan Mohamed", role: "All-Rounder" },
+  ]},
+  { name: "Niruvaththampai Knights", owner: "Sornaraj Sornavadivel & Ranjithraj Thurairajah", logo: "/vctb/2026/teams/niruvaththampai.png", retained: [
+    { playerId: "71", photoCode: "VC 071", name: "Sornaraj Sornavadivel", role: "All-Rounder" },
+    { playerId: "54", photoCode: "VC 054", name: "Kabilraj Kanagaratnam", role: "All-Rounder" },
+    { playerId: "103", photoCode: "VC 103", name: "Vensakar Kanthiraj", role: "All-Rounder" },
+    { playerId: "55", photoCode: "VC 055", name: "Murvin Abinash", role: "All-Rounder" },
+    { playerId: "143", photoCode: "VC 143", name: "Anusan Theiventhiran", role: "All-Rounder" },
+  ]},
+  { name: "Team Tiger", owner: "Mathan", logo: "/vctb/2026/teams/team-tiger.png", retained: [
+    { playerId: "175", photoCode: "VC 175", name: "Mathan", role: "Wicket Keeper" },
+    { playerId: "80", photoCode: "VC 080", name: "Pramoth Terrance", role: "All-Rounder" },
+    { playerId: "68", photoCode: "VC 068", name: "Ukantharasa Vinith", role: "All-Rounder" },
+    { playerId: "49", photoCode: "VC 049", name: "Rajee Sivalingam", role: "All-Rounder" },
+  ]},
+  { name: "Thunnalai Royals", owner: "Sivathasan Kailasapillai & Kugan Navaratnam", logo: "/vctb/2026/teams/thunnalai.png", retained: [
+    { playerId: "22", photoCode: "VC 022", name: "Kugan Navaratnam", role: "All-Rounder" },
+    { playerId: "154", photoCode: "VC 154", name: "Dikson Manokarasa", role: "All-Rounder" },
+    { playerId: "33", photoCode: "VC 033", name: "Purus Paran", role: "All-Rounder" },
+    { playerId: "25", photoCode: "VC 025", name: "Saranijan Gabilan", role: "All-Rounder" },
+    { playerId: "36", photoCode: "VC 036", name: "Riffaz Mohammed", role: "All-Rounder" },
+  ]},
+  { name: "Vallvai Blues SC UK", owner: "Ranjith Mahenthirarasaa & Dinesh Poobalasingham (DK)", logo: "/vctb/2026/teams/vallvai-blues.png", retained: [
+    { playerId: "3", photoCode: "VC 003", name: "Ranjith Mahenthirarasaa", role: "All-Rounder" },
+    { playerId: "83", photoCode: "VC 083", name: "Dinesh Poobalasingham (DK)", role: "All-Rounder" },
+    { playerId: "134", photoCode: "VC 134", name: "Dilan Puviraj", role: "All-Rounder" },
+    { playerId: "12", photoCode: "VC 012", name: "Kodeeswaran Vasthiyampillai", role: "Wicket Keeper" },
+    { playerId: "167", photoCode: "VC 167", name: "Thishok Arasaretnam", role: "All-Rounder" },
+  ]},
 ];
 
 export default function VCTB2026Page() {
@@ -852,12 +731,10 @@ export default function VCTB2026Page() {
                                       retainedRef.name}
                                 </p>
 
-                                {/* SHOW ROLE ONLY IF AVAILABLE */}
-                                {retainedPlayer?.role && (
-                                  <p className="mt-1 text-xs font-semibold text-white/60">
-                                    {retainedPlayer.role}
-                                  </p>
-                                )}
+                                {/* CONFIRMED RETAINED PLAYER ROLE */}
+                                <p className="mt-1 text-xs font-semibold text-white/60">
+                                  {retainedRef.role || retainedPlayer?.role}
+                                </p>
 
                                 <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/40">
                                   {retainedRef.photoCode}
