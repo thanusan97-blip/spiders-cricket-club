@@ -327,7 +327,7 @@ export default function VCTB2025Page() {
 
               <Link
                 key={slug}
-                href={`/competitions/vctb2025/${slug}`}
+                href={`/vctb/2025/${slug}`}
                 className="group rounded-[24px] border border-white/10 bg-[#0c0c0c] p-5 transition duration-300 hover:-translate-y-1 hover:border-yellow-400/50"
               >
 
