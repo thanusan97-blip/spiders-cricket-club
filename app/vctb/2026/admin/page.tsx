@@ -20,6 +20,15 @@ const teams = [
   "Vallvai Blues SC UK",
 ];
 
+const teamBudgets: Record<string, number> = {
+  "Aathiyadi JL Super Kings": 3000,
+  "Balmoral Fighters": 2900,
+  "Niruvaththampai Knights": 2900,
+  "Team Tiger": 2900,
+  "Thunnalai Royals": 2900,
+  "Vallvai Blues SC UK": 2900,
+};
+
 const playerRoles = [
   "Batsman",
   "Bowler",
@@ -41,6 +50,7 @@ export default function VCTB2026AdminPage() {
   const [role, setRole] = useState("");
   const [team, setTeam] = useState("");
   const [points, setPoints] = useState("");
+  const [remainingPoints, setRemainingPoints] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -48,6 +58,15 @@ export default function VCTB2026AdminPage() {
   useEffect(() => {
     checkUser();
   }, []);
+
+  useEffect(() => {
+    if (!team) {
+      setRemainingPoints(null);
+      return;
+    }
+
+    loadRemainingPoints(team);
+  }, [team]);
 
   async function checkUser() {
     const {
@@ -87,9 +106,31 @@ export default function VCTB2026AdminPage() {
     setPlayer(null);
     setPlayerId("");
     setRole("");
-    setTeam("");
     setPoints("");
+    setRemainingPoints(null);
     setMessage("Logged out.");
+  }
+
+  async function loadRemainingPoints(teamName: string) {
+    const startingPoints = teamBudgets[teamName] ?? 0;
+
+    const { data, error } = await supabase
+      .from("auction_signings")
+      .select("points")
+      .eq("team", teamName);
+
+    if (error) {
+      console.error("Could not load remaining points:", error);
+      setRemainingPoints(startingPoints);
+      return;
+    }
+
+    const spent = (data || []).reduce(
+      (total, signing) => total + Number(signing.points || 0),
+      0
+    );
+
+    setRemainingPoints(Math.max(0, startingPoints - spent));
   }
 
   async function findPlayer() {
@@ -149,6 +190,35 @@ export default function VCTB2026AdminPage() {
     setLoading(true);
     setMessage("");
 
+    const startingPoints = teamBudgets[team] ?? 0;
+
+    const { data: teamSpendData, error: teamSpendError } = await supabase
+      .from("auction_signings")
+      .select("points")
+      .eq("team", team);
+
+    if (teamSpendError) {
+      setMessage(`Could not check team balance: ${teamSpendError.message}`);
+      setLoading(false);
+      return;
+    }
+
+    const alreadySpent = (teamSpendData || []).reduce(
+      (total, signing) => total + Number(signing.points || 0),
+      0
+    );
+
+    const availablePoints = Math.max(0, startingPoints - alreadySpent);
+
+    if (Number(points) > availablePoints) {
+      setMessage(
+        `Not enough points. ${team} has ${availablePoints.toLocaleString()} points remaining.`
+      );
+      setRemainingPoints(availablePoints);
+      setLoading(false);
+      return;
+    }
+
     // Prevent the same player being signed twice
     const { data: existing } = await supabase
       .from("auction_signings")
@@ -175,16 +245,22 @@ export default function VCTB2026AdminPage() {
       return;
     }
 
+    const newRemaining = Math.max(
+      0,
+      (remainingPoints ?? teamBudgets[team] ?? 0) - Number(points)
+    );
+
+    setRemainingPoints(newRemaining);
+
     setMessage(
       `✅ ${player.name} signed by ${team} as ${role} for ${Number(
         points
-      ).toLocaleString()} points.`
+      ).toLocaleString()} points. Remaining: ${newRemaining.toLocaleString()} points.`
     );
 
     setPlayerId("");
     setPlayer(null);
     setRole("");
-    setTeam("");
     setPoints("");
     setLoading(false);
   }
@@ -388,6 +464,19 @@ export default function VCTB2026AdminPage() {
                 </option>
               ))}
             </select>
+
+            {team && remainingPoints !== null && (
+              <div className="mt-3 rounded-xl border border-yellow-400/30 bg-yellow-400/10 px-4 py-3">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-yellow-300">
+                    Remaining Points
+                  </span>
+                  <span className="text-xl font-black text-yellow-400">
+                    {remainingPoints.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* AUCTION POINTS */}

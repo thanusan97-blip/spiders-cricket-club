@@ -30,41 +30,41 @@ type AuctionSigning = {
 };
 
 const teams = [
-  { name: "Aathiyadi JL Super Kings", owner: "Jatheesan Arulanantham", logo: "/vctb/2026/teams/aathiyadi.png", retained: [
+  { name: "Aathiyadi JL Super Kings", owner: "Jatheesan Arulanantham", startingPoints: 3000, logo: "/vctb/2026/teams/aathiyadi.png", retained: [
     { playerId: "112", photoCode: "VC 112", name: "Satheesram Chandrasegaram", role: "All-Rounder" },
     { playerId: "6", photoCode: "VC 006", name: "Dinalan Nallagurunathan", role: "All-Rounder" },
     { playerId: "160", photoCode: "VC 160", name: "Mohamed Nawazish", role: "All-Rounder" },
     { playerId: "150", photoCode: "VC 150", name: "Akram Muthalib", role: "Wicket Keeper" },
   ]},
-  { name: "Balmoral Fighters", owner: "Krishanth Thayalan & Anushan Arulanantham", logo: "/vctb/2026/teams/balmoral.png", retained: [
+  { name: "Balmoral Fighters", startingPoints: 2900, owner: "Krishanth Thayalan & Anushan Arulanantham", logo: "/vctb/2026/teams/balmoral.png", retained: [
     { playerId: "53", photoCode: "VC 053", name: "Anushan Arulanantham", role: "All-Rounder" },
     { playerId: "59", photoCode: "VC 059", name: "Caniston Gunaratnam", role: "All-Rounder" },
     { playerId: "93", photoCode: "VC 093", name: "Dinoshan Theivendram", role: "All-Rounder" },
     { playerId: "92", photoCode: "VC 092", name: "Visnujith Parakirama", role: "Bowler" },
     { playerId: "91", photoCode: "VC 091", name: "Fazlan Mohamed", role: "All-Rounder" },
   ]},
-  { name: "Niruvaththampai Knights", owner: "Sornaraj Sornavadivel & Ranjithraj Thurairajah", logo: "/vctb/2026/teams/niruvaththampai.png", retained: [
+  { name: "Niruvaththampai Knights", startingPoints: 2900, owner: "Sornaraj Sornavadivel & Ranjithraj Thurairajah", logo: "/vctb/2026/teams/niruvaththampai.png", retained: [
     { playerId: "71", photoCode: "VC 071", name: "Sornaraj Sornavadivel", role: "All-Rounder" },
     { playerId: "54", photoCode: "VC 054", name: "Kabilraj Kanagaratnam", role: "All-Rounder" },
     { playerId: "103", photoCode: "VC 103", name: "Vensakar Kanthiraj", role: "All-Rounder" },
     { playerId: "55", photoCode: "VC 055", name: "Murvin Abinash", role: "All-Rounder" },
     { playerId: "143", photoCode: "VC 143", name: "Anusan Theiventhiran", role: "All-Rounder" },
   ]},
-  { name: "Team Tiger", owner: "Sothilingham Yogeswaran (Mathan)", logo: "/vctb/2026/teams/team-tiger.png", retained: [
+  { name: "Team Tiger", startingPoints: 2900, owner: "Sothilingham Yogeswaran (Mathan)", logo: "/vctb/2026/teams/team-tiger.png", retained: [
     { playerId: "175", photoCode: "VC 175", name: "Mathan", role: "Wicket Keeper" },
     { playerId: "80", photoCode: "VC 080", name: "Pramoth Terrance", role: "All-Rounder" },
     { playerId: "68", photoCode: "VC 068", name: "Ukantharasa Vinith", role: "All-Rounder" },
     { playerId: "49", photoCode: "VC 049", name: "Rajee Sivalingam", role: "All-Rounder" },
     { playerId: "104", photoCode: "VC 104", name: "Dhivendhiran Vembaiyan", role: "Batsman" },
   ]},
-  { name: "Thunnalai Royals", owner: "Sivathasan Kailasapillai & Kugan Navaratnam", logo: "/vctb/2026/teams/thunnalai.png", retained: [
+  { name: "Thunnalai Royals", startingPoints: 2900, owner: "Sivathasan Kailasapillai & Kugan Navaratnam", logo: "/vctb/2026/teams/thunnalai.png", retained: [
     { playerId: "22", photoCode: "VC 022", name: "Kugan Navaratnam", role: "All-Rounder" },
     { playerId: "154", photoCode: "VC 154", name: "Dikson Manokarasa", role: "All-Rounder" },
     { playerId: "33", photoCode: "VC 033", name: "Purus Paran", role: "All-Rounder" },
     { playerId: "25", photoCode: "VC 025", name: "Saranijan Gabilan", role: "All-Rounder" },
     { playerId: "36", photoCode: "VC 036", name: "Riffaz Mohammed", role: "All-Rounder" },
   ]},
-  { name: "Vallvai Blues SC UK", owner: "Ranjith Mahenthirarasaa & Dinesh Poobalasingham (DK)", logo: "/vctb/2026/teams/vallvai-blues.png", retained: [
+  { name: "Vallvai Blues SC UK", startingPoints: 2900, owner: "Ranjith Mahenthirarasaa & Dinesh Poobalasingham (DK)", logo: "/vctb/2026/teams/vallvai-blues.png", retained: [
     { playerId: "3", photoCode: "VC 003", name: "Ranjith Mahenthirarasaa", role: "All-Rounder" },
     { playerId: "83", photoCode: "VC 083", name: "Dinesh Poobalasingham (DK)", role: "All-Rounder" },
     { playerId: "134", photoCode: "VC 134", name: "Dilan Puviraj", role: "All-Rounder" },
@@ -627,6 +627,16 @@ export default function VCTB2026Page() {
               const currentSquad =
                 team.retained.length + teamSignings.length;
 
+              const pointsSpent = teamSignings.reduce(
+                (total, signing) => total + Number(signing.points || 0),
+                0
+              );
+
+              const remainingPoints = Math.max(
+                0,
+                team.startingPoints - pointsSpent
+              );
+
               return (
                 <article
                   key={team.name}
@@ -679,6 +689,29 @@ export default function VCTB2026Page() {
                       <p className="mt-2 text-lg font-bold">
                         {team.owner}
                       </p>
+                    </div>
+
+                    {/* REMAINING AUCTION POINTS */}
+                    <div className="mt-5 rounded-2xl border border-yellow-400/25 bg-yellow-400/10 p-4">
+                      <div className="flex items-end justify-between gap-4">
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300">
+                            Remaining Points
+                          </p>
+                          <p className="mt-1 text-3xl font-black text-yellow-400">
+                            {remainingPoints.toLocaleString()}
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                            Starting
+                          </p>
+                          <p className="mt-1 text-sm font-black text-white/70">
+                            {team.startingPoints.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
                     {/* ================================================= */}
