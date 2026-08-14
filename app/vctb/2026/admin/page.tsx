@@ -12,7 +12,7 @@ type Player = {
 };
 
 const teams = [
-  "Aathiyadi Super Kings",
+  "Aathiyadi JL Super Kings",
   "Balmoral Fighters",
   "Niruvaththampai Knights",
   "Team Tiger",

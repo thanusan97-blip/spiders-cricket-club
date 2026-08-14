@@ -30,7 +30,7 @@ type AuctionSigning = {
 };
 
 const teams = [
-  { name: "Aathiyadi Super Kings", owner: "Jatheesan Arulanantham", logo: "/vctb/2026/teams/aathiyadi.png", retained: [
+  { name: "Aathiyadi JL Super Kings", owner: "Jatheesan Arulanantham", logo: "/vctb/2026/teams/aathiyadi.png", retained: [
     { playerId: "112", photoCode: "VC 112", name: "Satheesram Chandrasegaram", role: "All-Rounder" },
     { playerId: "6", photoCode: "VC 006", name: "Dinalan Nallagurunathan", role: "All-Rounder" },
     { playerId: "160", photoCode: "VC 160", name: "Mohamed Nawazish", role: "All-Rounder" },
@@ -50,11 +50,12 @@ const teams = [
     { playerId: "55", photoCode: "VC 055", name: "Murvin Abinash", role: "All-Rounder" },
     { playerId: "143", photoCode: "VC 143", name: "Anusan Theiventhiran", role: "All-Rounder" },
   ]},
-  { name: "Team Tiger", owner: "Mathan", logo: "/vctb/2026/teams/team-tiger.png", retained: [
+  { name: "Team Tiger", owner: "Sothilingham Yogeswaran (Mathan)", logo: "/vctb/2026/teams/team-tiger.png", retained: [
     { playerId: "175", photoCode: "VC 175", name: "Mathan", role: "Wicket Keeper" },
     { playerId: "80", photoCode: "VC 080", name: "Pramoth Terrance", role: "All-Rounder" },
     { playerId: "68", photoCode: "VC 068", name: "Ukantharasa Vinith", role: "All-Rounder" },
     { playerId: "49", photoCode: "VC 049", name: "Rajee Sivalingam", role: "All-Rounder" },
+    { playerId: "104", photoCode: "VC 104", name: "Dhivendhiran Vembaiyan", role: "Batsman" },
   ]},
   { name: "Thunnalai Royals", owner: "Sivathasan Kailasapillai & Kugan Navaratnam", logo: "/vctb/2026/teams/thunnalai.png", retained: [
     { playerId: "22", photoCode: "VC 022", name: "Kugan Navaratnam", role: "All-Rounder" },
