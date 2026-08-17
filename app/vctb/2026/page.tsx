@@ -73,6 +73,44 @@ const teams = [
   ]},
 ];
 
+const teamMeta: Record<string, { shortName: string; slug: string; group: "A" | "B" }> = {
+  "Aathiyadi JL Super Kings": { shortName: "Aathiyadi JL Super Kings", slug: "aathiyadi-jl-super-kings", group: "A" },
+  "Balmoral Fighters": { shortName: "Balmoral Fighters", slug: "balmoral-fighters", group: "A" },
+  "Niruvaththampai Knights": { shortName: "Niruvaththampai Knights", slug: "niruvaththampai-knights", group: "B" },
+  "Team Tiger": { shortName: "Team Tiger", slug: "team-tiger", group: "B" },
+  "Thunnalai Royals": { shortName: "Thunnalai Royals", slug: "thunnalai-royals", group: "A" },
+  "Vallvai Blues SC UK": { shortName: "Vallvai Kadalodikal", slug: "vallvai-blues-sc-uk", group: "B" },
+};
+
+type Fixture = {
+  time: string;
+  pitch: "Pitch 1" | "Pitch 2";
+  teamA?: string;
+  teamB?: string;
+  label?: string;
+  kind: "match" | "ceremony" | "semi" | "final";
+};
+
+const fixtures: Fixture[] = [
+  { time: "8:00 AM", pitch: "Pitch 1", label: "VCTB Opening Ceremony", kind: "ceremony" },
+  { time: "8:00 AM", pitch: "Pitch 2", label: "VCTB Opening Ceremony", kind: "ceremony" },
+  { time: "8:30 AM", pitch: "Pitch 1", teamA: "Thunnalai Royals", teamB: "Vallvai Blues SC UK", kind: "match" },
+  { time: "8:30 AM", pitch: "Pitch 2", teamA: "Balmoral Fighters", teamB: "Niruvaththampai Knights", kind: "match" },
+  { time: "10:00 AM", pitch: "Pitch 1", teamA: "Aathiyadi JL Super Kings", teamB: "Team Tiger", kind: "match" },
+  { time: "10:00 AM", pitch: "Pitch 2", teamA: "Thunnalai Royals", teamB: "Niruvaththampai Knights", kind: "match" },
+  { time: "11:30 AM", pitch: "Pitch 1", teamA: "Balmoral Fighters", teamB: "Vallvai Blues SC UK", kind: "match" },
+  { time: "1:00 PM", pitch: "Pitch 1", teamA: "Balmoral Fighters", teamB: "Team Tiger", kind: "match" },
+  { time: "1:00 PM", pitch: "Pitch 2", teamA: "Aathiyadi JL Super Kings", teamB: "Vallvai Blues SC UK", kind: "match" },
+  { time: "2:30 PM", pitch: "Pitch 1", teamA: "Thunnalai Royals", teamB: "Team Tiger", kind: "match" },
+  { time: "2:30 PM", pitch: "Pitch 2", teamA: "Aathiyadi JL Super Kings", teamB: "Niruvaththampai Knights", kind: "match" },
+  { time: "4:00 PM", pitch: "Pitch 1", label: "Semi Final 1 — 1st of Group A vs 2nd of Group A", kind: "semi" },
+  { time: "4:00 PM", pitch: "Pitch 2", label: "Semi Final 2 — 1st of Group B vs 2nd of Group B", kind: "semi" },
+  { time: "5:30 PM", pitch: "Pitch 1", label: "VCTB Grand Final", kind: "final" },
+  { time: "7:15 PM", pitch: "Pitch 1", label: "Presentation Ceremony", kind: "ceremony" },
+  { time: "7:15 PM", pitch: "Pitch 2", label: "Presentation Ceremony", kind: "ceremony" },
+];
+
+
 export default function VCTB2026Page() {
   const supabase = useMemo(() => createClient(), []);
 
@@ -247,6 +285,10 @@ export default function VCTB2026Page() {
     );
   }
 
+  function getDisplayTeamName(teamName: string) {
+    return teamMeta[teamName]?.shortName || teamName;
+  }
+
   // =====================================================
   // PAGE
   // =====================================================
@@ -257,690 +299,177 @@ export default function VCTB2026Page() {
       ? auctionSignings[auctionSignings.length - 1]
       : null;
 
-  const recentSignings = [...auctionSignings]
-    .slice(-5)
-    .reverse();
+  const topFiveSignings = [...auctionSignings]
+    .sort((a, b) => Number(b.points) - Number(a.points))
+    .slice(0, 5);
+
+  const totalAuctionPoints = auctionSignings.reduce(
+    (total, signing) => total + Number(signing.points || 0),
+    0
+  );
+
+  const totalSquadPlayers = teams.reduce(
+    (total, team) => total + team.retained.length + getTeamSignings(team.name).length,
+    0
+  );
+
+  const pitch1Fixtures = fixtures.filter((fixture) => fixture.pitch === "Pitch 1");
+  const pitch2Fixtures = fixtures.filter((fixture) => fixture.pitch === "Pitch 2");
 
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
-
-        {/* ===================================================== */}
-        {/* BREADCRUMB */}
-        {/* ===================================================== */}
-
         <div className="mb-8 flex flex-wrap gap-2 text-sm font-semibold text-white/80 md:text-base">
-          <Link
-            href="/"
-            className="hover:text-yellow-400 hover:underline"
-          >
-            Home
-          </Link>
-
+          <Link href="/" className="hover:text-yellow-400 hover:underline">Home</Link>
           <span>›</span>
-
-          <Link
-            href="/vctb"
-            className="hover:text-yellow-400 hover:underline"
-          >
-            VCTB
-          </Link>
-
+          <Link href="/vctb" className="hover:text-yellow-400 hover:underline">VCTB</Link>
           <span>›</span>
-
           <span className="text-yellow-400">2026</span>
         </div>
 
-        {/* ===================================================== */}
-        {/* HERO */}
-        {/* ===================================================== */}
-
-        <section
-          className="relative overflow-hidden rounded-[32px] border border-yellow-400/50 shadow-2xl"
-          style={{
-            backgroundImage: "url('/vctb/2026/vctb-2026-bg.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          <div className="absolute inset-0 bg-black/60" />
-
+        <section className="relative overflow-hidden rounded-[32px] border border-yellow-400/50 shadow-2xl" style={{backgroundImage:"url('/vctb/2026/vctb-2026-bg.png')",backgroundSize:"cover",backgroundPosition:"center",backgroundRepeat:"no-repeat"}}>
+          <div className="absolute inset-0 bg-black/65" />
           <div className="relative z-10 p-6 md:p-10">
-            <div className="grid items-center gap-8 lg:grid-cols-[260px_1fr]">
-
-              {/* VCTB LOGO */}
+            <div className="grid items-center gap-8 lg:grid-cols-[250px_1fr]">
               <div className="flex justify-center">
-                <div className="bg-white p-3 shadow-2xl">
-                  <Image
-                    src="/vctb/2026/vctb-3-logo.png"
-                    alt="VCTB Edition 3.0"
-                    width={250}
-                    height={250}
-                    className="object-contain"
-                    priority
-                  />
+                <div className="rounded-[26px] bg-white p-3 shadow-2xl">
+                  <Image src="/vctb/2026/vctb-3-logo.png" alt="VCTB Edition 3.0" width={240} height={240} priority className="object-contain" />
                 </div>
               </div>
-
-              {/* HERO TEXT */}
               <div className="text-center lg:text-left">
-                <p className="text-sm font-black uppercase tracking-[0.35em] text-yellow-400 md:text-base">
-                  KWIK MART PRESENTS
-                </p>
-
-                <h1 className="mt-4 text-4xl font-black uppercase leading-tight md:text-6xl">
-                  VCTB 2026
-                </h1>
-
-                <h2 className="mt-2 text-2xl font-black uppercase text-yellow-400 md:text-4xl">
-                  Player Auction Night
-                </h2>
-
+                <p className="text-sm font-black uppercase tracking-[0.35em] text-yellow-400 md:text-base">KWIK MART PRESENTS</p>
+                <h1 className="mt-4 text-4xl font-black uppercase leading-tight md:text-6xl">Vadamaradchy Champion T10 Blast</h1>
+                <h2 className="mt-3 text-2xl font-black uppercase text-yellow-400 md:text-4xl">Edition 3.0 • 2026</h2>
+                <p className="mt-6 text-xl font-black uppercase md:text-2xl">The Teams Are Ready 🔥</p>
+                <p className="mt-3 max-w-3xl text-base leading-7 text-white/75 md:text-lg">Six teams. {totalSquadPlayers || 102} players. One trophy. VCTB 3.0 moves from Auction Night to tournament day.</p>
                 <div className="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
-                  <div className="rounded-full border border-yellow-400/50 bg-black/75 px-5 py-3 font-bold">
-                    📅 14 August 2026
-                  </div>
-
-                  <div className="rounded-full border border-yellow-400/50 bg-black/75 px-5 py-3 font-bold">
-                    🕡 6:30 PM
-                  </div>
+                  <div className="rounded-full border border-yellow-400/40 bg-black/65 px-5 py-3 font-bold">📅 6 September 2026</div>
+                  <div className="rounded-full border border-yellow-400/40 bg-black/65 px-5 py-3 font-bold">📍 Tenetelow Sports Ground, UB2 4LW</div>
+                  <div className="rounded-full border border-yellow-400/40 bg-black/65 px-5 py-3 font-bold">🏏 2 Pitches</div>
                 </div>
-
-                <p className="mt-6 max-w-3xl text-base leading-7 text-white/90 md:text-lg">
-                  Follow the VCTB Edition 3.0 player auction and see each
-                  team squad develop as players are selected.
-                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ===================================================== */}
-        {/* LIVE AUCTION CENTRE */}
-        {/* ===================================================== */}
+        <nav className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          {[["Teams","#teams"],["Fixtures","#fixtures"],["Live","#live"],["Points Table","#points-table"],["Statistics","#statistics"],["Auction","#auction"]].map(([label,href])=>(
+            <a key={label} href={href} className="rounded-2xl border border-white/10 bg-[#0b0b0b] px-4 py-4 text-center text-sm font-black uppercase tracking-wider transition hover:-translate-y-1 hover:border-yellow-400/50 hover:text-yellow-400">{label}</a>
+          ))}
+        </nav>
 
-        <section className="mt-8 overflow-hidden rounded-[30px] border border-red-500/50 bg-gradient-to-br from-red-950/80 via-black to-black shadow-2xl">
-
-          {/* HEADER */}
-          <div className="border-b border-red-500/30 bg-red-950/50 px-6 py-5 text-center">
-            <div className="flex items-center justify-center gap-3">
-              <span className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
-
-              <h2 className="text-2xl font-black uppercase tracking-wide md:text-3xl">
-                Live Auction Centre
-              </h2>
-            </div>
-
-            <p className="mt-2 text-sm text-white/60">
-              Live VCTB 2026 player auction updates
-            </p>
-          </div>
-
-          {/* NO SIGNINGS YET */}
-          {!latestSigning ? (
-            <div className="p-8 text-center md:p-12">
-              <p className="text-xl font-black text-white/70">
-                Waiting for the first signing...
-              </p>
-
-              <p className="mt-2 text-sm text-white/40">
-                New auction signings will appear here automatically.
-              </p>
-            </div>
-          ) : (
-            <div className="p-6 md:p-8">
-
-              {/* LATEST SIGNING */}
-              <div className="rounded-[26px] border border-yellow-400/40 bg-gradient-to-r from-yellow-500/10 via-red-950/40 to-black p-5 md:p-7">
-
-                <p className="mb-5 text-center text-xs font-black uppercase tracking-[0.3em] text-yellow-400">
-                  🔥 Latest Signing
-                </p>
-
-                <div className="flex flex-col items-center gap-6 md:flex-row">
-
-                  <img
-                    src={encodeURI(
-                      getAuctionPlayerPhoto(
-                        latestSigning.player_id,
-                        latestSigning.player?.photo_url
-                      )
-                    )}
-                    alt={
-                      latestSigning.player?.name ||
-                      `Player ${latestSigning.player_id}`
-                    }
-                    className="h-28 w-28 shrink-0 rounded-full border-4 border-yellow-400 object-cover shadow-xl md:h-32 md:w-32"
-                  />
-
-                  <div className="min-w-0 flex-1 text-center md:text-left">
-
-                    <p className="text-xs font-black uppercase tracking-widest text-yellow-400">
-                      {latestSigning.player_id}
-                    </p>
-
-                    <h3 className="mt-2 text-2xl font-black md:text-4xl">
-                      {latestSigning.player?.name ||
-                        `Player ${latestSigning.player_id}`}
-                    </h3>
-
-                    {(latestSigning.role ||
-                      latestSigning.player?.role) && (
-                      <p className="mt-2 text-lg font-semibold text-white/60">
-                        {latestSigning.role ||
-                          latestSigning.player?.role}
-                      </p>
-                    )}
-
-                    <div className="mt-5 flex flex-wrap justify-center gap-3 md:justify-start">
-
-                      <div className="rounded-full border border-red-500/40 bg-red-950/60 px-5 py-2">
-                        <span className="text-xs font-bold uppercase text-white/50">
-                          Team
-                        </span>
-
-                        <p className="font-black text-white">
-                          {latestSigning.team}
-                        </p>
-                      </div>
-
-                      <div className="rounded-full border border-yellow-400/40 bg-yellow-400/10 px-5 py-2">
-                        <span className="text-xs font-bold uppercase text-yellow-400/70">
-                          Sold For
-                        </span>
-
-                        <p className="font-black text-yellow-400">
-                          {Number(
-                            latestSigning.points
-                          ).toLocaleString()}{" "}
-                          Points
-                        </p>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* RECENT SIGNINGS */}
-              <div className="mt-8">
-
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-[0.25em] text-white/70">
-                    Recent Signings
-                  </h3>
-
-                  <span className="rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-bold text-yellow-400">
-                    {auctionSignings.length} Confirmed
-                  </span>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                  {recentSignings.map((signing) => (
-                    <div
-                      key={signing.id}
-                      className="rounded-2xl border border-white/10 bg-white/5 p-4"
-                    >
-
-                      <div className="flex items-center gap-3">
-
-                        <img
-                          src={encodeURI(
-                            getAuctionPlayerPhoto(
-                              signing.player_id,
-                              signing.player?.photo_url
-                            )
-                          )}
-                          alt={
-                            signing.player?.name ||
-                            signing.player_id
-                          }
-                          className="h-12 w-12 shrink-0 rounded-full border-2 border-yellow-400 object-cover"
-                        />
-
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-black">
-                            {signing.player?.name ||
-                              `Player ${signing.player_id}`}
-                          </p>
-
-                          {(signing.role ||
-                            signing.player?.role) && (
-                            <p className="truncate text-xs text-white/50">
-                              {signing.role ||
-                                signing.player?.role}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-3 border-t border-white/10 pt-3">
-
-                        <p className="truncate text-xs font-bold text-red-300">
-                          {signing.team}
-                        </p>
-
-                        <p className="mt-1 text-lg font-black text-yellow-400">
-                          {Number(
-                            signing.points
-                          ).toLocaleString()}{" "}
-                          pts
-                        </p>
-
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        <section id="live" className="mt-10 overflow-hidden rounded-[30px] border border-red-500/30 bg-gradient-to-br from-red-950/60 via-[#070707] to-black shadow-2xl">
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="p-7 md:p-9">
+              <p className="text-xs font-black uppercase tracking-[0.3em] text-red-400">VCTB 3.0 Match Centre</p>
+              <h2 className="mt-3 text-3xl font-black md:text-5xl">Opening Round</h2>
+              <p className="mt-3 max-w-2xl text-white/60">Two matches begin simultaneously at 8:30 AM across Pitch 1 and Pitch 2.</p>
+              <div className="mt-7 grid gap-4 md:grid-cols-2">
+                <OpeningMatchCard pitch="Pitch 1" time="8:30 AM" teamA="Thunnalai Royals" teamB="Vallvai Blues SC UK" />
+                <OpeningMatchCard pitch="Pitch 2" time="8:30 AM" teamA="Balmoral Fighters" teamB="Niruvaththampai Knights" />
               </div>
             </div>
-          )}
-        </section>
-
-        {/* ===================================================== */}
-        {/* SPONSORS */}
-        {/* ===================================================== */}
-
-        <section className="mt-12">
-          <div className="mb-6">
-            <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
-              Partners
-            </p>
-
-            <h2 className="mt-2 text-3xl font-black md:text-4xl">
-              Tournament Sponsors
-            </h2>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-3">
-
-            {/* KWIK MART */}
-            <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1">
-              <p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">
-                Title Sponsor
-              </p>
-
-              <Image
-                src="/sponsors/kiwikmart.png"
-                alt="Kwik Mart"
-                width={260}
-                height={120}
-                className="object-contain"
-              />
-            </div>
-
-            {/* JATHEESAN */}
-            <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1">
-              <p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">
-                Gold Sponsor
-              </p>
-
-              <Image
-                src="/sponsors/jatheesan.png"
-                alt="Jatheesan Ltd"
-                width={260}
-                height={120}
-                className="object-contain"
-              />
-            </div>
-
-            {/* SAM */}
-            <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1">
-              <p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">
-                Powered By
-              </p>
-
-              <Image
-                src="/sponsors/sam.jpg"
-                alt="SAM Accountants"
-                width={260}
-                height={120}
-                className="object-contain"
-              />
+            <div className="border-t border-white/10 bg-white/[0.03] p-7 lg:border-l lg:border-t-0 md:p-9">
+              <p className="text-xs font-black uppercase tracking-[0.3em] text-yellow-400">Live Scoring</p>
+              <h3 className="mt-3 text-2xl font-black">VCTB Live Score Centre</h3>
+              <p className="mt-3 leading-7 text-white/60">Professional VCTB live scoring, scorecards and broadcast overlays can be connected here when the scoring system is ready.</p>
+              <div className="mt-6 rounded-2xl border border-dashed border-yellow-400/30 bg-yellow-400/5 p-5">
+                <p className="font-black text-yellow-400">Coming next</p>
+                <p className="mt-2 text-sm text-white/50">Live score • Scorecard • Commentary • Playing XI • Match info</p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ===================================================== */}
-        {/* PARTICIPATING TEAMS */}
-        {/* ===================================================== */}
-
-        <section className="mt-16">
+        <section id="teams" className="mt-16">
           <div className="mb-8">
-            <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
-              VCTB Edition 3.0
-            </p>
-
-            <h2 className="mt-2 text-3xl font-black md:text-5xl">
-              Participating Teams
-            </h2>
-
-            <p className="mt-3 max-w-3xl text-white/70">
-              Retained players and auction signings for VCTB 2026.
-            </p>
+            <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">VCTB Edition 3.0</p>
+            <h2 className="mt-2 text-3xl font-black md:text-5xl">2026 Teams</h2>
+            <p className="mt-3 max-w-3xl text-white/60">Final squads are complete following the VCTB 3.0 player auction.</p>
           </div>
-
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {teams.map((team) => {
-              const teamSignings = getTeamSignings(team.name);
-
-              const currentSquad =
-                team.retained.length + teamSignings.length;
-
-              const pointsSpent = teamSignings.reduce(
-                (total, signing) => total + Number(signing.points || 0),
-                0
-              );
-
-              const remainingPoints = Math.max(
-                0,
-                team.startingPoints - pointsSpent
-              );
-
-              return (
-                <article
-                  key={team.name}
-                  className="overflow-hidden rounded-[28px] border border-yellow-400/30 bg-[#080808] shadow-2xl transition duration-300 hover:-translate-y-1 hover:border-yellow-400/60"
-                >
-
-                  {/* ================================================= */}
-                  {/* TEAM HEADER */}
-                  {/* ================================================= */}
-
-                  <div className="border-b border-yellow-400/20 bg-gradient-to-r from-yellow-500/20 via-[#111]/80 to-red-600/15 p-6">
-                    <div className="flex items-center gap-5">
-
-                      {/* TEAM LOGO */}
-                      <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white p-2 shadow-xl">
-                        <Image
-                          src={team.logo}
-                          alt={team.name}
-                          width={90}
-                          height={90}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-
-                      {/* TEAM NAME */}
-                      <div>
-                        <h3 className="text-xl font-black uppercase leading-tight md:text-2xl">
-                          {team.name}
-                        </h3>
-
-                        <p className="mt-2 text-xs font-bold uppercase tracking-widest text-yellow-400">
-                          VCTB 2026
-                        </p>
-                      </div>
+            {teams.map((team)=>{
+              const teamSignings=getTeamSignings(team.name);
+              const squadSize=team.retained.length+teamSignings.length;
+              const pointsSpent=teamSignings.reduce((total,signing)=>total+Number(signing.points||0),0);
+              const remainingPoints=Math.max(0,team.startingPoints-pointsSpent);
+              const meta=teamMeta[team.name];
+              return <article key={team.name} className="overflow-hidden rounded-[28px] border border-yellow-400/25 bg-[#080808] shadow-2xl transition duration-300 hover:-translate-y-1 hover:border-yellow-400/60">
+                <div className="border-b border-yellow-400/20 bg-gradient-to-r from-yellow-500/15 via-[#111] to-red-600/10 p-6">
+                  <div className="flex items-center gap-5">
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-white p-2 shadow-xl"><Image src={team.logo} alt={team.name} width={75} height={75} className="h-full w-full object-contain" /></div>
+                    <div className="min-w-0">
+                      <div className="mb-2 inline-flex rounded-full bg-yellow-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-yellow-400">Group {meta.group}</div>
+                      <h3 className="text-xl font-black uppercase leading-tight">{meta.shortName}</h3>
                     </div>
                   </div>
-
-                  {/* ================================================= */}
-                  {/* TEAM DETAILS */}
-                  {/* ================================================= */}
-
-                  <div className="p-6">
-
-                    {/* OWNER */}
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
-                        Owner
-                      </p>
-
-                      <p className="mt-2 text-lg font-bold">
-                        {team.owner}
-                      </p>
-                    </div>
-
-                    {/* REMAINING AUCTION POINTS */}
-                    <div className="mt-5 rounded-2xl border border-yellow-400/25 bg-yellow-400/10 p-4">
-                      <div className="flex items-end justify-between gap-4">
-                        <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300">
-                            Remaining Points
-                          </p>
-                          <p className="mt-1 text-3xl font-black text-yellow-400">
-                            {remainingPoints.toLocaleString()}
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">
-                            Starting
-                          </p>
-                          <p className="mt-1 text-sm font-black text-white/70">
-                            {team.startingPoints.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* ================================================= */}
-                    {/* RETAINED PLAYERS */}
-                    {/* ================================================= */}
-
-                    <div className="mt-7">
-                      <div className="flex items-center justify-between gap-4">
-                        <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
-                          Retained Players
-                        </p>
-
-                        <span className="whitespace-nowrap rounded-full bg-yellow-400/15 px-3 py-1 text-xs font-bold text-yellow-300">
-                          {team.retained.length}{" "}
-                          {team.retained.length === 1
-                            ? "Player"
-                            : "Players"}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 space-y-3">
-                        {team.retained.map((retainedRef) => {
-                          const retainedPlayer =
-                            retainedPlayers.get(retainedRef.playerId);
-
-                          return (
-                            <div
-                              key={retainedRef.playerId}
-                              className="flex items-center gap-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-3"
-                            >
-
-                              {/* RETAINED PLAYER PHOTO */}
-                              <img
-                                src={getRetainedPhoto(
-                                  retainedRef.photoCode
-                                )}
-                                alt={
-                                  retainedPlayer?.name ||
-                                  retainedRef.name
-                                }
-                                className="h-14 w-14 shrink-0 rounded-full border-2 border-yellow-400 object-cover"
-                              />
-
-                              {/* RETAINED PLAYER DETAILS */}
-                              <div className="min-w-0 flex-1">
-
-                                <p className="font-black leading-tight text-white">
-                                  {loadingRetained
-                                    ? retainedRef.name
-                                    : retainedPlayer?.name ||
-                                      retainedRef.name}
-                                </p>
-
-                                {/* CONFIRMED RETAINED PLAYER ROLE */}
-                                <p className="mt-1 text-xs font-semibold text-white/60">
-                                  {retainedRef.role || retainedPlayer?.role}
-                                </p>
-
-                                <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/40">
-                                  {retainedRef.photoCode}
-                                </p>
-                              </div>
-
-                              {/* RETAINED STAR */}
-                              <div className="shrink-0 text-lg text-yellow-400">
-                                ⭐
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* ================================================= */}
-                    {/* AUCTION SIGNINGS */}
-                    {/* ================================================= */}
-
-                    <div className="mt-7">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
-                          Auction Signings
-                        </p>
-
-                        {teamSignings.length > 0 && (
-                          <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-bold text-red-300">
-                            {teamSignings.length}{" "}
-                            {teamSignings.length === 1
-                              ? "Signing"
-                              : "Signings"}
-                          </span>
-                        )}
-                      </div>
-
-                      {loadingSignings ? (
-                        <div className="mt-4 rounded-2xl border border-dashed border-white/10 bg-white/5 p-5 text-center">
-                          <p className="font-semibold text-white/50">
-                            Loading auction signings...
-                          </p>
-                        </div>
-                      ) : teamSignings.length === 0 ? (
-                        <div className="mt-4 rounded-2xl border border-dashed border-red-400/30 bg-red-950/20 p-5 text-center">
-                          <p className="font-semibold text-white/60">
-                            Waiting for Auction Night...
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="mt-4 space-y-3">
-                          {teamSignings.map((signing) => {
-                            const player = signing.player;
-
-                            const signingRole =
-                              signing.role || player?.role;
-
-                            return (
-                              <div
-                                key={signing.id}
-                                className="flex items-center gap-3 rounded-2xl border border-red-400/20 bg-gradient-to-r from-red-950/40 to-white/5 p-3"
-                              >
-
-                                {/* AUCTION PLAYER PHOTO */}
-                                <img
-                                  src={getAuctionPlayerPhoto(
-                                    signing.player_id,
-                                    player?.photo_url
-                                  )}
-                                  alt={
-                                    player?.name ||
-                                    `Player ${signing.player_id}`
-                                  }
-                                  className="h-14 w-14 shrink-0 rounded-full border-2 border-red-400 object-cover"
-                                />
-
-                                {/* AUCTION PLAYER DETAILS */}
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-black leading-tight text-white">
-                                    {player?.name ||
-                                      `Player ${signing.player_id}`}
-                                  </p>
-
-                                  {/* ROLE FROM ADMIN SIGNING */}
-                                  {signingRole && (
-                                    <p className="mt-1 text-xs font-semibold text-white/60">
-                                      {signingRole}
-                                    </p>
-                                  )}
-
-                                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/40">
-                                    Player #{signing.player_id}
-                                  </p>
-                                </div>
-
-                                {/* AUCTION POINTS */}
-                                <div className="shrink-0 text-right">
-                                  <p className="text-lg font-black text-yellow-400">
-                                    {Number(
-                                      signing.points
-                                    ).toLocaleString()}
-                                  </p>
-
-                                  <p className="text-[10px] font-bold uppercase tracking-wider text-yellow-400/70">
-                                    Points
-                                  </p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* ================================================= */}
-                    {/* CURRENT SQUAD */}
-                    {/* ================================================= */}
-
-                    <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
-                      <span className="text-sm text-white/60">
-                        Current Squad
-                      </span>
-
-                      <span className="text-lg font-black text-yellow-400">
-                        {currentSquad}{" "}
-                        {currentSquad === 1 ? "Player" : "Players"}
-                      </span>
-                    </div>
+                </div>
+                <div className="p-6">
+                  <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">Owner</p>
+                  <p className="mt-2 min-h-[52px] text-lg font-bold">{team.owner}</p>
+                  <div className="mt-5 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-white/40">Squad</p><p className="mt-1 text-2xl font-black text-white">{squadSize||17}</p><p className="text-xs text-white/40">Players</p></div>
+                    <div className="rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-yellow-300/70">Auction Balance</p><p className="mt-1 text-2xl font-black text-yellow-400">{remainingPoints.toLocaleString()}</p><p className="text-xs text-yellow-400/50">Points</p></div>
                   </div>
-                </article>
-              );
+                  <details className="group mt-5">
+                    <summary className="cursor-pointer list-none rounded-2xl bg-yellow-400 px-5 py-3 text-center text-sm font-black uppercase text-black transition hover:bg-yellow-300">View Full Squad</summary>
+                    <div className="mt-4 max-h-[470px] space-y-2 overflow-y-auto pr-1">
+                      {team.retained.map((player)=><div key={`retained-${player.playerId}`} className="flex items-center gap-3 rounded-xl border border-yellow-400/15 bg-yellow-400/5 p-3">
+                        <img src={encodeURI(`/vctb-2026-players/${player.photoCode}.jpeg`)} alt={player.name} className="h-11 w-11 rounded-full border border-yellow-400 object-cover" />
+                        <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{player.name}</p><p className="mt-1 text-[11px] text-white/45">{player.role} • {player.photoCode} • Retained</p></div>
+                      </div>)}
+                      {teamSignings.map((signing)=><div key={`auction-${signing.id}`} className="flex items-center gap-3 rounded-xl border border-red-400/15 bg-red-950/20 p-3">
+                        <img src={encodeURI(getAuctionPlayerPhoto(signing.player_id,signing.player?.photo_url))} alt={signing.player?.name||signing.player_id} className="h-11 w-11 rounded-full border border-red-400 object-cover" />
+                        <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{signing.player?.name||`Player ${signing.player_id}`}</p><p className="mt-1 text-[11px] text-white/45">{signing.role||signing.player?.role||"Player"} • {signing.player_id} • {Number(signing.points).toLocaleString()} pts</p></div>
+                      </div>)}
+                    </div>
+                  </details>
+                </div>
+              </article>
             })}
           </div>
         </section>
 
-        {/* ===================================================== */}
-        {/* RETENTION RULES */}
-        {/* ===================================================== */}
+        <section id="fixtures" className="mt-16">
+          <div className="mb-8"><p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">6 September 2026</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Fixtures & Tournament Schedule</h2><p className="mt-3 max-w-3xl text-white/60">League matches are cross-group. Semi-finals are played within the same group: 1st vs 2nd.</p></div>
+          <div className="grid gap-6 xl:grid-cols-2"><FixtureColumn title="Pitch 1" fixtures={pitch1Fixtures}/><FixtureColumn title="Pitch 2" fixtures={pitch2Fixtures}/></div>
+          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-5 text-center"><p className="font-black text-yellow-400">📍 Tenetelow Sports Ground, UB2 4LW</p></div>
+        </section>
 
-        <section className="mt-16 rounded-[30px] border border-yellow-400/30 bg-[#080808] p-7 shadow-2xl md:p-10">
-          <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
-            VCTB 2026
-          </p>
+        <section id="points-table" className="mt-16">
+          <div className="mb-8"><p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">Tournament Standings</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Points Table</h2><p className="mt-3 text-white/60">Tables are ready for match results. Automatic scoring integration can be added next.</p></div>
+          <div className="grid gap-6 xl:grid-cols-2"><PointsTable group="A"/><PointsTable group="B"/></div>
+        </section>
 
-          <h2 className="mt-2 text-3xl font-black">
-            Retention Rules
-          </h2>
+        <section id="statistics" className="mt-16">
+          <div className="mb-8"><p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">Tournament Leaders</p><h2 className="mt-2 text-3xl font-black md:text-5xl">VCTB 3.0 Statistics</h2></div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{[["🏏","Top Run Scorer"],["🎯","Top Wicket Taker"],["🔥","Most Sixes"],["💯","Highest Score"],["⚡","Best Bowling"]].map(([icon,title])=><div key={title} className="rounded-[24px] border border-white/10 bg-[#0a0a0a] p-6 text-center"><div className="text-4xl">{icon}</div><p className="mt-4 text-xs font-black uppercase tracking-wider text-yellow-400">{title}</p><p className="mt-3 text-lg font-black text-white/40">Tournament Pending</p></div>)}</div>
+        </section>
 
-          <div className="mt-7 grid gap-4 md:grid-cols-2">
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <p className="text-4xl font-black text-yellow-400">
-                4
-              </p>
-
-              <p className="mt-2 text-white/70">
-                Retained players permitted per team.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <p className="text-4xl font-black text-yellow-400">
-                5
-              </p>
-
-              <p className="mt-2 text-white/70">
-                If an owner is playing, the squad may include 4 retained
-                players plus 1 playing owner.
-              </p>
+        <section id="auction" className="mt-16 overflow-hidden rounded-[30px] border border-red-500/30 bg-gradient-to-br from-red-950/60 via-[#080808] to-black shadow-2xl">
+          <div className="border-b border-red-500/20 p-7 text-center md:p-9"><p className="text-sm font-black uppercase tracking-[0.3em] text-red-400">VCTB 3.0 Auction</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Auction Completed ✓</h2><p className="mt-3 text-white/60">The squads are complete. Auction Night is now part of the VCTB 3.0 tournament archive.</p></div>
+          <div className="p-6 md:p-8">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><AuctionStat label="Auction Signings" value={loadingSignings?"...":auctionSignings.length.toString()}/><AuctionStat label="Teams" value="6"/><AuctionStat label="Final Squad Players" value={(totalSquadPlayers||102).toString()}/><AuctionStat label="Auction Points Spent" value={loadingSignings?"...":totalAuctionPoints.toLocaleString()}/></div>
+            {latestSigning&&<div className="mt-7 rounded-[24px] border border-white/10 bg-white/5 p-5"><p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">Final Signing</p><div className="mt-4 flex flex-col items-center gap-4 sm:flex-row"><img src={encodeURI(getAuctionPlayerPhoto(latestSigning.player_id,latestSigning.player?.photo_url))} alt={latestSigning.player?.name||latestSigning.player_id} className="h-20 w-20 rounded-full border-2 border-yellow-400 object-cover"/><div className="text-center sm:text-left"><h3 className="text-2xl font-black">{latestSigning.player?.name||`Player ${latestSigning.player_id}`}</h3><p className="mt-1 text-white/50">{getDisplayTeamName(latestSigning.team)} • {Number(latestSigning.points).toLocaleString()} points</p></div></div></div>}
+            <div className="mt-9"><div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">Auction Leaders</p><h3 className="mt-2 text-2xl font-black md:text-3xl">Top 5 Auction Signings</h3></div><p className="text-sm text-white/40">Automatically ranked by points</p></div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">{topFiveSignings.map((signing,index)=><div key={signing.id} className="rounded-[22px] border border-yellow-400/20 bg-black/50 p-4"><div className="flex items-start justify-between gap-3"><span className="text-3xl font-black text-yellow-400/40">#{index+1}</span><span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black">{Number(signing.points).toLocaleString()} pts</span></div><img src={encodeURI(getAuctionPlayerPhoto(signing.player_id,signing.player?.photo_url))} alt={signing.player?.name||signing.player_id} className="mx-auto mt-4 h-24 w-24 rounded-full border-2 border-yellow-400 object-cover"/><h4 className="mt-4 text-center text-lg font-black leading-tight">{signing.player?.name||`Player ${signing.player_id}`}</h4><p className="mt-2 text-center text-xs font-bold text-red-300">{getDisplayTeamName(signing.team)}</p><p className="mt-1 text-center text-xs text-white/40">{signing.role||signing.player?.role||"Player"}</p></div>)}</div>
             </div>
           </div>
         </section>
+
+        <section className="mt-16 pb-4"><div className="mb-6"><p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">Partners</p><h2 className="mt-2 text-3xl font-black md:text-4xl">Tournament Sponsors</h2></div><div className="grid gap-5 md:grid-cols-3"><SponsorCard title="Title Sponsor" src="/sponsors/kiwikmart.png" alt="Kwik Mart"/><SponsorCard title="Gold Sponsor" src="/sponsors/jatheesan.png" alt="Jatheesan Ltd"/><SponsorCard title="Powered By" src="/sponsors/sam.jpg" alt="SAM Accountants"/></div></section>
       </div>
     </main>
   );
 }
+
+function OpeningMatchCard({pitch,time,teamA,teamB}:{pitch:string;time:string;teamA:string;teamB:string;}){
+  return <div className="rounded-[24px] border border-white/10 bg-black/40 p-5"><div className="flex items-center justify-between"><span className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-300">{pitch}</span><span className="text-sm font-black text-yellow-400">{time}</span></div><div className="mt-5 space-y-4"><TeamMiniRow teamName={teamA}/><div className="text-center text-xs font-black uppercase tracking-[0.3em] text-white/25">VS</div><TeamMiniRow teamName={teamB}/></div></div>
+}
+function TeamMiniRow({teamName}:{teamName:string}){const team=teams.find((t)=>t.name===teamName);if(!team)return null;return <div className="flex items-center gap-3"><div className="flex h-12 w-12 items-center justify-center rounded-full bg-white p-1.5"><Image src={team.logo} alt={team.name} width={44} height={44} className="h-full w-full object-contain"/></div><p className="font-black leading-tight">{teamMeta[team.name].shortName}</p></div>}
+function FixtureColumn({title,fixtures}:{title:string;fixtures:Fixture[]}){return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#080808]"><div className="bg-gradient-to-r from-blue-950 via-black to-red-950 px-6 py-5"><h3 className="text-2xl font-black uppercase">{title}</h3></div><div className="divide-y divide-white/5">{fixtures.map((fixture,index)=><FixtureRow key={`${fixture.pitch}-${fixture.time}-${index}`} fixture={fixture}/>)}</div></div>}
+function FixtureRow({fixture}:{fixture:Fixture}){if(fixture.kind!=="match")return <div className="grid gap-3 px-5 py-4 sm:grid-cols-[90px_1fr] sm:items-center"><p className="font-black text-yellow-400">{fixture.time}</p><div><span className={`inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider ${fixture.kind==="final"?"bg-yellow-400 text-black":fixture.kind==="semi"?"bg-red-500/15 text-red-300":"bg-white/10 text-white/60"}`}>{fixture.kind==="final"?"Grand Final":fixture.kind==="semi"?"Semi Final":"Ceremony"}</span><p className="mt-2 font-black">{fixture.label}</p></div></div>;return <div className="grid gap-3 px-5 py-4 sm:grid-cols-[90px_1fr] sm:items-center"><p className="font-black text-yellow-400">{fixture.time}</p><div className="grid items-center gap-3 sm:grid-cols-[1fr_auto_1fr]"><FixtureTeam teamName={fixture.teamA!}/><span className="text-center text-xs font-black uppercase tracking-wider text-white/30">VS</span><FixtureTeam teamName={fixture.teamB!} right/></div></div>}
+function FixtureTeam({teamName,right=false}:{teamName:string;right?:boolean}){const team=teams.find((t)=>t.name===teamName);if(!team)return null;return <div className={`flex items-center gap-3 ${right?"sm:flex-row-reverse sm:text-right":""}`}><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white p-1"><Image src={team.logo} alt={team.name} width={40} height={40} className="h-full w-full object-contain"/></div><p className="text-sm font-black leading-tight">{teamMeta[team.name].shortName}</p></div>}
+function PointsTable({group}:{group:"A"|"B"}){const groupTeams=teams.filter((team)=>teamMeta[team.name].group===group);return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#080808]"><div className="border-b border-white/10 bg-white/5 px-6 py-5"><p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">Group {group}</p><h3 className="mt-2 text-2xl font-black">Standings</h3></div><div className="overflow-x-auto"><table className="w-full min-w-[540px] text-left text-sm"><thead><tr className="border-b border-white/10 text-xs font-black uppercase tracking-wider text-white/40"><th className="px-5 py-4">Team</th><th className="px-3 py-4">P</th><th className="px-3 py-4">W</th><th className="px-3 py-4">L</th><th className="px-3 py-4">Pts</th><th className="px-3 py-4">NRR</th></tr></thead><tbody>{groupTeams.map((team)=><tr key={team.name} className="border-b border-white/5"><td className="px-5 py-4"><div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-1"><Image src={team.logo} alt={team.name} width={32} height={32} className="h-full w-full object-contain"/></div><span className="font-black">{teamMeta[team.name].shortName}</span></div></td><td className="px-3 py-4 text-white/50">0</td><td className="px-3 py-4 text-white/50">0</td><td className="px-3 py-4 text-white/50">0</td><td className="px-3 py-4 font-black text-yellow-400">0</td><td className="px-3 py-4 text-white/50">0.000</td></tr>)}</tbody></table></div></div>}
+function AuctionStat({label,value}:{label:string;value:string}){return <div className="rounded-[22px] border border-white/10 bg-white/5 p-5 text-center"><p className="text-3xl font-black text-yellow-400">{value}</p><p className="mt-2 text-xs font-black uppercase tracking-wider text-white/40">{label}</p></div>}
+function SponsorCard({title,src,alt}:{title:string;src:string;alt:string}){return <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1"><p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">{title}</p><Image src={src} alt={alt} width={260} height={120} className="object-contain"/></div>}
