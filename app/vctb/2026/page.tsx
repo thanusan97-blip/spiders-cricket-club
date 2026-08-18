@@ -411,19 +411,12 @@ export default function VCTB2026Page() {
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-white/40">Squad</p><p className="mt-1 text-2xl font-black text-white">{squadSize||17}</p><p className="text-xs text-white/40">Players</p></div>
                     <div className="rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-yellow-300/70">Auction Balance</p><p className="mt-1 text-2xl font-black text-yellow-400">{remainingPoints.toLocaleString()}</p><p className="text-xs text-yellow-400/50">Points</p></div>
                   </div>
-                  <details className="group mt-5">
-                    <summary className="cursor-pointer list-none rounded-2xl bg-yellow-400 px-5 py-3 text-center text-sm font-black uppercase text-black transition hover:bg-yellow-300">View Full Squad</summary>
-                    <div className="mt-4 max-h-[470px] space-y-2 overflow-y-auto pr-1">
-                      {team.retained.map((player)=><div key={`retained-${player.playerId}`} className="flex items-center gap-3 rounded-xl border border-yellow-400/15 bg-yellow-400/5 p-3">
-                        <img src={encodeURI(`/vctb-2026-players/${player.photoCode}.jpeg`)} alt={player.name} className="h-11 w-11 rounded-full border border-yellow-400 object-cover" />
-                        <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{player.name}</p><p className="mt-1 text-[11px] text-white/45">{player.role} • {player.photoCode} • Retained</p></div>
-                      </div>)}
-                      {teamSignings.map((signing)=><div key={`auction-${signing.id}`} className="flex items-center gap-3 rounded-xl border border-red-400/15 bg-red-950/20 p-3">
-                        <img src={encodeURI(getAuctionPlayerPhoto(signing.player_id,signing.player?.photo_url))} alt={signing.player?.name||signing.player_id} className="h-11 w-11 rounded-full border border-red-400 object-cover" />
-                        <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{signing.player?.name||`Player ${signing.player_id}`}</p><p className="mt-1 text-[11px] text-white/45">{signing.role||signing.player?.role||"Player"} • {signing.player_id} • {Number(signing.points).toLocaleString()} pts</p></div>
-                      </div>)}
-                    </div>
-                  </details>
+                  <Link
+                    href={`/vctb/2026/teams/${meta.slug}`}
+                    className="mt-5 block rounded-2xl bg-yellow-400 px-5 py-3 text-center text-sm font-black uppercase text-black transition hover:bg-yellow-300"
+                  >
+                    View Full Squad →
+                  </Link>
                 </div>
               </article>
             })}
