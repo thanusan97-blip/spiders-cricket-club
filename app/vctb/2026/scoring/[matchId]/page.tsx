@@ -116,6 +116,53 @@ export default function MatchScorerPage() {
   const matchId = Number(params.matchId);
 
   const supabase = useMemo(() => createClient(), []);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [scorerEmail, setScorerEmail] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkAuth() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+
+      if (!user) {
+        window.location.href = "/vctb/2026/scoring/login";
+        return;
+      }
+
+      setScorerEmail(user.email || "");
+      setAuthLoading(false);
+    }
+
+    checkAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        window.location.href = "/vctb/2026/scoring/login";
+        return;
+      }
+
+      setScorerEmail(session.user.email || "");
+      setAuthLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  async function signOutScorer() {
+    await supabase.auth.signOut();
+    window.location.href = "/vctb/2026/scoring/login";
+  }
+
 
   const [match, setMatch] = useState<MatchRow | null>(null);
   const [players, setPlayers] = useState<MatchPlayer[]>([]);
@@ -918,6 +965,14 @@ export default function MatchScorerPage() {
     return String(delivery.runs_batter);
   }
 
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-black px-4 py-20 text-center text-white">
+        <p className="font-black text-yellow-400">Checking scorer access...</p>
+      </main>
+    );
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen bg-black p-8 text-center text-white">
@@ -945,6 +1000,17 @@ export default function MatchScorerPage() {
 
   return (
     <main className="min-h-screen bg-black text-white">
+      <div className="fixed bottom-3 right-3 z-40 flex items-center gap-2 rounded-full border border-white/10 bg-black/90 p-1.5 shadow-xl">
+        <span className="hidden max-w-[180px] truncate pl-2 text-[10px] font-bold text-white/40 sm:block">
+          {scorerEmail}
+        </span>
+        <button
+          onClick={signOutScorer}
+          className="rounded-full border border-red-400/20 bg-red-950/30 px-3 py-2 text-[10px] font-black uppercase text-red-200"
+        >
+          Sign Out
+        </button>
+      </div>
       <div className="mx-auto max-w-3xl px-2 py-3 sm:px-3 md:py-5">
 
         <div className="mb-2 flex items-center justify-between gap-2">

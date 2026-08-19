@@ -44,7 +44,44 @@ type FixtureMatch = {
   result_text: string | null;
 };
 
+
+type StandingInnings = {
+  id: number;
+  match_id: number;
+  innings_number: number;
+  batting_team: string;
+  bowling_team: string;
+  total_runs: number;
+  wickets: number;
+  legal_balls: number;
+  completed: boolean;
+};
+
+type StandingRow = {
+  team: string;
+  played: number;
+  won: number;
+  lost: number;
+  tied: number;
+  points: number;
+  runsFor: number;
+  ballsFor: number;
+  runsAgainst: number;
+  ballsAgainst: number;
+  nrr: number;
+};
+
 const PLAYING_XI_SIZE = 11;
+
+const teamGroups: Record<string, "A" | "B"> = {
+  "Aathiyadi JL Super Kings": "A",
+  "Balmoral Fighters": "A",
+  "Thunnalai Royals": "A",
+  "Niruvaththampai Knights": "B",
+  "Team Tiger": "B",
+  "Vallvai Blues SC UK": "B",
+};
+
 
 const fixtures: Fixture[] = [
   { matchNumber: 1, pitch: "Pitch 1", startTime: "08:30", teamA: "Thunnalai Royals", teamB: "Vallvai Blues SC UK" },
@@ -112,6 +149,53 @@ function fallbackPhoto(playerId: string) {
 
 export default function VCTBScoringCentrePage() {
   const supabase = useMemo(() => createClient(), []);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [scorerEmail, setScorerEmail] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkAuth() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+
+      if (!user) {
+        window.location.href = "/vctb/2026/scoring/login";
+        return;
+      }
+
+      setScorerEmail(user.email || "");
+      setAuthLoading(false);
+    }
+
+    checkAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        window.location.href = "/vctb/2026/scoring/login";
+        return;
+      }
+
+      setScorerEmail(session.user.email || "");
+      setAuthLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  async function signOutScorer() {
+    await supabase.auth.signOut();
+    window.location.href = "/vctb/2026/scoring/login";
+  }
+
 
   const [selectedFixture, setSelectedFixture] = useState<Fixture | null>(null);
   const [teamASquad, setTeamASquad] = useState<SquadPlayer[]>([]);
@@ -133,31 +217,48 @@ export default function VCTBScoringCentrePage() {
   const [startingMatch, setStartingMatch] = useState(false);
   const [message, setMessage] = useState("");
   const [fixtureMatches, setFixtureMatches] = useState<FixtureMatch[]>([]);
+  const [standingInnings, setStandingInnings] = useState<StandingInnings[]>([]);
   const [restartTarget, setRestartTarget] = useState<{
     fixture: Fixture;
     match: FixtureMatch;
   } | null>(null);
   const [restarting, setRestarting] = useState(false);
+  const [walkoverTarget, setWalkoverTarget] = useState<Fixture | null>(null);
+  const [walkoverProcessing, setWalkoverProcessing] = useState(false);
 
   useEffect(() => {
-    async function loadFixtureMatches() {
-      const { data, error } = await supabase
-        .from("matches")
-        .select(
-          "id, match_number, pitch, start_time, team_a, team_b, status, winner, result_text"
-        )
-        .order("id", { ascending: false });
+    async function loadFixtureData() {
+      const [
+        { data: matchData, error: matchError },
+        { data: inningsData, error: inningsError },
+      ] = await Promise.all([
+        supabase
+          .from("matches")
+          .select(
+            "id, match_number, pitch, start_time, team_a, team_b, status, winner, result_text"
+          )
+          .order("id", { ascending: false }),
+        supabase
+          .from("innings")
+          .select(
+            "id, match_id, innings_number, batting_team, bowling_team, total_runs, wickets, legal_balls, completed"
+          )
+          .order("innings_number"),
+      ]);
 
-      if (error) {
-        console.error(error);
+      if (matchError) {
+        console.error(matchError);
         return;
       }
 
-      // During development several test rows may exist for the same fixture.
-      // Keep ONLY the newest row for each Match Number + Pitch.
+      if (inningsError) {
+        console.error(inningsError);
+        return;
+      }
+
       const latestByFixture = new Map<string, FixtureMatch>();
 
-      for (const row of (data || []) as FixtureMatch[]) {
+      for (const row of (matchData || []) as FixtureMatch[]) {
         const key = `${row.match_number}-${row.pitch}`;
 
         if (!latestByFixture.has(key)) {
@@ -165,18 +266,336 @@ export default function VCTBScoringCentrePage() {
         }
       }
 
-      setFixtureMatches(Array.from(latestByFixture.values()));
+      const latestMatches = Array.from(latestByFixture.values());
+      const ids = new Set(latestMatches.map((row) => row.id));
+
+      setFixtureMatches(latestMatches);
+      setStandingInnings(
+        ((inningsData || []) as StandingInnings[]).filter((row) =>
+          ids.has(row.match_id)
+        )
+      );
     }
 
-    loadFixtureMatches();
+    loadFixtureData();
+
+    const channel = supabase
+      .channel("vctb-scoring-centre-qualification")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "matches" },
+        loadFixtureData
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "innings" },
+        loadFixtureData
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [supabase]);
 
-  function getFixtureMatch(fixture: Fixture) {
-    return fixtureMatches.find(
-      (row) =>
-        row.match_number === fixture.matchNumber &&
-        row.pitch === fixture.pitch
+  const completedGroupMatches = fixtures
+    .map((fixture) => {
+      const match = fixtureMatches.find(
+        (row) =>
+          row.match_number === fixture.matchNumber &&
+          row.pitch === fixture.pitch &&
+          row.status === "completed"
+      );
+
+      if (!match) return null;
+
+      const innings = standingInnings
+        .filter((row) => row.match_id === match.id)
+        .sort((a, b) => a.innings_number - b.innings_number);
+
+      const isWalkover =
+        match.result_text?.toLowerCase().includes("walkover") ?? false;
+
+      if (!isWalkover && innings.length < 2) return null;
+
+      return { fixture, match, innings };
+    })
+    .filter(Boolean) as {
+      fixture: Fixture;
+      match: FixtureMatch;
+      innings: StandingInnings[];
+    }[];
+
+  function buildGroupStandings(group: "A" | "B") {
+    const groupTeams = Object.keys(teamGroups).filter(
+      (team) => teamGroups[team] === group
     );
+
+    const table = new Map<string, StandingRow>();
+
+    groupTeams.forEach((team) => {
+      table.set(team, {
+        team,
+        played: 0,
+        won: 0,
+        lost: 0,
+        tied: 0,
+        points: 0,
+        runsFor: 0,
+        ballsFor: 0,
+        runsAgainst: 0,
+        ballsAgainst: 0,
+        nrr: 0,
+      });
+    });
+
+    for (const completed of completedGroupMatches) {
+      const isWalkover =
+        completed.match.result_text?.toLowerCase().includes("walkover") ?? false;
+
+      if (isWalkover) {
+        const winnerRow = table.get(completed.match.winner || "");
+        const loserTeam =
+          completed.match.winner === completed.match.team_a
+            ? completed.match.team_b
+            : completed.match.team_a;
+        const loserRow = table.get(loserTeam);
+
+        if (winnerRow) {
+          winnerRow.played += 1;
+          winnerRow.won += 1;
+          winnerRow.points += 2;
+        }
+
+        if (loserRow) {
+          loserRow.played += 1;
+          loserRow.lost += 1;
+        }
+
+        continue;
+      }
+
+      const first = completed.innings.find(
+        (row) => row.innings_number === 1
+      );
+      const second = completed.innings.find(
+        (row) => row.innings_number === 2
+      );
+
+      if (!first || !second) continue;
+
+      for (const team of [
+        completed.match.team_a,
+        completed.match.team_b,
+      ]) {
+        const row = table.get(team);
+        if (!row) continue;
+
+        const own =
+          first.batting_team === team ? first : second;
+        const opp =
+          first.batting_team === team ? second : first;
+
+        row.played += 1;
+        row.runsFor += own.total_runs;
+        row.runsAgainst += opp.total_runs;
+        row.ballsFor +=
+          own.wickets >= 10 ? 50 : own.legal_balls;
+        row.ballsAgainst +=
+          opp.wickets >= 10 ? 50 : opp.legal_balls;
+      }
+
+      const a = table.get(completed.match.team_a);
+      const b = table.get(completed.match.team_b);
+
+      const aInn =
+        first.batting_team === completed.match.team_a
+          ? first
+          : second;
+      const bInn =
+        first.batting_team === completed.match.team_b
+          ? first
+          : second;
+
+      if (aInn.total_runs === bInn.total_runs) {
+        if (a) {
+          a.tied += 1;
+          a.points += 1;
+        }
+        if (b) {
+          b.tied += 1;
+          b.points += 1;
+        }
+      } else if (
+        completed.match.winner === completed.match.team_a
+      ) {
+        if (a) {
+          a.won += 1;
+          a.points += 2;
+        }
+        if (b) b.lost += 1;
+      } else if (
+        completed.match.winner === completed.match.team_b
+      ) {
+        if (b) {
+          b.won += 1;
+          b.points += 2;
+        }
+        if (a) a.lost += 1;
+      }
+    }
+
+    for (const row of table.values()) {
+      const forRate =
+        row.ballsFor > 0
+          ? (row.runsFor / row.ballsFor) * 5
+          : 0;
+      const againstRate =
+        row.ballsAgainst > 0
+          ? (row.runsAgainst / row.ballsAgainst) * 5
+          : 0;
+
+      row.nrr = forRate - againstRate;
+    }
+
+    return Array.from(table.values()).sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.nrr !== a.nrr) return b.nrr - a.nrr;
+      if (b.won !== a.won) return b.won - a.won;
+      return displayTeamName(a.team).localeCompare(
+        displayTeamName(b.team)
+      );
+    });
+  }
+
+  const groupAStandings = buildGroupStandings("A");
+  const groupBStandings = buildGroupStandings("B");
+
+  const groupStageComplete =
+    completedGroupMatches.length === fixtures.length;
+
+  const automaticSemiFinals: Fixture[] =
+    groupStageComplete &&
+    groupAStandings.length >= 2 &&
+    groupBStandings.length >= 2
+      ? [
+          {
+            matchNumber: 10,
+            pitch: "Pitch 1",
+            startTime: "16:00",
+            teamA: groupAStandings[0].team,
+            teamB: groupAStandings[1].team,
+          },
+          {
+            matchNumber: 11,
+            pitch: "Pitch 2",
+            startTime: "16:00",
+            teamA: groupBStandings[0].team,
+            teamB: groupBStandings[1].team,
+          },
+        ]
+      : [];
+
+  // Only use knockout rows created AFTER the current completed group stage.
+  // This prevents an old test Semi-Final/Final from returning after Matches 1–9
+  // are restarted.
+  const currentGroupGenerationId = groupStageComplete
+    ? Math.max(0, ...completedGroupMatches.map((row) => row.match.id))
+    : 0;
+
+  const expectedSemiFinal1 = automaticSemiFinals.find(
+    (fixture) => fixture.matchNumber === 10
+  );
+  const expectedSemiFinal2 = automaticSemiFinals.find(
+    (fixture) => fixture.matchNumber === 11
+  );
+
+  const semiFinal1Match =
+    groupStageComplete && expectedSemiFinal1
+      ? fixtureMatches
+          .filter(
+            (row) =>
+              row.match_number === 10 &&
+              row.pitch === "Pitch 1" &&
+              row.id > currentGroupGenerationId &&
+              row.team_a === expectedSemiFinal1.teamA &&
+              row.team_b === expectedSemiFinal1.teamB
+          )
+          .sort((a, b) => b.id - a.id)[0]
+      : undefined;
+
+  const semiFinal2Match =
+    groupStageComplete && expectedSemiFinal2
+      ? fixtureMatches
+          .filter(
+            (row) =>
+              row.match_number === 11 &&
+              row.pitch === "Pitch 2" &&
+              row.id > currentGroupGenerationId &&
+              row.team_a === expectedSemiFinal2.teamA &&
+              row.team_b === expectedSemiFinal2.teamB
+          )
+          .sort((a, b) => b.id - a.id)[0]
+      : undefined;
+
+  const automaticFinal: Fixture[] =
+    groupStageComplete &&
+    semiFinal1Match?.status === "completed" &&
+    semiFinal2Match?.status === "completed" &&
+    semiFinal1Match.winner &&
+    semiFinal2Match.winner
+      ? [
+          {
+            matchNumber: 12,
+            pitch: "Pitch 1",
+            startTime: "17:30",
+            teamA: semiFinal1Match.winner,
+            teamB: semiFinal2Match.winner,
+          },
+        ]
+      : [];
+
+  const availableFixtures = [
+    ...fixtures,
+    ...automaticSemiFinals,
+    ...automaticFinal,
+  ];
+
+  function getFixtureMatch(fixture: Fixture) {
+    const candidates = fixtureMatches
+      .filter(
+        (row) =>
+          row.match_number === fixture.matchNumber &&
+          row.pitch === fixture.pitch
+      )
+      .sort((a, b) => b.id - a.id);
+
+    if (fixture.matchNumber === 10 || fixture.matchNumber === 11) {
+      return candidates.find(
+        (row) =>
+          groupStageComplete &&
+          row.id > currentGroupGenerationId &&
+          row.team_a === fixture.teamA &&
+          row.team_b === fixture.teamB
+      );
+    }
+
+    if (fixture.matchNumber === 12) {
+      const currentSemiGenerationId =
+        semiFinal1Match && semiFinal2Match
+          ? Math.max(semiFinal1Match.id, semiFinal2Match.id)
+          : 0;
+
+      return candidates.find(
+        (row) =>
+          currentSemiGenerationId > 0 &&
+          row.id > currentSemiGenerationId &&
+          row.team_a === fixture.teamA &&
+          row.team_b === fixture.teamB
+      );
+    }
+
+    return candidates[0];
   }
 
   const resumableMatches = fixtureMatches.filter(
@@ -266,6 +685,110 @@ export default function VCTBScoringCentrePage() {
         "Could not restart the match. Please check Supabase delete permissions."
       );
       setRestarting(false);
+    }
+  }
+
+  async function completeWalkover(
+    fixture: Fixture,
+    winningTeam: string
+  ) {
+    const losingTeam =
+      winningTeam === fixture.teamA
+        ? fixture.teamB
+        : fixture.teamA;
+
+    setWalkoverProcessing(true);
+    setMessage("");
+
+    try {
+      const { data: oldRows, error: oldRowsError } = await supabase
+        .from("matches")
+        .select("id")
+        .eq("match_number", fixture.matchNumber)
+        .eq("pitch", fixture.pitch);
+
+      if (oldRowsError) throw oldRowsError;
+
+      const oldIds = (oldRows || []).map((row) => Number(row.id));
+
+      if (oldIds.length > 0) {
+        const { error: deliveriesError } = await supabase
+          .from("deliveries")
+          .delete()
+          .in("match_id", oldIds);
+        if (deliveriesError) throw deliveriesError;
+
+        const { error: inningsError } = await supabase
+          .from("innings")
+          .delete()
+          .in("match_id", oldIds);
+        if (inningsError) throw inningsError;
+
+        const { error: playersError } = await supabase
+          .from("match_players")
+          .delete()
+          .in("match_id", oldIds);
+        if (playersError) throw playersError;
+
+        const { error: matchesError } = await supabase
+          .from("matches")
+          .delete()
+          .in("id", oldIds);
+        if (matchesError) throw matchesError;
+
+        oldIds.forEach((id) =>
+          sessionStorage.removeItem(`vctb-scoring-${id}`)
+        );
+      }
+
+      const resultText = `${displayTeamName(winningTeam)} won by walkover`;
+
+      const { data: inserted, error: insertError } = await supabase
+        .from("matches")
+        .insert({
+          match_number: fixture.matchNumber,
+          pitch: fixture.pitch,
+          match_date: "2026-09-06",
+          start_time: fixture.startTime,
+          team_a: fixture.teamA,
+          team_b: fixture.teamB,
+          status: "completed",
+          winner: winningTeam,
+          result_text: resultText,
+        })
+        .select(
+          "id, match_number, pitch, start_time, team_a, team_b, status, winner, result_text"
+        )
+        .single();
+
+      if (insertError) throw insertError;
+
+      setFixtureMatches((current) => [
+        inserted as FixtureMatch,
+        ...current.filter(
+          (row) =>
+            !(
+              row.match_number === fixture.matchNumber &&
+              row.pitch === fixture.pitch
+            )
+        ),
+      ]);
+
+      setStandingInnings((current) =>
+        current.filter((row) => !oldIds.includes(row.match_id))
+      );
+
+      setWalkoverTarget(null);
+      setMessage(
+        `${resultText}. ${displayTeamName(winningTeam)} receives 2 points, ${displayTeamName(losingTeam)} receives 0 points, and NRR is unchanged.`
+      );
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        "Could not complete the walkover. Please check Supabase permissions."
+      );
+    } finally {
+      setWalkoverProcessing(false);
     }
   }
 
@@ -618,8 +1141,27 @@ export default function VCTBScoringCentrePage() {
     }
   }
 
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-black px-4 py-20 text-center text-white">
+        <p className="font-black text-yellow-400">Checking scorer access...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-black text-white">
+      <div className="fixed bottom-3 right-3 z-40 flex items-center gap-2 rounded-full border border-white/10 bg-black/90 p-1.5 shadow-xl">
+        <span className="hidden max-w-[180px] truncate pl-2 text-[10px] font-bold text-white/40 sm:block">
+          {scorerEmail}
+        </span>
+        <button
+          onClick={signOutScorer}
+          className="rounded-full border border-red-400/20 bg-red-950/30 px-3 py-2 text-[10px] font-black uppercase text-red-200"
+        >
+          Sign Out
+        </button>
+      </div>
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
         <div className="mb-7 flex flex-wrap items-center gap-2 text-sm text-white/60">
           <Link href="/" className="hover:text-yellow-400">Home</Link>
@@ -667,8 +1209,34 @@ export default function VCTBScoringCentrePage() {
               <h2 className="mt-2 text-3xl font-black">Select a Match</h2>
             </div>
 
+            {groupStageComplete && automaticSemiFinals.length === 2 && (
+              <div className="mb-6 rounded-[24px] border border-green-400/25 bg-green-950/20 p-5">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-green-300">
+                  ✓ Group Stage Complete
+                </p>
+                <p className="mt-2 font-black text-white">
+                  Semi Final 1 and Semi Final 2 have been generated automatically from the final points tables.
+                </p>
+              </div>
+            )}
+
+            {automaticFinal.length === 1 && (
+              <div className="mb-6 rounded-[24px] border border-yellow-400/30 bg-yellow-400/5 p-5">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
+                  🏆 Grand Final Generated
+                </p>
+                <p className="mt-2 font-black text-white">
+                  {displayTeamName(automaticFinal[0].teamA)} vs{" "}
+                  {displayTeamName(automaticFinal[0].teamB)}
+                </p>
+                <p className="mt-1 text-sm text-white/50">
+                  Match 12 • Pitch 1 • 17:30
+                </p>
+              </div>
+            )}
+
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {fixtures.map((fixture) => {
+              {availableFixtures.map((fixture) => {
                 const fixtureMatch = getFixtureMatch(fixture);
                 const isLive = fixtureMatch?.status === "live";
                 const isCompleted = fixtureMatch?.status === "completed";
@@ -773,12 +1341,21 @@ export default function VCTBScoringCentrePage() {
                         </button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => openFixture(fixture)}
-                        className="mt-5 w-full rounded-xl bg-yellow-400 px-4 py-3 text-center text-sm font-black uppercase text-black"
-                      >
-                        Set Up Match →
-                      </button>
+                      <div className="mt-5 grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => openFixture(fixture)}
+                          className="rounded-xl bg-yellow-400 px-4 py-3 text-center text-sm font-black uppercase text-black"
+                        >
+                          Set Up Match →
+                        </button>
+
+                        <button
+                          onClick={() => setWalkoverTarget(fixture)}
+                          className="rounded-xl border border-orange-400/30 bg-orange-950/30 px-4 py-3 text-center text-sm font-black uppercase text-orange-200"
+                        >
+                          Walkover
+                        </button>
+                      </div>
                     )}
                   </div>
                 );
@@ -1011,7 +1588,62 @@ export default function VCTBScoringCentrePage() {
             )}
           </section>
         )}
-        {restartTarget && (
+        {walkoverTarget && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 px-4">
+          <div className="w-full max-w-lg rounded-[28px] border border-orange-400/30 bg-[#0a0a0a] p-6 shadow-2xl">
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-orange-300">
+              Complete by Walkover
+            </p>
+
+            <h2 className="mt-3 text-2xl font-black text-white">
+              Which team receives the walkover?
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-white/50">
+              Winner: 2 points • Loser: 0 points • NRR unchanged.
+              For a Semi-Final or Final, the selected winner advances automatically.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <button
+                disabled={walkoverProcessing}
+                onClick={() =>
+                  completeWalkover(walkoverTarget, walkoverTarget.teamA)
+                }
+                className="w-full rounded-2xl bg-yellow-400 px-5 py-4 text-left font-black text-black disabled:opacity-50"
+              >
+                {displayTeamName(walkoverTarget.teamA)}
+              </button>
+
+              <button
+                disabled={walkoverProcessing}
+                onClick={() =>
+                  completeWalkover(walkoverTarget, walkoverTarget.teamB)
+                }
+                className="w-full rounded-2xl bg-yellow-400 px-5 py-4 text-left font-black text-black disabled:opacity-50"
+              >
+                {displayTeamName(walkoverTarget.teamB)}
+              </button>
+
+              <button
+                disabled={walkoverProcessing}
+                onClick={() => setWalkoverTarget(null)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-black text-white"
+              >
+                Cancel
+              </button>
+            </div>
+
+            {walkoverProcessing && (
+              <p className="mt-4 text-center text-sm font-bold text-orange-200">
+                Recording walkover...
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {restartTarget && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
             <div className="w-full max-w-md rounded-[24px] border border-red-500/30 bg-[#0a0a0a] p-6 shadow-2xl">
               <p className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
