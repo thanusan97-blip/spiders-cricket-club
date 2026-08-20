@@ -37,6 +37,7 @@ type MatchPlayer = {
   role: string | null;
   is_captain: boolean;
   is_wicket_keeper: boolean;
+  photo_url?: string | null;
 };
 
 type DeliveryRow = {
@@ -85,6 +86,12 @@ function deliveryBadge(d: DeliveryRow) {
   return String(d.runs_batter);
 }
 
+function playerPhoto(playerId: string, photoUrl?: string | null) {
+  if (photoUrl) return photoUrl;
+  return encodeURI(`/vctb-2026-players/${playerId}.jpeg`);
+}
+
+
 const shell: CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -111,6 +118,22 @@ export default function VCTBOverlayPage() {
 
   const [centreCard, setCentreCard] = useState<"batting" | "bowling" | null>(null);
   const [eventAnimation, setEventAnimation] = useState<"FOUR" | "SIX" | "WICKET" | null>(null);
+  const [batsmanTransition, setBatsmanTransition] = useState<{
+    kind: "OUT" | "NEXT";
+    playerId: string;
+    wicketType?: string | null;
+    runs?: number;
+    balls?: number;
+    bowlerId?: string | null;
+  } | null>(null);
+  const pendingWicket = useRef<{
+    deliveryId: number;
+    dismissedPlayerId: string;
+    survivingPlayerId: string | null;
+    wicketType: string | null;
+    bowlerId: string | null;
+  } | null>(null);
+  const batsmanCardTimer = useRef<number | null>(null);
   const lastAnimatedDeliveryId = useRef<number | null>(null);
   const animationTimer = useRef<number | null>(null);
   const hasInitialDeliverySnapshot = useRef(false);
@@ -171,8 +194,33 @@ export default function VCTBOverlayPage() {
     if (playersRes.error) console.error(playersRes.error);
     if (deliveriesRes.error) console.error(deliveriesRes.error);
 
+    const rawMatchPlayers = (playersRes.data || []) as MatchPlayer[];
+    const playerIds = [...new Set(rawMatchPlayers.map((player) => String(player.player_id)))];
+
+    let photoMap = new Map<string, string | null>();
+
+    if (playerIds.length) {
+      const { data: photoRows, error: photoError } = await supabase
+        .from("players")
+        .select("player_id,photo_url")
+        .in("player_id", playerIds);
+
+      if (photoError) {
+        console.error("Overlay player photos error:", photoError);
+      } else {
+        (photoRows || []).forEach((row) => {
+          photoMap.set(String(row.player_id), row.photo_url || null);
+        });
+      }
+    }
+
     setInnings((inningsRes.data || []) as InningsRow[]);
-    setPlayers((playersRes.data || []) as MatchPlayer[]);
+    setPlayers(
+      rawMatchPlayers.map((player) => ({
+        ...player,
+        photo_url: photoMap.get(String(player.player_id)) || null,
+      }))
+    );
     setDeliveries((deliveriesRes.data || []) as DeliveryRow[]);
   }, [pitch, supabase]);
 
@@ -232,15 +280,20 @@ export default function VCTBOverlayPage() {
     : [];
 
   // FOUR / SIX / WICKET animation: trigger only for a newly arriving delivery.
+  // For a wicket: play WICKET first, then keep the dismissed-batter card visible
+  // until the scorer selects the replacement batter.
   useEffect(() => {
     if (!match || !currentInnings || match.status === "completed") {
       hasInitialDeliverySnapshot.current = false;
       lastAnimatedDeliveryId.current = null;
+      pendingWicket.current = null;
       setEventAnimation(null);
+      setBatsmanTransition(null);
       return;
     }
 
     const latest = inningsDeliveries[inningsDeliveries.length - 1];
+
     if (!latest) {
       hasInitialDeliverySnapshot.current = true;
       lastAnimatedDeliveryId.current = null;
@@ -263,12 +316,124 @@ export default function VCTBOverlayPage() {
     if (!next) return;
 
     if (animationTimer.current) window.clearTimeout(animationTimer.current);
+    if (batsmanCardTimer.current) window.clearTimeout(batsmanCardTimer.current);
+
+    // Clear any previous batter card while the event animation is playing.
+    setBatsmanTransition(null);
     setEventAnimation(next);
+
+    if (next === "WICKET" && latest.dismissed_player_id) {
+      const dismissedId = latest.dismissed_player_id;
+      const survivingId =
+        latest.striker_id === dismissedId
+          ? latest.non_striker_id
+          : latest.striker_id;
+
+      pendingWicket.current = {
+        deliveryId: latest.id,
+        dismissedPlayerId: dismissedId,
+        survivingPlayerId: survivingId || null,
+        wicketType: latest.wicket_type,
+        bowlerId: latest.bowler_id,
+      };
+
+      const faced = inningsDeliveries.filter(
+        (delivery) =>
+          delivery.striker_id === dismissedId &&
+          delivery.id <= latest.id
+      );
+
+      const dismissedRuns = faced.reduce(
+        (sum, delivery) => sum + Number(delivery.runs_batter || 0),
+        0
+      );
+
+      const dismissedBalls = faced.filter(
+        (delivery) =>
+          delivery.is_legal_ball && delivery.extra_type !== "wide"
+      ).length;
+
+      animationTimer.current = window.setTimeout(() => {
+        setEventAnimation(null);
+        setBatsmanTransition({
+          kind: "OUT",
+          playerId: dismissedId,
+          wicketType: latest.wicket_type,
+          runs: dismissedRuns,
+          balls: dismissedBalls,
+          bowlerId: latest.bowler_id,
+        });
+        animationTimer.current = null;
+      }, 2600);
+
+      return;
+    }
+
     animationTimer.current = window.setTimeout(() => {
       setEventAnimation(null);
       animationTimer.current = null;
-    }, next === "WICKET" ? 2600 : 2200);
-  }, [match?.id, currentInnings?.id, inningsDeliveries.length, inningsDeliveries[inningsDeliveries.length - 1]?.id]);
+    }, 2200);
+  }, [
+    match?.id,
+    match?.status,
+    currentInnings?.id,
+    inningsDeliveries.length,
+    inningsDeliveries[inningsDeliveries.length - 1]?.id,
+  ]);
+
+  // Once the scorer selects the replacement batter, replace the OUT card
+  // with NEXT BATSMAN for 10 seconds.
+  useEffect(() => {
+    if (!pendingWicket.current || !currentInnings || match?.status !== "live") {
+      return;
+    }
+
+    const pending = pendingWicket.current;
+    const currentIds = [
+      currentInnings.striker_id || null,
+      currentInnings.non_striker_id || null,
+    ].filter(Boolean) as string[];
+
+    const replacementId = currentIds.find(
+      (id) =>
+        id !== pending.dismissedPlayerId &&
+        id !== pending.survivingPlayerId
+    );
+
+    if (!replacementId) return;
+
+    // Do not interrupt the WICKET animation. If selection is extremely quick,
+    // wait until the animation has finished, then show NEXT BATSMAN.
+    const showNext = () => {
+      setBatsmanTransition({
+        kind: "NEXT",
+        playerId: replacementId,
+      });
+
+      pendingWicket.current = null;
+
+      if (batsmanCardTimer.current) {
+        window.clearTimeout(batsmanCardTimer.current);
+      }
+
+      batsmanCardTimer.current = window.setTimeout(() => {
+        setBatsmanTransition(null);
+        batsmanCardTimer.current = null;
+      }, 10000);
+    };
+
+    if (eventAnimation === "WICKET") {
+      window.setTimeout(showNext, 2700);
+    } else {
+      showNext();
+    }
+  }, [
+    match?.status,
+    currentInnings?.striker_id,
+    currentInnings?.non_striker_id,
+    eventAnimation,
+  ]);
+
 
   // Every completed over:
   // batting scorecard 10 sec -> bowling scorecard 10 sec -> hide.
@@ -350,6 +515,7 @@ export default function VCTBOverlayPage() {
     return () => {
       overCardTimers.current.forEach((timer) => window.clearTimeout(timer));
       if (animationTimer.current) window.clearTimeout(animationTimer.current);
+      if (batsmanCardTimer.current) window.clearTimeout(batsmanCardTimer.current);
     };
   }, []);
 
@@ -641,6 +807,50 @@ export default function VCTBOverlayPage() {
     }
 
     return "MATCH TIED";
+  })();
+
+
+  const transitionPlayer = batsmanTransition
+    ? players.find((player) => player.player_id === batsmanTransition.playerId) || null
+    : null;
+
+  const transitionBowler =
+    batsmanTransition?.bowlerId
+      ? players.find((player) => player.player_id === batsmanTransition.bowlerId) || null
+      : null;
+
+  const dismissalDescription = (() => {
+    if (!batsmanTransition || batsmanTransition.kind !== "OUT") return "";
+
+    const type = (batsmanTransition.wicketType || "OUT").trim();
+    const upper = type.toUpperCase();
+
+    if (upper.includes("RUN OUT")) return "RUN OUT";
+    if (upper.includes("RETIRED")) return upper;
+    if (upper.includes("STUMP")) {
+      return transitionBowler
+        ? `STUMPED • BOWLING ${transitionBowler.player_name.toUpperCase()}`
+        : "STUMPED";
+    }
+    if (upper.includes("BOWLED")) {
+      return transitionBowler
+        ? `BOWLED • ${transitionBowler.player_name.toUpperCase()}`
+        : "BOWLED";
+    }
+    if (upper.includes("LBW")) {
+      return transitionBowler
+        ? `LBW • ${transitionBowler.player_name.toUpperCase()}`
+        : "LBW";
+    }
+    if (upper.includes("CAUGHT")) {
+      return transitionBowler
+        ? `CAUGHT • BOWLING ${transitionBowler.player_name.toUpperCase()}`
+        : "CAUGHT";
+    }
+
+    return transitionBowler
+      ? `${upper} • ${transitionBowler.player_name.toUpperCase()}`
+      : upper;
   })();
 
   if (!match) {
@@ -1053,6 +1263,244 @@ export default function VCTBOverlayPage() {
               }}
             >
               VCTB 3.0 • TENETELOW SPORTS GROUND, SOUTHALL
+            </div>
+          </div>
+        </div>
+      )}
+
+      {batsmanTransition && transitionPlayer && !eventAnimation && !isCompletedMatch && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "43%",
+            transform: "translate(-50%,-50%)",
+            zIndex: 360,
+            width: 760,
+            minHeight: 350,
+            pointerEvents: "none",
+            overflow: "hidden",
+            borderRadius: 34,
+            border: `4px solid ${gold}`,
+            background:
+              batsmanTransition.kind === "OUT"
+                ? "radial-gradient(circle at 20% 35%,rgba(215,25,39,.32),transparent 38%),linear-gradient(135deg,#41050b 0%,#071831 50%,#030914 100%)"
+                : "radial-gradient(circle at 20% 35%,rgba(34,119,218,.35),transparent 38%),linear-gradient(135deg,#071831 0%,#0b397c 48%,#030914 100%)",
+            boxShadow:
+              "0 24px 75px rgba(0,0,0,.75),inset 0 2px 0 rgba(255,255,255,.16),0 0 38px rgba(231,180,58,.32)",
+          }}
+        >
+          <div
+            style={{
+              height: 67,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 14,
+              color: "#fff",
+              background:
+                batsmanTransition.kind === "OUT"
+                  ? "linear-gradient(90deg,#8f0711,#e01d2b,#8f0711)"
+                  : "linear-gradient(90deg,#092658,#1261c6,#092658)",
+              borderBottom: `3px solid ${gold}`,
+              fontSize: 28,
+              fontWeight: 1000,
+              letterSpacing: "4px",
+            }}
+          >
+            {batsmanTransition.kind === "OUT" ? "WICKET • BATTER OUT" : "NEXT BATSMAN"}
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "270px 1fr",
+              minHeight: 280,
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                overflow: "hidden",
+                background:
+                  batsmanTransition.kind === "OUT"
+                    ? "linear-gradient(180deg,#3a070c,#0a1935)"
+                    : "linear-gradient(180deg,#09285c,#071831)",
+                borderRight: "1px solid rgba(255,255,255,.12)",
+              }}
+            >
+              <img
+                src={playerPhoto(transitionPlayer.player_id, transitionPlayer.photo_url)}
+                alt={transitionPlayer.player_name}
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center top",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg,transparent 48%,rgba(3,9,20,.9) 100%)",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: 16,
+                  bottom: 13,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                }}
+              >
+                <img
+                  src={TEAM_LOGOS[transitionPlayer.team] || "/vctb/2026/vctb-3-logo.png"}
+                  alt=""
+                  style={{
+                    width: 44,
+                    height: 44,
+                    objectFit: "contain",
+                    padding: 3,
+                    borderRadius: "50%",
+                    background: "#fff",
+                  }}
+                />
+                <span style={{ fontSize: 12, fontWeight: 1000 }}>
+                  {displayTeam(transitionPlayer.team).toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                padding: "28px 34px",
+              }}
+            >
+              <div
+                style={{
+                  color: "#ffc71c",
+                  fontSize: 13,
+                  fontWeight: 1000,
+                  letterSpacing: "4px",
+                }}
+              >
+                {batsmanTransition.kind === "OUT" ? "DEPARTING BATTER" : "COMING TO THE CREASE"}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 38,
+                  lineHeight: 1.05,
+                  fontWeight: 1000,
+                }}
+              >
+                {transitionPlayer.player_name.toUpperCase()}
+                {transitionPlayer.is_captain ? " (C)" : ""}
+                {transitionPlayer.is_wicket_keeper ? " (WK)" : ""}
+              </div>
+
+              {batsmanTransition.kind === "OUT" ? (
+                <>
+                  <div
+                    style={{
+                      marginTop: 20,
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: 13,
+                    }}
+                  >
+                    <strong
+                      style={{
+                        color: "#fff",
+                        fontSize: 64,
+                        lineHeight: .9,
+                        fontWeight: 1000,
+                      }}
+                    >
+                      {batsmanTransition.runs ?? 0}
+                    </strong>
+                    <span
+                      style={{
+                        color: "rgba(255,255,255,.62)",
+                        fontSize: 21,
+                        fontWeight: 900,
+                      }}
+                    >
+                      ({batsmanTransition.balls ?? 0} BALLS)
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 18,
+                      paddingTop: 14,
+                      borderTop: "1px solid rgba(255,255,255,.14)",
+                      color: "#ff5e69",
+                      fontSize: 18,
+                      lineHeight: 1.25,
+                      fontWeight: 1000,
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    {dismissalDescription}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 12,
+                      color: "rgba(255,255,255,.45)",
+                      fontSize: 11,
+                      fontWeight: 900,
+                      letterSpacing: "2px",
+                    }}
+                  >
+                    WAITING FOR NEXT BATSMAN
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      marginTop: 18,
+                      color: "#61f0a1",
+                      fontSize: 24,
+                      fontWeight: 1000,
+                    }}
+                  >
+                    {transitionPlayer.role?.toUpperCase() || "BATTER"}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 23,
+                      padding: "12px 17px",
+                      alignSelf: "flex-start",
+                      borderRadius: 999,
+                      border: "1px solid rgba(255,199,28,.45)",
+                      color: "#ffc71c",
+                      background: "rgba(0,0,0,.25)",
+                      fontSize: 12,
+                      fontWeight: 1000,
+                      letterSpacing: "2px",
+                    }}
+                  >
+                    VCTB 3.0 • NEXT BATSMAN
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
