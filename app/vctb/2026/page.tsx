@@ -205,6 +205,9 @@ export default function VCTB2026Page() {
   const [statMatchPlayers, setStatMatchPlayers] = useState<MatchPlayerStatRow[]>([]);
   const [statDeliveries, setStatDeliveries] = useState<DeliveryStatRow[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [mobilePointsGroup, setMobilePointsGroup] = useState<"A" | "B">("A");
+  const [mobileAuctionOpen, setMobileAuctionOpen] = useState(false);
+  const [openStatTop10, setOpenStatTop10] = useState<string | null>(null);
 
   // =====================================================
   // LOAD RETAINED PLAYERS
@@ -1095,17 +1098,25 @@ export default function VCTB2026Page() {
 
   const battingRows = Array.from(battingTotals.values());
 
-  const topRunScorer = [...battingRows].sort((a, b) => {
-    if (b.runs !== a.runs) return b.runs - a.runs;
-    if (b.sixes !== a.sixes) return b.sixes - a.sixes;
-    return a.playerName.localeCompare(b.playerName);
-  })[0];
+  const topRunScorers = [...battingRows]
+    .sort((a, b) => {
+      if (b.runs !== a.runs) return b.runs - a.runs;
+      if (b.sixes !== a.sixes) return b.sixes - a.sixes;
+      return a.playerName.localeCompare(b.playerName);
+    })
+    .slice(0, 10);
 
-  const mostSixes = [...battingRows].sort((a, b) => {
-    if (b.sixes !== a.sixes) return b.sixes - a.sixes;
-    if (b.runs !== a.runs) return b.runs - a.runs;
-    return a.playerName.localeCompare(b.playerName);
-  })[0];
+  const topRunScorer = topRunScorers[0];
+
+  const mostSixesList = [...battingRows]
+    .sort((a, b) => {
+      if (b.sixes !== a.sixes) return b.sixes - a.sixes;
+      if (b.runs !== a.runs) return b.runs - a.runs;
+      return a.playerName.localeCompare(b.playerName);
+    })
+    .slice(0, 10);
+
+  const mostSixes = mostSixesList[0];
 
   // Highest individual innings score
   const inningsBatting = new Map<
@@ -1147,13 +1158,15 @@ export default function VCTB2026Page() {
     inningsBatting.set(key, row);
   }
 
-  const highestScore = Array.from(inningsBatting.values()).sort(
-    (a, b) => {
+  const highestScoreList = Array.from(inningsBatting.values())
+    .sort((a, b) => {
       if (b.runs !== a.runs) return b.runs - a.runs;
       if (a.balls !== b.balls) return a.balls - b.balls;
       return a.playerName.localeCompare(b.playerName);
-    }
-  )[0];
+    })
+    .slice(0, 10);
+
+  const highestScore = highestScoreList[0];
 
   // Bowling aggregates
   const bowlingTotals = new Map<
@@ -1254,27 +1267,34 @@ export default function VCTB2026Page() {
 
   const bowlingRows = Array.from(bowlingTotals.values());
 
-  const topWicketTaker = [...bowlingRows].sort((a, b) => {
-    if (b.wickets !== a.wickets) return b.wickets - a.wickets;
-    if (a.runs !== b.runs) return a.runs - b.runs;
-    return a.playerName.localeCompare(b.playerName);
-  })[0];
+  const topWicketTakers = [...bowlingRows]
+    .sort((a, b) => {
+      if (b.wickets !== a.wickets) return b.wickets - a.wickets;
+      if (a.runs !== b.runs) return a.runs - b.runs;
+      return a.playerName.localeCompare(b.playerName);
+    })
+    .slice(0, 10);
 
-  const bestBowling = Array.from(inningsBowling.values()).sort(
-    (a, b) => {
+  const topWicketTaker = topWicketTakers[0];
+
+  const bestBowlingList = Array.from(inningsBowling.values())
+    .sort((a, b) => {
       if (b.wickets !== a.wickets) return b.wickets - a.wickets;
       if (a.runs !== b.runs) return a.runs - b.runs;
       if (a.legalBalls !== b.legalBalls) {
         return a.legalBalls - b.legalBalls;
       }
       return a.playerName.localeCompare(b.playerName);
-    }
-  )[0];
+    })
+    .slice(0, 10);
+
+  const bestBowling = bestBowlingList[0];
 
   const statisticLeaders: Array<{
     icon: string;
     title: string;
     leader?: TournamentLeader;
+    top10: TournamentLeader[];
   }> = [
     {
       icon: "🏏",
@@ -1288,6 +1308,13 @@ export default function VCTB2026Page() {
             secondary: `${topRunScorer.balls} balls`,
           }
         : undefined,
+      top10: topRunScorers.map((row) => ({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        team: row.team,
+        value: `${row.runs} runs`,
+        secondary: `${row.balls} balls • ${row.fours} fours • ${row.sixes} sixes`,
+      })),
     },
     {
       icon: "🎯",
@@ -1303,6 +1330,13 @@ export default function VCTB2026Page() {
             secondary: `${topWicketTaker.runs} runs conceded`,
           }
         : undefined,
+      top10: topWicketTakers.map((row) => ({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        team: row.team,
+        value: `${row.wickets} wicket${row.wickets === 1 ? "" : "s"}`,
+        secondary: `${row.runs} runs • ${oversFromLegalBalls(row.legalBalls)} overs`,
+      })),
     },
     {
       icon: "🔥",
@@ -1318,6 +1352,13 @@ export default function VCTB2026Page() {
             secondary: `${mostSixes.runs} runs`,
           }
         : undefined,
+      top10: mostSixesList.map((row) => ({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        team: row.team,
+        value: `${row.sixes} six${row.sixes === 1 ? "" : "es"}`,
+        secondary: `${row.runs} runs`,
+      })),
     },
     {
       icon: "💯",
@@ -1331,6 +1372,13 @@ export default function VCTB2026Page() {
             secondary: `${highestScore.balls} balls`,
           }
         : undefined,
+      top10: highestScoreList.map((row) => ({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        team: row.team,
+        value: `${row.runs}`,
+        secondary: `${row.balls} balls`,
+      })),
     },
     {
       icon: "⚡",
@@ -1346,13 +1394,20 @@ export default function VCTB2026Page() {
             )} overs`,
           }
         : undefined,
+      top10: bestBowlingList.map((row) => ({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        team: row.team,
+        value: `${row.wickets}/${row.runs}`,
+        secondary: `${oversFromLegalBalls(row.legalBalls)} overs`,
+      })),
     },
   ];
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-16">
-        <div className="mb-8 flex flex-wrap gap-2 text-sm font-semibold text-white/80 md:text-base">
+      <div className="mx-auto max-w-7xl px-3 py-4 md:px-6 md:py-16">
+        <div className="mb-4 flex flex-wrap gap-2 text-xs font-semibold text-white/70 md:mb-8 md:text-base md:text-white/80">
           <Link href="/" className="hover:text-yellow-400 hover:underline">Home</Link>
           <span>›</span>
           <Link href="/vctb" className="hover:text-yellow-400 hover:underline">VCTB</Link>
@@ -1360,9 +1415,30 @@ export default function VCTB2026Page() {
           <span className="text-yellow-400">2026</span>
         </div>
 
-        <section className="relative overflow-hidden rounded-[32px] border border-yellow-400/50 shadow-2xl" style={{backgroundImage:"url('/vctb/2026/vctb-2026-bg.png')",backgroundSize:"cover",backgroundPosition:"center",backgroundRepeat:"no-repeat"}}>
+        <section className="relative overflow-hidden rounded-[22px] border border-yellow-400/50 shadow-2xl md:rounded-[32px]" style={{backgroundImage:"url('/vctb/2026/vctb-2026-bg.png')",backgroundSize:"cover",backgroundPosition:"center",backgroundRepeat:"no-repeat"}}>
           <div className="absolute inset-0 bg-black/65" />
-          <div className="relative z-10 p-6 md:p-10">
+
+          {/* MOBILE HERO ONLY */}
+          <div className="relative z-10 p-4 md:hidden">
+            <div className="flex items-center gap-3">
+              <div className="flex h-[82px] w-[82px] shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 shadow-xl">
+                <Image src="/vctb/2026/vctb-3-logo.png" alt="VCTB Edition 3.0" width={82} height={82} priority className="h-full w-full object-contain" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-[0.24em] text-yellow-400">KWIK MART PRESENTS</p>
+                <h1 className="mt-1 text-[21px] font-black uppercase leading-[1.05]">Vadamaradchy Champion T10 Blast</h1>
+                <p className="mt-1 text-sm font-black uppercase text-yellow-400">Edition 3.0 • 2026</p>
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-1.5 text-center text-[10px] font-black">
+              <div className="rounded-xl border border-yellow-400/25 bg-black/65 px-2 py-2">📅 6 Sep</div>
+              <div className="rounded-xl border border-yellow-400/25 bg-black/65 px-2 py-2">📍 Tenetelow</div>
+              <div className="rounded-xl border border-yellow-400/25 bg-black/65 px-2 py-2">🏏 2 Pitches</div>
+            </div>
+          </div>
+
+          {/* DESKTOP / TABLET HERO — ORIGINAL DESIGN */}
+          <div className="relative z-10 hidden p-10 md:block">
             <div className="grid items-center gap-8 lg:grid-cols-[250px_1fr]">
               <div className="flex justify-center">
                 <div className="rounded-[26px] bg-white p-3 shadow-2xl">
@@ -1370,11 +1446,11 @@ export default function VCTB2026Page() {
                 </div>
               </div>
               <div className="text-center lg:text-left">
-                <p className="text-sm font-black uppercase tracking-[0.35em] text-yellow-400 md:text-base">KWIK MART PRESENTS</p>
-                <h1 className="mt-4 text-4xl font-black uppercase leading-tight md:text-6xl">Vadamaradchy Champion T10 Blast</h1>
-                <h2 className="mt-3 text-2xl font-black uppercase text-yellow-400 md:text-4xl">Edition 3.0 • 2026</h2>
-                <p className="mt-6 text-xl font-black uppercase md:text-2xl">The Teams Are Ready 🔥</p>
-                <p className="mt-3 max-w-3xl text-base leading-7 text-white/75 md:text-lg">Six teams. {totalSquadPlayers || 102} players. One trophy. VCTB 3.0 moves from Auction Night to tournament day.</p>
+                <p className="text-base font-black uppercase tracking-[0.35em] text-yellow-400">KWIK MART PRESENTS</p>
+                <h1 className="mt-4 text-6xl font-black uppercase leading-tight">Vadamaradchy Champion T10 Blast</h1>
+                <h2 className="mt-3 text-4xl font-black uppercase text-yellow-400">Edition 3.0 • 2026</h2>
+                <p className="mt-6 text-2xl font-black uppercase">The Teams Are Ready 🔥</p>
+                <p className="mt-3 max-w-3xl text-lg leading-7 text-white/75">Six teams. {totalSquadPlayers || 102} players. One trophy. VCTB 3.0 moves from Auction Night to tournament day.</p>
                 <div className="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
                   <div className="rounded-full border border-yellow-400/40 bg-black/65 px-5 py-3 font-bold">📅 6 September 2026</div>
                   <div className="rounded-full border border-yellow-400/40 bg-black/65 px-5 py-3 font-bold">📍 Tenetelow Sports Ground, UB2 4LW</div>
@@ -1385,7 +1461,15 @@ export default function VCTB2026Page() {
           </div>
         </section>
 
-        <nav className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <nav className="sticky top-0 z-40 -mx-3 mt-3 border-y border-white/10 bg-black/95 px-3 py-2 backdrop-blur md:hidden">
+          <div className="grid grid-cols-6 gap-1 overflow-x-auto">
+            {[["Live","#live"],["Fixtures","#fixtures"],["Table","#points-table"],["Stats","#statistics"],["Teams","#teams"],["Auction","#auction"]].map(([label,href])=>(
+              <a key={label} href={href} className="rounded-lg border border-white/10 bg-[#0b0b0b] px-1 py-2 text-center text-[9px] font-black uppercase tracking-tight text-white/80">{label}</a>
+            ))}
+          </div>
+        </nav>
+
+        <nav className="mt-6 hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-6">
           {[["Live","#live"],["Fixtures","#fixtures"],["Points Table","#points-table"],["Statistics","#statistics"],["Teams","#teams"],["Auction","#auction"]].map(([label,href])=>(
             <a key={label} href={href} className="rounded-2xl border border-white/10 bg-[#0b0b0b] px-4 py-4 text-center text-sm font-black uppercase tracking-wider transition hover:-translate-y-1 hover:border-yellow-400/50 hover:text-yellow-400">{label}</a>
           ))}
@@ -1393,20 +1477,20 @@ export default function VCTB2026Page() {
 
         <section
           id="live"
-          className="mt-10 overflow-hidden rounded-[30px] border border-red-500/30 bg-gradient-to-br from-red-950/60 via-[#070707] to-black shadow-2xl"
+          className="mt-5 overflow-hidden rounded-[22px] border border-red-500/30 md:mt-10 md:rounded-[30px] bg-gradient-to-br from-red-950/60 via-[#070707] to-black shadow-2xl"
         >
-          <div className="p-7 md:p-9">
+          <div className="p-4 md:p-9">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.3em] text-red-400">
                   VCTB 3.0 Match Centre
                 </p>
 
-                <h2 className="mt-3 text-3xl font-black md:text-5xl">
+                <h2 className="mt-1 text-2xl font-black md:mt-3 md:text-5xl">
                   Live Matches
                 </h2>
 
-                <p className="mt-3 max-w-2xl text-white/60">
+                <p className="mt-1 text-xs text-white/50 md:mt-3 md:max-w-2xl md:text-base md:text-white/60">
                   Follow both pitches live with official VCTB ball-by-ball scoring and full scorecards.
                 </p>
               </div>
@@ -1419,11 +1503,11 @@ export default function VCTB2026Page() {
             </div>
 
             {loadingLiveMatches ? (
-              <div className="mt-7 rounded-[24px] border border-white/10 bg-black/40 p-7 text-center">
+              <div className="mt-4 rounded-[18px] border border-white/10 bg-black/40 p-4 text-center md:mt-7 md:rounded-[24px] md:p-7">
                 <p className="font-black text-white/60">Loading live matches...</p>
               </div>
             ) : liveMatches.length === 0 ? (
-              <div className="mt-7 rounded-[24px] border border-white/10 bg-black/40 p-7 text-center">
+              <div className="mt-4 rounded-[18px] border border-white/10 bg-black/40 p-4 text-center md:mt-7 md:rounded-[24px] md:p-7">
                 <p className="text-xl font-black">No match is live right now</p>
                 <p className="mt-2 text-sm text-white/50">
                   As soon as official scoring begins, the live match will appear here automatically.
@@ -1431,7 +1515,7 @@ export default function VCTB2026Page() {
 
                 {upNextFixtures.length > 0 && (
                   <>
-                    <div className="mt-6 flex items-center justify-center gap-3">
+                    <div className="mt-4 flex items-center justify-center gap-3 md:mt-6">
                       <span className="h-px flex-1 bg-white/10" />
                       <p className="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">
                         Up Next
@@ -1439,22 +1523,73 @@ export default function VCTB2026Page() {
                       <span className="h-px flex-1 bg-white/10" />
                     </div>
 
-                    <div className="mt-5 grid gap-4 md:grid-cols-2">
-                      {upNextFixtures.map((fixture) => (
-                        <OpeningMatchCard
-                          key={`${fixture.pitch}-${fixture.time}-${fixture.teamA}-${fixture.teamB}`}
-                          pitch={fixture.pitch}
-                          time={fixture.time}
-                          teamA={fixture.teamA!}
-                          teamB={fixture.teamB!}
-                        />
-                      ))}
+                    <div className="mt-3 grid gap-2 md:mt-5 md:grid-cols-2 md:gap-3">
+                      {upNextFixtures.map((fixture) => {
+                        const teamA = teams.find((team) => team.name === fixture.teamA);
+                        const teamB = teams.find((team) => team.name === fixture.teamB);
+
+                        return (
+                          <div
+                            key={`${fixture.pitch}-${fixture.time}-${fixture.teamA}-${fixture.teamB}`}
+                            className="rounded-[14px] border border-white/10 bg-black/40 px-3 py-2.5 md:px-4 md:py-3"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="rounded-full bg-red-500/10 px-2 py-1 text-[8px] font-black uppercase text-red-300 md:text-[9px]">
+                                {fixture.pitch}
+                              </span>
+                              <span className="text-[10px] font-black text-yellow-400 md:text-xs">
+                                {fixture.time}
+                              </span>
+                            </div>
+
+                            <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                              <div className="flex min-w-0 items-center gap-2">
+                                {teamA && (
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white p-0.5 md:h-9 md:w-9">
+                                    <Image
+                                      src={teamA.logo}
+                                      alt={teamA.name}
+                                      width={34}
+                                      height={34}
+                                      className="h-full w-full object-contain"
+                                    />
+                                  </div>
+                                )}
+                                <span className="truncate text-[10px] font-black leading-tight md:text-xs">
+                                  {getDisplayMobileTeamName(fixture.teamA!)}
+                                </span>
+                              </div>
+
+                              <span className="text-[8px] font-black uppercase text-white/20">
+                                VS
+                              </span>
+
+                              <div className="flex min-w-0 flex-row-reverse items-center gap-2 text-right">
+                                {teamB && (
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white p-0.5 md:h-9 md:w-9">
+                                    <Image
+                                      src={teamB.logo}
+                                      alt={teamB.name}
+                                      width={34}
+                                      height={34}
+                                      className="h-full w-full object-contain"
+                                    />
+                                  </div>
+                                )}
+                                <span className="truncate text-[10px] font-black leading-tight md:text-xs">
+                                  {getDisplayMobileTeamName(fixture.teamB!)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 )}
               </div>
             ) : (
-              <div className="mt-7 grid gap-5 lg:grid-cols-2">
+              <div className="mt-4 grid gap-3 md:mt-7 md:gap-5 lg:grid-cols-2">
                 {liveMatches.map((liveMatch) => {
                   const matchInnings = getLiveMatchInnings(liveMatch.id);
 
@@ -1481,9 +1616,9 @@ export default function VCTB2026Page() {
                   return (
                     <article
                       key={liveMatch.id}
-                      className="overflow-hidden rounded-[26px] border border-red-500/30 bg-black/55 shadow-xl"
+                      className="overflow-hidden rounded-[18px] border border-red-500/30 md:rounded-[26px] bg-black/55 shadow-xl"
                     >
-                      <div className="border-b border-white/10 bg-gradient-to-r from-red-950/60 via-black to-yellow-950/30 p-5">
+                      <div className="border-b border-white/10 bg-gradient-to-r from-red-950/60 via-black to-yellow-950/30 p-3 md:p-5">
                         <div className="flex items-center justify-between gap-3">
                           <span className="rounded-full bg-red-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-white">
                             ● Live • {liveMatch.pitch}
@@ -1494,7 +1629,7 @@ export default function VCTB2026Page() {
                           </span>
                         </div>
 
-                        <div className="mt-5 grid items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
+                        <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:mt-5 md:gap-3">
                           <TeamMiniRow teamName={liveMatch.team_a} />
 
                           <div className="text-center text-xs font-black uppercase tracking-[0.3em] text-white/25">
@@ -1507,7 +1642,7 @@ export default function VCTB2026Page() {
                         </div>
                       </div>
 
-                      <div className="p-5">
+                      <div className="p-3 md:p-5">
                         {currentInnings ? (
                           <>
                             <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
@@ -1516,7 +1651,7 @@ export default function VCTB2026Page() {
 
                             <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
                               <div>
-                                <p className="text-4xl font-black">
+                                <p className="text-3xl font-black md:text-4xl">
                                   {currentInnings.total_runs}/{currentInnings.wickets}
                                 </p>
 
@@ -1551,7 +1686,7 @@ export default function VCTB2026Page() {
 
                         <Link
                           href={`/vctb/2026/matches/${liveMatch.id}`}
-                          className="mt-5 block rounded-2xl bg-yellow-400 px-5 py-4 text-center text-sm font-black uppercase text-black transition hover:bg-yellow-300"
+                          className="mt-3 block rounded-xl bg-yellow-400 px-4 py-3 text-center text-xs font-black uppercase text-black transition hover:bg-yellow-300 md:mt-5 md:rounded-2xl md:px-5 md:py-4 md:text-sm"
                         >
                           Live Ball-by-Ball & Full Scorecard →
                         </Link>
@@ -1564,9 +1699,24 @@ export default function VCTB2026Page() {
           </div>
         </section>
 
-        <section id="fixtures" className="mt-16">
-          <div className="mb-8"><p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">6 September 2026</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Fixtures & Tournament Schedule</h2><p className="mt-3 max-w-3xl text-white/60">League matches are cross-group. Semi-finals are played within the same group: 1st vs 2nd.</p></div>
-          <div className="grid gap-6 xl:grid-cols-2">
+        <section id="fixtures" className="mt-8 scroll-mt-14 md:mt-16">
+          <div className="mb-4 md:mb-8"><p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">6 September 2026</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Fixtures & Tournament Schedule</h2><p className="mt-3 max-w-3xl text-white/60">League matches are cross-group. Semi-finals are played within the same group: 1st vs 2nd.</p></div>
+          <div className="md:hidden">
+            <div className="overflow-hidden rounded-[20px] border border-white/10 bg-[#080808]">
+              <div className="divide-y divide-white/5">
+                {resolvedFixtures.map((fixture, index) => (
+                  <MobileFixtureRow
+                    key={`mobile-${fixture.pitch}-${fixture.time}-${index}`}
+                    fixture={fixture}
+                    publicMatches={publicMatches}
+                    publicInnings={publicInnings}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden gap-6 md:grid xl:grid-cols-2">
             <FixtureColumn
               title="Pitch 1"
               fixtures={resolvedPitch1Fixtures}
@@ -1583,8 +1733,8 @@ export default function VCTB2026Page() {
           <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-5 text-center"><p className="font-black text-yellow-400">📍 Tenetelow Sports Ground, UB2 4LW</p></div>
         </section>
 
-        <section id="points-table" className="mt-16">
-          <div className="mb-8">
+        <section id="points-table" className="mt-8 scroll-mt-14 md:mt-16">
+          <div className="mb-4 md:mb-8">
             <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
               Tournament Standings
             </p>
@@ -1596,7 +1746,25 @@ export default function VCTB2026Page() {
             </p>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-2">
+          <div className="md:hidden">
+            <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-[#080808] p-1.5">
+              {(["A", "B"] as const).map((group) => (
+                <button
+                  key={group}
+                  onClick={() => setMobilePointsGroup(group)}
+                  className={`rounded-lg px-3 py-2 text-xs font-black uppercase ${mobilePointsGroup === group ? "bg-yellow-400 text-black" : "text-white/55"}`}
+                >
+                  Group {group}
+                </button>
+              ))}
+            </div>
+            <PointsTable
+              group={mobilePointsGroup}
+              standings={mobilePointsGroup === "A" ? groupAStandings : groupBStandings}
+            />
+          </div>
+
+          <div className="hidden gap-6 md:grid xl:grid-cols-2">
             <PointsTable group="A" standings={groupAStandings} />
             <PointsTable group="B" standings={groupBStandings} />
           </div>
@@ -1639,8 +1807,8 @@ export default function VCTB2026Page() {
           )}
         </section>
 
-        <section id="statistics" className="mt-16">
-          <div className="mb-8">
+        <section id="statistics" className="mt-8 scroll-mt-14 md:mt-16">
+          <div className="mb-4 md:mb-8">
             <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">
               Tournament Leaders
             </p>
@@ -1654,15 +1822,15 @@ export default function VCTB2026Page() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            {statisticLeaders.map(({ icon, title, leader }) => (
+          <div className="-mx-3 flex snap-x gap-2 overflow-x-auto px-3 pb-2 md:mx-0 md:grid md:gap-4 md:overflow-visible md:px-0 md:pb-0 md:grid-cols-2 xl:grid-cols-5">
+            {statisticLeaders.map(({ icon, title, leader, top10 }) => (
               <div
                 key={title}
-                className="rounded-[24px] border border-white/10 bg-[#0a0a0a] p-6 text-center"
+                className="min-w-[150px] snap-start rounded-[18px] border border-white/10 bg-[#0a0a0a] p-3 text-center md:min-w-0 md:rounded-[24px] md:p-6"
               >
-                <div className="text-4xl">{icon}</div>
+                <div className="text-2xl md:text-4xl">{icon}</div>
 
-                <p className="mt-4 text-xs font-black uppercase tracking-wider text-yellow-400">
+                <p className="mt-2 text-[9px] font-black uppercase tracking-wider text-yellow-400 md:mt-4 md:text-xs">
                   {title}
                 </p>
 
@@ -1689,6 +1857,18 @@ export default function VCTB2026Page() {
                         {leader.secondary}
                       </p>
                     )}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenStatTop10((current) =>
+                          current === title ? null : title
+                        )
+                      }
+                      className="mt-3 w-full rounded-lg border border-yellow-400/25 bg-yellow-400/10 px-2 py-2 text-[9px] font-black uppercase tracking-wider text-yellow-300 transition hover:bg-yellow-400/15 md:mt-4 md:text-[10px]"
+                    >
+                      {openStatTop10 === title ? "Hide Top 10 ↑" : "View Top 10 ↓"}
+                    </button>
                   </>
                 ) : (
                   <p className="mt-3 text-lg font-black text-white/40">
@@ -1698,15 +1878,154 @@ export default function VCTB2026Page() {
               </div>
             ))}
           </div>
+
+          {openStatTop10 && (
+            <div className="mt-4 overflow-hidden rounded-[20px] border border-yellow-400/20 bg-[#080808] md:mt-6 md:rounded-[26px]">
+              {(() => {
+                const selectedStat = statisticLeaders.find(
+                  (stat) => stat.title === openStatTop10
+                );
+
+                if (!selectedStat) return null;
+
+                return (
+                  <>
+                    <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-gradient-to-r from-yellow-950/20 via-black to-red-950/20 px-4 py-3 md:px-6 md:py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl md:text-3xl">
+                          {selectedStat.icon}
+                        </span>
+                        <div>
+                          <p className="text-[9px] font-black uppercase tracking-[0.24em] text-yellow-400 md:text-xs">
+                            Tournament Top 10
+                          </p>
+                          <h3 className="mt-0.5 text-lg font-black md:text-2xl">
+                            {selectedStat.title}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setOpenStatTop10(null)}
+                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[9px] font-black uppercase text-white/55 md:text-xs"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {selectedStat.top10.length > 0 ? (
+                      <div className="divide-y divide-white/5">
+                        {selectedStat.top10.map((row, index) => {
+                          const team = teams.find(
+                            (teamRow) => teamRow.name === row.team
+                          );
+
+                          return (
+                            <div
+                              key={`${selectedStat.title}-${row.playerId}-${index}`}
+                              className={`grid grid-cols-[30px_1fr_auto] items-center gap-2 px-3 py-2.5 md:grid-cols-[44px_1fr_auto] md:gap-4 md:px-6 md:py-3 ${
+                                index < 3 ? "bg-yellow-400/[0.025]" : ""
+                              }`}
+                            >
+                              <div
+                                className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-black md:h-9 md:w-9 md:text-sm ${
+                                  index === 0
+                                    ? "bg-yellow-400 text-black"
+                                    : index === 1
+                                    ? "bg-white/20 text-white"
+                                    : index === 2
+                                    ? "bg-orange-500/20 text-orange-300"
+                                    : "bg-white/5 text-white/40"
+                                }`}
+                              >
+                                {index + 1}
+                              </div>
+
+                              <div className="flex min-w-0 items-center gap-2 md:gap-3">
+                                {team && (
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white p-0.5 md:h-10 md:w-10 md:p-1">
+                                    <Image
+                                      src={team.logo}
+                                      alt={team.name}
+                                      width={36}
+                                      height={36}
+                                      className="h-full w-full object-contain"
+                                    />
+                                  </div>
+                                )}
+
+                                <div className="min-w-0">
+                                  <p className="truncate text-[11px] font-black text-white md:text-sm">
+                                    {row.playerName}
+                                  </p>
+                                  <p className="truncate text-[9px] text-white/35 md:text-xs">
+                                    {teamMeta[row.team]?.shortName || row.team}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="text-right">
+                                <p className="text-xs font-black text-yellow-400 md:text-base">
+                                  {row.value}
+                                </p>
+                                {row.secondary && (
+                                  <p className="mt-0.5 text-[8px] text-white/30 md:text-xs">
+                                    {row.secondary}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-6 text-center text-sm font-bold text-white/35">
+                        Tournament data will appear after completed matches.
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
         </section>
 
-        <section id="teams" className="mt-16">
-          <div className="mb-8">
+        <section id="teams" className="mt-8 scroll-mt-14 md:mt-16">
+          <div className="mb-4 md:mb-8">
             <p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">VCTB Edition 3.0</p>
             <h2 className="mt-2 text-3xl font-black md:text-5xl">2026 Teams</h2>
             <p className="mt-3 max-w-3xl text-white/60">Final squads are complete following the VCTB 3.0 player auction.</p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="space-y-2 md:hidden">
+            {teams.map((team) => {
+              const teamSignings = getTeamSignings(team.name);
+              const squadSize = team.retained.length + teamSignings.length;
+              const meta = teamMeta[team.name];
+              return (
+                <Link
+                  key={`mobile-${team.name}`}
+                  href={`/vctb/2026/teams/${meta.slug}`}
+                  className="flex items-center gap-3 rounded-[18px] border border-yellow-400/20 bg-[#080808] p-3"
+                >
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white p-1.5">
+                    <Image src={team.logo} alt={team.name} width={52} height={52} className="h-full w-full object-contain" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-yellow-400/10 px-2 py-0.5 text-[8px] font-black uppercase text-yellow-400">Group {meta.group}</span>
+                      <span className="text-[10px] font-bold text-white/35">{squadSize || 17} players</span>
+                    </div>
+                    <p className="mt-1 text-sm font-black uppercase leading-tight">{meta.shortName}</p>
+                    <p className="mt-1 truncate text-[10px] text-white/40">Owner: {team.owner}</p>
+                  </div>
+                  <span className="text-xl font-black text-yellow-400">›</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="hidden gap-6 md:grid md:grid-cols-2 xl:grid-cols-3">
             {teams.map((team)=>{
               const teamSignings=getTeamSignings(team.name);
               const squadSize=team.retained.length+teamSignings.length;
@@ -1742,9 +2061,48 @@ export default function VCTB2026Page() {
           </div>
         </section>
 
-        <section id="auction" className="mt-16 overflow-hidden rounded-[30px] border border-red-500/30 bg-gradient-to-br from-red-950/60 via-[#080808] to-black shadow-2xl">
-          <div className="border-b border-red-500/20 p-7 text-center md:p-9"><p className="text-sm font-black uppercase tracking-[0.3em] text-red-400">VCTB 3.0 Auction</p><h2 className="mt-2 text-3xl font-black md:text-5xl">Auction Completed ✓</h2><p className="mt-3 text-white/60">The squads are complete. Auction Night is now part of the VCTB 3.0 tournament archive.</p></div>
-          <div className="p-6 md:p-8">
+        <section id="auction" className="mt-8 scroll-mt-14 overflow-hidden md:mt-16 rounded-[30px] border border-red-500/30 bg-gradient-to-br from-red-950/60 via-[#080808] to-black shadow-2xl">
+          <div className="border-b border-red-500/20 p-4 text-center md:p-9"><p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400 md:text-sm">VCTB 3.0 Auction</p><h2 className="mt-1 text-2xl font-black md:mt-2 md:text-5xl">Auction Completed ✓</h2><p className="mt-1 text-xs text-white/50 md:mt-3 md:text-base md:text-white/60">The squads are complete. Auction Night is now part of the VCTB 3.0 tournament archive.</p></div>
+
+          {/* MOBILE AUCTION */}
+          <div className="p-4 md:hidden">
+            <div className="grid grid-cols-2 gap-2">
+              <MobileAuctionStat label="Signings" value={loadingSignings ? "..." : auctionSignings.length.toString()} />
+              <MobileAuctionStat label="Teams" value="6" />
+              <MobileAuctionStat label="Players" value={(totalSquadPlayers || 102).toString()} />
+              <MobileAuctionStat label="Points Spent" value={loadingSignings ? "..." : totalAuctionPoints.toLocaleString()} />
+            </div>
+            <button
+              onClick={() => setMobileAuctionOpen((open) => !open)}
+              className="mt-3 w-full rounded-xl border border-yellow-400/25 bg-yellow-400/10 px-4 py-3 text-xs font-black uppercase text-yellow-300"
+            >
+              {mobileAuctionOpen ? "Hide Auction Results ↑" : "View Auction Results ↓"}
+            </button>
+
+            {mobileAuctionOpen && (
+              <div className="mt-4 space-y-4">
+                {latestSigning && (
+                  <div className="flex items-center gap-3 rounded-[16px] border border-white/10 bg-white/5 p-3">
+                    <img src={encodeURI(getAuctionPlayerPhoto(latestSigning.player_id,latestSigning.player?.photo_url))} alt={latestSigning.player?.name||latestSigning.player_id} className="h-14 w-14 rounded-full border border-yellow-400 object-cover"/>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-black uppercase tracking-wider text-yellow-400">Final Signing</p>
+                      <p className="truncate text-sm font-black">{latestSigning.player?.name||`Player ${latestSigning.player_id}`}</p>
+                      <p className="text-[10px] text-white/45">{getDisplayTeamName(latestSigning.team)} • {Number(latestSigning.points).toLocaleString()} pts</p>
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <p className="mb-2 text-xs font-black uppercase tracking-wider text-yellow-400">Top 5 Auction Signings</p>
+                  <div className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-2">
+                    {topFiveSignings.map((signing,index)=><div key={signing.id} className="min-w-[138px] snap-start rounded-[16px] border border-yellow-400/20 bg-black/50 p-3 text-center"><div className="flex items-center justify-between"><span className="text-lg font-black text-yellow-400/40">#{index+1}</span><span className="rounded-full bg-yellow-400 px-2 py-0.5 text-[9px] font-black text-black">{Number(signing.points).toLocaleString()}</span></div><img src={encodeURI(getAuctionPlayerPhoto(signing.player_id,signing.player?.photo_url))} alt={signing.player?.name||signing.player_id} className="mx-auto mt-2 h-14 w-14 rounded-full border border-yellow-400 object-cover"/><p className="mt-2 text-xs font-black leading-tight">{signing.player?.name||`Player ${signing.player_id}`}</p><p className="mt-1 text-[9px] text-red-300">{getDisplayTeamName(signing.team)}</p></div>)}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* DESKTOP AUCTION — ORIGINAL CONTENT */}
+          <div className="hidden p-8 md:block">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><AuctionStat label="Auction Signings" value={loadingSignings?"...":auctionSignings.length.toString()}/><AuctionStat label="Teams" value="6"/><AuctionStat label="Final Squad Players" value={(totalSquadPlayers||102).toString()}/><AuctionStat label="Auction Points Spent" value={loadingSignings?"...":totalAuctionPoints.toLocaleString()}/></div>
             {latestSigning&&<div className="mt-7 rounded-[24px] border border-white/10 bg-white/5 p-5"><p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">Final Signing</p><div className="mt-4 flex flex-col items-center gap-4 sm:flex-row"><img src={encodeURI(getAuctionPlayerPhoto(latestSigning.player_id,latestSigning.player?.photo_url))} alt={latestSigning.player?.name||latestSigning.player_id} className="h-20 w-20 rounded-full border-2 border-yellow-400 object-cover"/><div className="text-center sm:text-left"><h3 className="text-2xl font-black">{latestSigning.player?.name||`Player ${latestSigning.player_id}`}</h3><p className="mt-1 text-white/50">{getDisplayTeamName(latestSigning.team)} • {Number(latestSigning.points).toLocaleString()} points</p></div></div></div>}
             <div className="mt-9"><div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">Auction Leaders</p><h3 className="mt-2 text-2xl font-black md:text-3xl">Top 5 Auction Signings</h3></div><p className="text-sm text-white/40">Automatically ranked by points</p></div>
@@ -1753,16 +2111,23 @@ export default function VCTB2026Page() {
           </div>
         </section>
 
-        <section className="mt-16 pb-4"><div className="mb-6"><p className="text-sm font-black uppercase tracking-[0.3em] text-yellow-400">Partners</p><h2 className="mt-2 text-3xl font-black md:text-4xl">Tournament Sponsors</h2></div><div className="grid gap-5 md:grid-cols-3"><SponsorCard title="Title Sponsor" src="/sponsors/kiwikmart.png" alt="Kwik Mart"/><SponsorCard title="Gold Sponsor" src="/sponsors/jatheesan.png" alt="Jatheesan Ltd"/><SponsorCard title="Powered By" src="/sponsors/sam.jpg" alt="SAM Accountants"/></div></section>
+        <section className="mt-8 pb-4 md:mt-16"><div className="mb-3 md:mb-6"><p className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-400 md:text-sm">Partners</p><h2 className="mt-1 text-2xl font-black md:mt-2 md:text-4xl">Tournament Sponsors</h2></div>
+          <div className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-2 md:hidden">
+            <MobileSponsorCard title="Title Sponsor" src="/sponsors/kiwikmart.png" alt="Kwik Mart"/>
+            <MobileSponsorCard title="Gold Sponsor" src="/sponsors/jatheesan.png" alt="Jatheesan Ltd"/>
+            <MobileSponsorCard title="Powered By" src="/sponsors/sam.jpg" alt="SAM Accountants"/>
+          </div>
+          <div className="hidden gap-5 md:grid md:grid-cols-3"><SponsorCard title="Title Sponsor" src="/sponsors/kiwikmart.png" alt="Kwik Mart"/><SponsorCard title="Gold Sponsor" src="/sponsors/jatheesan.png" alt="Jatheesan Ltd"/><SponsorCard title="Powered By" src="/sponsors/sam.jpg" alt="SAM Accountants"/></div>
+        </section>
       </div>
     </main>
   );
 }
 
 function OpeningMatchCard({pitch,time,teamA,teamB}:{pitch:string;time:string;teamA:string;teamB:string;}){
-  return <div className="rounded-[24px] border border-white/10 bg-black/40 p-5"><div className="flex items-center justify-between"><span className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-300">{pitch}</span><span className="text-sm font-black text-yellow-400">{time}</span></div><div className="mt-5 space-y-4"><TeamMiniRow teamName={teamA}/><div className="text-center text-xs font-black uppercase tracking-[0.3em] text-white/25">VS</div><TeamMiniRow teamName={teamB}/></div></div>
+  return <div className="rounded-[16px] border border-white/10 bg-black/40 p-3 md:rounded-[24px] md:p-5"><div className="flex items-center justify-between"><span className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-300">{pitch}</span><span className="text-sm font-black text-yellow-400">{time}</span></div><div className="mt-3 space-y-2 md:mt-5 md:space-y-4"><TeamMiniRow teamName={teamA}/><div className="text-center text-xs font-black uppercase tracking-[0.3em] text-white/25">VS</div><TeamMiniRow teamName={teamB}/></div></div>
 }
-function TeamMiniRow({teamName}:{teamName:string}){const team=teams.find((t)=>t.name===teamName);if(!team)return null;return <div className="flex items-center gap-3"><div className="flex h-12 w-12 items-center justify-center rounded-full bg-white p-1.5"><Image src={team.logo} alt={team.name} width={44} height={44} className="h-full w-full object-contain"/></div><p className="font-black leading-tight">{teamMeta[team.name].shortName}</p></div>}
+function TeamMiniRow({teamName}:{teamName:string}){const team=teams.find((t)=>t.name===teamName);if(!team)return null;return <div className="flex items-center gap-2 md:gap-3"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-white p-1 md:h-12 md:w-12 md:p-1.5"><Image src={team.logo} alt={team.name} width={44} height={44} className="h-full w-full object-contain"/></div><p className="text-xs font-black leading-tight md:text-base">{teamMeta[team.name].shortName}</p></div>}
 function FixtureColumn({
   title,
   fixtures,
@@ -2022,6 +2387,76 @@ function FixtureRow({
 }
 
 function FixtureTeam({teamName,right=false}:{teamName:string;right?:boolean}){const team=teams.find((t)=>t.name===teamName);if(!team)return null;return <div className={`flex items-center gap-3 ${right?"sm:flex-row-reverse sm:text-right":""}`}><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white p-1"><Image src={team.logo} alt={team.name} width={40} height={40} className="h-full w-full object-contain"/></div><p className="text-sm font-black leading-tight">{teamMeta[team.name].shortName}</p></div>}
+function MobileFixtureRow({
+  fixture,
+  publicMatches,
+  publicInnings,
+}: {
+  fixture: Fixture;
+  publicMatches: PublicMatch[];
+  publicInnings: PublicInnings[];
+}) {
+  const playable = (fixture.kind === "match" || fixture.kind === "semi" || fixture.kind === "final") && Boolean(fixture.teamA) && Boolean(fixture.teamB);
+
+  if (!playable) {
+    return (
+      <div className="flex items-center gap-3 px-3 py-2.5">
+        <div className="w-[58px] shrink-0"><p className="text-[10px] font-black text-yellow-400">{fixture.time}</p><p className="mt-0.5 text-[8px] font-black uppercase text-white/30">{fixture.pitch}</p></div>
+        <div className="min-w-0"><span className={`rounded-full px-2 py-0.5 text-[7px] font-black uppercase ${fixture.kind === "final" ? "bg-yellow-400 text-black" : fixture.kind === "semi" ? "bg-red-500/15 text-red-300" : "bg-white/10 text-white/50"}`}>{fixture.kind === "final" ? "Grand Final" : fixture.kind === "semi" ? fixture.matchNumber === 10 ? "Semi Final 1" : "Semi Final 2" : "Ceremony"}</span><p className="mt-1 truncate text-[11px] font-black">{fixture.label}</p></div>
+      </div>
+    );
+  }
+
+  const latestCurrentGroupId = Math.max(0,...publicMatches.filter((match)=>match.match_number>=1&&match.match_number<=9).map((match)=>match.id));
+  const validCurrentSemiMatches = publicMatches.filter((match)=>(match.match_number===10||match.match_number===11)&&match.id>latestCurrentGroupId);
+  const latestCurrentSemiId = Math.max(0,...validCurrentSemiMatches.map((match)=>match.id));
+  const fixtureMatch = fixture.matchNumber ? publicMatches.filter((match)=>{
+    if(match.match_number!==fixture.matchNumber||match.pitch!==fixture.pitch)return false;
+    if(fixture.matchNumber===10||fixture.matchNumber===11)return match.id>latestCurrentGroupId&&match.team_a===fixture.teamA&&match.team_b===fixture.teamB;
+    if(fixture.matchNumber===12)return latestCurrentSemiId>0&&match.id>latestCurrentSemiId&&match.team_a===fixture.teamA&&match.team_b===fixture.teamB;
+    return true;
+  }).sort((a,b)=>b.id-a.id)[0] : undefined;
+
+  const innings = fixtureMatch ? publicInnings.filter((row)=>row.match_id===fixtureMatch.id).sort((a,b)=>a.innings_number-b.innings_number) : [];
+  const isLive = fixtureMatch?.status === "live";
+  const isCompleted = fixtureMatch?.status === "completed";
+  const teamA = teams.find((t)=>t.name===fixture.teamA);
+  const teamB = teams.find((t)=>t.name===fixture.teamB);
+
+  return (
+    <div className={`${isLive?"bg-red-950/15":isCompleted?"bg-green-950/10":""} px-3 py-2.5`}>
+      <div className="flex items-start gap-2.5">
+        <div className="w-[58px] shrink-0">
+          <p className="text-[10px] font-black text-yellow-400">{fixture.time}</p>
+          <p className="mt-0.5 text-[8px] font-black uppercase text-white/30">{fixture.pitch.replace("Pitch ","P")}</p>
+          {isLive && <span className="mt-1 inline-flex rounded-full bg-red-600 px-1.5 py-0.5 text-[7px] font-black uppercase">● Live</span>}
+          {isCompleted && <span className="mt-1 inline-flex rounded-full bg-green-400/10 px-1.5 py-0.5 text-[7px] font-black uppercase text-green-300">✓ Done</span>}
+        </div>
+        <div className="min-w-0 flex-1">
+          {(fixture.kind==="semi"||fixture.kind==="final")&&<p className="mb-1 text-[8px] font-black uppercase tracking-wider text-red-300">{fixture.kind==="final"?"Grand Final":fixture.matchNumber===10?"Semi Final 1":"Semi Final 2"}</p>}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5">
+            <div className="flex min-w-0 items-center gap-1.5">{teamA&&<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-0.5"><Image src={teamA.logo} alt={teamA.name} width={26} height={26} className="h-full w-full object-contain"/></div>}<span className="truncate text-[10px] font-black">{getDisplayMobileTeamName(fixture.teamA!)}</span></div>
+            <span className="text-[8px] font-black text-white/20">VS</span>
+            <div className="flex min-w-0 flex-row-reverse items-center gap-1.5 text-right">{teamB&&<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-0.5"><Image src={teamB.logo} alt={teamB.name} width={26} height={26} className="h-full w-full object-contain"/></div>}<span className="truncate text-[10px] font-black">{getDisplayMobileTeamName(fixture.teamB!)}</span></div>
+          </div>
+          {fixtureMatch&&(isLive||isCompleted)&&(
+            <div className="mt-2 rounded-lg border border-white/10 bg-black/40 px-2 py-1.5">
+              {innings.map((inn)=><div key={inn.id} className="flex items-center justify-between gap-2 text-[9px]"><span className="truncate font-bold text-white/60">{getDisplayMobileTeamName(inn.batting_team)}</span><span className="font-black">{inn.total_runs}/{inn.wickets} <span className="text-white/30">({Math.floor(inn.legal_balls/5)}.{inn.legal_balls%5})</span></span></div>)}
+              {isCompleted&&fixtureMatch.result_text&&<p className="mt-1 truncate text-[9px] font-black text-green-300">{fixtureMatch.result_text}</p>}
+              <Link href={`/vctb/2026/matches/${fixtureMatch.id}`} className={`mt-1.5 block rounded-md px-2 py-1.5 text-center text-[8px] font-black uppercase ${isLive?"bg-red-600 text-white":"bg-yellow-400 text-black"}`}>{isLive?"Live →":"Scorecard →"}</Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getDisplayMobileTeamName(teamName:string){
+  const name=teamMeta[teamName]?.shortName||teamName;
+  return name.replace("Aathiyadi JL Super Kings","Aathiyadi JL SK").replace("Niruvaththampai Knights","Niruvaththampai").replace("Vallvai Kadalodikal","Vallvai");
+}
+
 function PointsTable({
   group,
   standings,
@@ -2030,15 +2465,40 @@ function PointsTable({
   standings: StandingRow[];
 }) {
   return (
-    <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#080808]">
-      <div className="border-b border-white/10 bg-white/5 px-6 py-5">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
+    <div className="overflow-hidden rounded-[18px] border border-white/10 bg-[#080808] md:rounded-[28px]">
+      <div className="border-b border-white/10 bg-white/5 px-4 py-3 md:px-6 md:py-5">
+        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-yellow-400 md:text-xs">
           Group {group}
         </p>
-        <h3 className="mt-2 text-2xl font-black">Standings</h3>
+        <h3 className="mt-1 text-lg font-black md:mt-2 md:text-2xl">Standings</h3>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* MOBILE TABLE — no horizontal scrolling */}
+      <div className="md:hidden">
+        <div className="grid grid-cols-[24px_1fr_28px_38px_52px] items-center border-b border-white/10 px-3 py-2 text-[8px] font-black uppercase text-white/35">
+          <span>#</span><span>Team</span><span className="text-center">P</span><span className="text-center">Pts</span><span className="text-right">NRR</span>
+        </div>
+        {standings.map((row,index)=>{
+          const team=teams.find((teamRow)=>teamRow.name===row.team);
+          if(!team)return null;
+          return (
+            <div key={row.team} className={`grid grid-cols-[24px_1fr_28px_38px_52px] items-center border-b border-white/5 px-3 py-2.5 ${index<2&&row.played>0?"bg-green-950/10":""}`}>
+              <span className={`text-xs font-black ${index<2&&row.played>0?"text-green-400":"text-white/35"}`}>{index+1}</span>
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-0.5"><Image src={team.logo} alt={team.name} width={26} height={26} className="h-full w-full object-contain"/></div>
+                <span className="truncate text-[10px] font-black">{teamMeta[team.name].shortName}</span>
+              </div>
+              <span className="text-center text-[10px] text-white/55">{row.played}</span>
+              <span className="text-center text-xs font-black text-yellow-400">{row.points}</span>
+              <span className={`text-right text-[10px] font-black ${row.nrr>0?"text-green-400":row.nrr<0?"text-red-400":"text-white/50"}`}>{row.nrr>0?"+":""}{row.nrr.toFixed(3)}</span>
+            </div>
+          );
+        })}
+        <div className="px-3 py-2 text-[9px] text-white/30">Top 2 qualify for the same-group semi-final.</div>
+      </div>
+
+      {/* DESKTOP TABLE — ORIGINAL DESIGN */}
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[620px] text-left text-sm">
           <thead>
             <tr className="border-b border-white/10 text-xs font-black uppercase tracking-wider text-white/40">
@@ -2052,99 +2512,33 @@ function PointsTable({
               <th className="px-3 py-4 text-right">NRR</th>
             </tr>
           </thead>
-
           <tbody>
             {standings.map((row, index) => {
-              const team = teams.find(
-                (teamRow) => teamRow.name === row.team
-              );
-
+              const team = teams.find((teamRow) => teamRow.name === row.team);
               if (!team) return null;
-
               return (
-                <tr
-                  key={row.team}
-                  className={`border-b border-white/5 ${
-                    index < 2 && row.played > 0
-                      ? "bg-green-950/10"
-                      : ""
-                  }`}
-                >
-                  <td className="px-5 py-4">
-                    <span
-                      className={`font-black ${
-                        index < 2 && row.played > 0
-                          ? "text-green-400"
-                          : "text-white/35"
-                      }`}
-                    >
-                      {index + 1}
-                    </span>
-                  </td>
-
-                  <td className="px-3 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-1">
-                        <Image
-                          src={team.logo}
-                          alt={team.name}
-                          width={32}
-                          height={32}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-
-                      <span className="font-black">
-                        {teamMeta[team.name].shortName}
-                      </span>
-                    </div>
-                  </td>
-
-                  <td className="px-3 py-4 text-center text-white/60">
-                    {row.played}
-                  </td>
-
-                  <td className="px-3 py-4 text-center text-white/60">
-                    {row.won}
-                  </td>
-
-                  <td className="px-3 py-4 text-center text-white/60">
-                    {row.lost}
-                  </td>
-
-                  <td className="px-3 py-4 text-center text-white/60">
-                    {row.tied}
-                  </td>
-
-                  <td className="px-3 py-4 text-center font-black text-yellow-400">
-                    {row.points}
-                  </td>
-
-                  <td
-                    className={`px-3 py-4 text-right font-black ${
-                      row.nrr > 0
-                        ? "text-green-400"
-                        : row.nrr < 0
-                        ? "text-red-400"
-                        : "text-white/50"
-                    }`}
-                  >
-                    {row.nrr > 0 ? "+" : ""}
-                    {row.nrr.toFixed(3)}
-                  </td>
+                <tr key={row.team} className={`border-b border-white/5 ${index < 2 && row.played > 0 ? "bg-green-950/10" : ""}`}>
+                  <td className="px-5 py-4"><span className={`font-black ${index < 2 && row.played > 0 ? "text-green-400" : "text-white/35"}`}>{index + 1}</span></td>
+                  <td className="px-3 py-4"><div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-1"><Image src={team.logo} alt={team.name} width={32} height={32} className="h-full w-full object-contain"/></div><span className="font-black">{teamMeta[team.name].shortName}</span></div></td>
+                  <td className="px-3 py-4 text-center text-white/60">{row.played}</td>
+                  <td className="px-3 py-4 text-center text-white/60">{row.won}</td>
+                  <td className="px-3 py-4 text-center text-white/60">{row.lost}</td>
+                  <td className="px-3 py-4 text-center text-white/60">{row.tied}</td>
+                  <td className="px-3 py-4 text-center font-black text-yellow-400">{row.points}</td>
+                  <td className={`px-3 py-4 text-right font-black ${row.nrr > 0 ? "text-green-400" : row.nrr < 0 ? "text-red-400" : "text-white/50"}`}>{row.nrr > 0 ? "+" : ""}{row.nrr.toFixed(3)}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-
-      <div className="border-t border-white/10 px-5 py-3 text-xs text-white/35">
-        Top 2 qualify for the same-group semi-final.
-      </div>
+      <div className="hidden border-t border-white/10 px-5 py-3 text-xs text-white/35 md:block">Top 2 qualify for the same-group semi-final.</div>
     </div>
   );
 }
 
 function AuctionStat({label,value}:{label:string;value:string}){return <div className="rounded-[22px] border border-white/10 bg-white/5 p-5 text-center"><p className="text-3xl font-black text-yellow-400">{value}</p><p className="mt-2 text-xs font-black uppercase tracking-wider text-white/40">{label}</p></div>}
 function SponsorCard({title,src,alt}:{title:string;src:string;alt:string}){return <div className="flex min-h-[190px] flex-col items-center justify-center rounded-3xl border border-yellow-400/30 bg-white p-8 shadow-2xl transition duration-300 hover:-translate-y-1"><p className="mb-5 text-sm font-black uppercase tracking-widest text-[#071a52]">{title}</p><Image src={src} alt={alt} width={260} height={120} className="object-contain"/></div>}
+
+function MobileAuctionStat({label,value}:{label:string;value:string}){return <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center"><p className="text-xl font-black text-yellow-400">{value}</p><p className="mt-1 text-[8px] font-black uppercase tracking-wider text-white/35">{label}</p></div>}
+function MobileSponsorCard({title,src,alt}:{title:string;src:string;alt:string}){return <div className="flex min-h-[110px] min-w-[165px] flex-col items-center justify-center rounded-2xl border border-yellow-400/25 bg-white p-3"><p className="mb-2 text-[8px] font-black uppercase tracking-wider text-[#071a52]">{title}</p><Image src={src} alt={alt} width={135} height={65} className="max-h-[58px] object-contain"/></div>}
