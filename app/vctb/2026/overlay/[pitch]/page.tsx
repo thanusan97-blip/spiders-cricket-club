@@ -710,34 +710,6 @@ export default function VCTBOverlayPage() {
                 "radial-gradient(circle at 88% 62%,rgba(236,42,42,.82),transparent 33%),linear-gradient(145deg,#081d41,#510913)",
             }}
           />
-          <div
-            style={{
-              position: "absolute",
-              right: 8,
-              bottom: 34,
-              width: 66,
-              height: 66,
-              borderRadius: "50%",
-              transform: "rotate(-18deg)",
-              background:
-                "radial-gradient(circle at 37% 30%,#ff7272 0 4%,#d91924 24%,#7e0710 70%,#350309 100%)",
-              border: "2px solid #ffb225",
-              boxShadow: "0 0 20px rgba(255,85,15,.65)",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                left: 29,
-                top: 4,
-                width: 3,
-                height: 56,
-                borderRadius: 999,
-                background: "#f4e4d3",
-                boxShadow: "6px 0 0 rgba(244,228,211,.8)",
-              }}
-            />
-          </div>
         </div>
 
         {/* VENUE STRIP */}
