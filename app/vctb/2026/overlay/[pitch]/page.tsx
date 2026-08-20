@@ -329,7 +329,7 @@ export default function VCTBOverlayPage() {
           width,
           height: 205,
           display: "grid",
-          gridTemplateColumns: "235px 430px minmax(650px,1fr) 405px 72px",
+          gridTemplateColumns: "235px 430px minmax(650px,1fr) 430px",
           gridTemplateRows: "164px 41px",
           alignItems: "stretch",
           filter: "drop-shadow(0 15px 22px rgba(0,0,0,.68))",
@@ -481,7 +481,7 @@ export default function VCTBOverlayPage() {
             gridColumn: 3,
             gridRow: 1,
             marginLeft: -18,
-            marginRight: -18,
+            marginRight: 0,
             overflow: "hidden",
             borderLeft: `2px solid ${gold}`,
             borderRight: `2px solid ${gold}`,
@@ -631,8 +631,8 @@ export default function VCTBOverlayPage() {
             gridRow: 1,
             overflow: "hidden",
             borderRight: `2px solid ${gold}`,
-            borderRadius: "0 25px 25px 0",
-            marginRight: -18,
+            borderRadius: "0 30px 30px 0",
+            marginRight: 0,
             zIndex: 4,
             background:
               "radial-gradient(circle at 94% 95%,rgba(206,26,35,.25),transparent 42%),linear-gradient(180deg,#0c2d61 0%,#071a39 50%,#050f22 100%)",
@@ -647,7 +647,7 @@ export default function VCTBOverlayPage() {
               alignItems: "center",
               justifyContent: "space-between",
               gap: 10,
-              padding: "8px 17px 8px 24px",
+              padding: "8px 22px 8px 24px",
             }}
           >
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -687,31 +687,6 @@ export default function VCTBOverlayPage() {
           </div>
         </section>
 
-        {/* RIGHT CRICKET BALL / FLAME WING */}
-        <div
-          style={{
-            position: "relative",
-            gridColumn: 5,
-            gridRow: "1 / span 2",
-            zIndex: 5,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: 0,
-              top: 32,
-              width: 91,
-              height: 163,
-              border: `2px solid ${gold}`,
-              borderLeft: 0,
-              borderRadius: "0 28px 28px 0",
-              background:
-                "radial-gradient(circle at 88% 62%,rgba(236,42,42,.82),transparent 33%),linear-gradient(145deg,#081d41,#510913)",
-            }}
-          />
-        </div>
-
         {/* VENUE STRIP */}
         <div
           style={{
@@ -746,7 +721,7 @@ export default function VCTBOverlayPage() {
         <div
           style={{
             position: "absolute",
-            right: 120,
+            right: 28,
             bottom: -2,
             zIndex: 12,
             minWidth: 132,
