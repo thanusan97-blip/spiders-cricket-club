@@ -118,7 +118,9 @@ export default function VCTBOverlayPage() {
   const overCardTimers = useRef<number[]>([]);
 
   const load = useCallback(async () => {
-    const { data: matchRows, error: matchError } = await supabase
+    // Prefer the live match. If there is no live match, retain the
+    // latest completed match on this pitch until the next one starts.
+    const { data: liveRows, error: liveError } = await supabase
       .from("matches")
       .select("id,match_number,pitch,team_a,team_b,status")
       .eq("pitch", pitch)
@@ -126,15 +128,33 @@ export default function VCTBOverlayPage() {
       .order("id", { ascending: false })
       .limit(1);
 
-    if (matchError) {
-      console.error(matchError);
+    if (liveError) {
+      console.error(liveError);
       return;
     }
 
-    const liveMatch = (matchRows?.[0] || null) as MatchRow | null;
-    setMatch(liveMatch);
+    let selectedMatch = (liveRows?.[0] || null) as MatchRow | null;
 
-    if (!liveMatch) {
+    if (!selectedMatch) {
+      const { data: completedRows, error: completedError } = await supabase
+        .from("matches")
+        .select("id,match_number,pitch,team_a,team_b,status")
+        .eq("pitch", pitch)
+        .eq("status", "completed")
+        .order("id", { ascending: false })
+        .limit(1);
+
+      if (completedError) {
+        console.error(completedError);
+        return;
+      }
+
+      selectedMatch = (completedRows?.[0] || null) as MatchRow | null;
+    }
+
+    setMatch(selectedMatch);
+
+    if (!selectedMatch) {
       setInnings([]);
       setPlayers([]);
       setDeliveries([]);
@@ -142,9 +162,9 @@ export default function VCTBOverlayPage() {
     }
 
     const [inningsRes, playersRes, deliveriesRes] = await Promise.all([
-      supabase.from("innings").select("*").eq("match_id", liveMatch.id).order("innings_number"),
-      supabase.from("match_players").select("*").eq("match_id", liveMatch.id),
-      supabase.from("deliveries").select("*").eq("match_id", liveMatch.id).order("id"),
+      supabase.from("innings").select("*").eq("match_id", selectedMatch.id).order("innings_number"),
+      supabase.from("match_players").select("*").eq("match_id", selectedMatch.id),
+      supabase.from("deliveries").select("*").eq("match_id", selectedMatch.id).order("id"),
     ]);
 
     if (inningsRes.error) console.error(inningsRes.error);
@@ -213,7 +233,7 @@ export default function VCTBOverlayPage() {
 
   // FOUR / SIX / WICKET animation: trigger only for a newly arriving delivery.
   useEffect(() => {
-    if (!match || !currentInnings) {
+    if (!match || !currentInnings || match.status === "completed") {
       hasInitialDeliverySnapshot.current = false;
       lastAnimatedDeliveryId.current = null;
       setEventAnimation(null);
@@ -487,6 +507,142 @@ export default function VCTBOverlayPage() {
       return a.player.player_name.localeCompare(b.player.player_name);
     });
 
+
+  const isCompletedMatch = match?.status === "completed";
+
+  const inningsForTeam = (team: string) =>
+    innings.find((row) => row.batting_team === team) || null;
+
+  const battingLeadersForTeam = (team: string) => {
+    const teamInnings = inningsForTeam(team);
+    if (!teamInnings) return [];
+
+    const teamDeliveries = deliveries.filter(
+      (delivery) => delivery.innings_id === teamInnings.id
+    );
+
+    return players
+      .filter((player) => player.team === team)
+      .map((player) => {
+        const faced = teamDeliveries.filter(
+          (delivery) => delivery.striker_id === player.player_id
+        );
+
+        const runs = faced.reduce(
+          (sum, delivery) => sum + Number(delivery.runs_batter || 0),
+          0
+        );
+
+        const balls = faced.filter(
+          (delivery) =>
+            delivery.is_legal_ball && delivery.extra_type !== "wide"
+        ).length;
+
+        const appeared = teamDeliveries.some(
+          (delivery) =>
+            delivery.striker_id === player.player_id ||
+            delivery.non_striker_id === player.player_id ||
+            delivery.dismissed_player_id === player.player_id
+        );
+
+        return { player, runs, balls, appeared };
+      })
+      .filter((row) => row.appeared)
+      .sort((a, b) => {
+        if (b.runs !== a.runs) return b.runs - a.runs;
+        if (a.balls !== b.balls) return a.balls - b.balls;
+        return a.player.player_name.localeCompare(b.player.player_name);
+      })
+      .slice(0, 4);
+  };
+
+  const bowlingLeadersForTeam = (team: string) => {
+    const bowlingInnings = innings.find((row) => row.bowling_team === team);
+    if (!bowlingInnings) return [];
+
+    const teamDeliveries = deliveries.filter(
+      (delivery) => delivery.innings_id === bowlingInnings.id
+    );
+
+    return players
+      .filter((player) => player.team === team)
+      .map((player) => {
+        const bowled = teamDeliveries.filter(
+          (delivery) => delivery.bowler_id === player.player_id
+        );
+
+        const legalBalls = bowled.filter(
+          (delivery) => delivery.is_legal_ball
+        ).length;
+
+        const runs = bowled.reduce((sum, delivery) => {
+          const kind = delivery.extra_type || "";
+
+          if (kind === "bye" || kind === "leg_bye") {
+            return sum + Number(delivery.runs_batter || 0);
+          }
+
+          if (kind === "no_ball_bye" || kind === "no_ball_leg_bye") {
+            return sum + Number(delivery.runs_batter || 0) + 1;
+          }
+
+          return (
+            sum +
+            Number(delivery.runs_batter || 0) +
+            Number(delivery.extras || 0)
+          );
+        }, 0);
+
+        const wickets = bowled.filter(
+          (delivery) =>
+            delivery.wicket &&
+            !["Run Out", "Retired Out"].includes(delivery.wicket_type || "")
+        ).length;
+
+        return { player, legalBalls, runs, wickets };
+      })
+      .filter((row) => row.legalBalls > 0)
+      .sort((a, b) => {
+        if (b.wickets !== a.wickets) return b.wickets - a.wickets;
+        if (a.runs !== b.runs) return a.runs - b.runs;
+        return a.player.player_name.localeCompare(b.player.player_name);
+      })
+      .slice(0, 3);
+  };
+
+  const teamAInnings = match ? inningsForTeam(match.team_a) : null;
+  const teamBInnings = match ? inningsForTeam(match.team_b) : null;
+
+  const teamABattingLeaders = match ? battingLeadersForTeam(match.team_a) : [];
+  const teamBBattingLeaders = match ? battingLeadersForTeam(match.team_b) : [];
+  const teamABowlingLeaders = match ? bowlingLeadersForTeam(match.team_a) : [];
+  const teamBBowlingLeaders = match ? bowlingLeadersForTeam(match.team_b) : [];
+
+  const completedResultText = (() => {
+    if (!match || !isCompletedMatch) return "";
+
+    const first = innings.find((row) => row.innings_number === 1);
+    const second = innings.find((row) => row.innings_number === 2);
+
+    if (!first || !second) return "MATCH COMPLETED";
+
+    if (second.total_runs > first.total_runs) {
+      const wicketsRemaining = Math.max(0, 10 - Number(second.wickets || 0));
+      return `${displayTeam(second.batting_team).toUpperCase()} WON BY ${wicketsRemaining} WICKET${
+        wicketsRemaining === 1 ? "" : "S"
+      }`;
+    }
+
+    if (first.total_runs > second.total_runs) {
+      const runMargin = first.total_runs - second.total_runs;
+      return `${displayTeam(first.batting_team).toUpperCase()} WON BY ${runMargin} RUN${
+        runMargin === 1 ? "" : "S"
+      }`;
+    }
+
+    return "MATCH TIED";
+  })();
+
   if (!match) {
     return (
       <main style={shell}>
@@ -591,6 +747,316 @@ export default function VCTBOverlayPage() {
         @keyframes eventWord {0%{opacity:0;transform:scale(.2) rotate(-8deg);filter:blur(10px)}22%{opacity:1;transform:scale(1.15) rotate(2deg);filter:blur(0)}38%{transform:scale(.98)}72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.22);filter:blur(3px)}}
         @keyframes eventRing {0%{opacity:.95;transform:translate(-50%,-50%) scale(.15)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}}
       `}</style>
+
+      {isCompletedMatch && match && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 250,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              width: "min(1120px, 72vw)",
+              minHeight: 680,
+              overflow: "hidden",
+              borderRadius: 34,
+              border: `4px solid ${gold}`,
+              background:
+                "radial-gradient(circle at 50% -8%,rgba(36,116,220,.32),transparent 36%),linear-gradient(180deg,#0a2c63 0%,#071831 28%,#030914 100%)",
+              boxShadow:
+                "0 28px 90px rgba(0,0,0,.78),inset 0 2px 0 rgba(255,255,255,.15),0 0 40px rgba(231,180,58,.28)",
+              color: "#fff",
+            }}
+          >
+            <div
+              style={{
+                minHeight: 122,
+                display: "grid",
+                gridTemplateColumns: "118px 1fr 118px",
+                alignItems: "center",
+                gap: 18,
+                padding: "12px 28px",
+                background:
+                  "linear-gradient(90deg,#a50815 0%,#d71927 24%,#092153 52%,#d71927 76%,#a50815 100%)",
+                borderBottom: `3px solid ${gold}`,
+              }}
+            >
+              <div
+                style={{
+                  width: 94,
+                  height: 94,
+                  overflow: "hidden",
+                  borderRadius: "50%",
+                  border: `3px solid ${gold}`,
+                  background: "#071831",
+                  boxShadow: "0 7px 20px rgba(0,0,0,.5)",
+                }}
+              >
+                <img
+                  src="/vctb/2026/vctb-3-logo.png"
+                  alt=""
+                  style={{
+                    width: "116%",
+                    height: "116%",
+                    marginLeft: "-8%",
+                    marginTop: "-8%",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
+
+              <div style={{ textAlign: "center" }}>
+                <div
+                  style={{
+                    color: "#ffc71c",
+                    fontSize: 14,
+                    fontWeight: 1000,
+                    letterSpacing: "5px",
+                  }}
+                >
+                  VCTB 3.0 • 2026
+                </div>
+                <div style={{ marginTop: 4, fontSize: 43, lineHeight: 1, fontWeight: 1000 }}>
+                  MATCH RESULT
+                </div>
+                <div
+                  style={{
+                    marginTop: 7,
+                    color: "rgba(255,255,255,.65)",
+                    fontSize: 14,
+                    fontWeight: 900,
+                  }}
+                >
+                  {pitch.toUpperCase()} • MATCH {match.match_number}
+                </div>
+              </div>
+
+              <div style={{ textAlign: "right" }}>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    padding: "9px 14px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,199,28,.45)",
+                    color: "#ffc71c",
+                    background: "rgba(0,0,0,.22)",
+                    fontSize: 12,
+                    fontWeight: 1000,
+                    letterSpacing: "2px",
+                  }}
+                >
+                  FINAL
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 72px 1fr",
+                gap: 18,
+                alignItems: "center",
+                padding: "24px 26px 20px",
+              }}
+            >
+              {[match.team_a, match.team_b].map((team, teamIndex) => {
+                const teamInnings = teamIndex === 0 ? teamAInnings : teamBInnings;
+                const battingRows = teamIndex === 0 ? teamABattingLeaders : teamBBattingLeaders;
+                const bowlingRows = teamIndex === 0 ? teamABowlingLeaders : teamBBowlingLeaders;
+
+                return (
+                  <div
+                    key={team}
+                    style={{
+                      gridColumn: teamIndex === 0 ? 1 : 3,
+                      borderRadius: 25,
+                      overflow: "hidden",
+                      border: `2px solid ${teamIndex === 0 ? "#2a75dd" : "#d71927"}`,
+                      background:
+                        teamIndex === 0
+                          ? "linear-gradient(180deg,#0b3478,#071a39 32%,#031024)"
+                          : "linear-gradient(180deg,#74101b,#071a39 32%,#031024)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        minHeight: 116,
+                        display: "grid",
+                        gridTemplateColumns: "88px 1fr",
+                        alignItems: "center",
+                        gap: 14,
+                        padding: "13px 18px",
+                        borderBottom: "1px solid rgba(255,255,255,.12)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 80,
+                          height: 80,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 5,
+                          borderRadius: "50%",
+                          background: "#fff",
+                          boxShadow: "0 0 0 3px #174e91",
+                        }}
+                      >
+                        <img
+                          src={TEAM_LOGOS[team] || "/vctb/2026/vctb-3-logo.png"}
+                          alt=""
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        />
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: 21, lineHeight: 1.05, fontWeight: 1000 }}>
+                          {displayTeam(team).toUpperCase()}
+                        </div>
+                        <div style={{ marginTop: 8, display: "flex", alignItems: "baseline", gap: 9 }}>
+                          <strong style={{ color: "#b9ff2e", fontSize: 43, lineHeight: .9 }}>
+                            {teamInnings ? `${teamInnings.total_runs}/${teamInnings.wickets}` : "—"}
+                          </strong>
+                          <span style={{ color: "rgba(255,255,255,.72)", fontSize: 16, fontWeight: 900 }}>
+                            {teamInnings ? `(${overs(teamInnings.legal_balls)} OV)` : ""}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: "14px 18px 17px" }}>
+                      <div style={{ color: "#ffc71c", fontSize: 11, fontWeight: 1000, letterSpacing: "2px" }}>
+                        TOP BATTERS
+                      </div>
+                      <div style={{ marginTop: 7 }}>
+                        {battingRows.length ? battingRows.map((row) => (
+                          <div
+                            key={row.player.player_id}
+                            style={{
+                              minHeight: 29,
+                              display: "grid",
+                              gridTemplateColumns: "1fr auto",
+                              alignItems: "center",
+                              gap: 10,
+                              borderBottom: "1px solid rgba(255,255,255,.06)",
+                              fontSize: 14,
+                            }}
+                          >
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 900 }}>
+                              {row.player.player_name}
+                            </span>
+                            <strong style={{ color: "#b9ff2e", fontSize: 16 }}>
+                              {row.runs} <span style={{ color: "rgba(255,255,255,.55)", fontSize: 12 }}>({row.balls})</span>
+                            </strong>
+                          </div>
+                        )) : (
+                          <div style={{ color: "rgba(255,255,255,.35)", fontSize: 13 }}>No batting figures</div>
+                        )}
+                      </div>
+
+                      <div style={{ marginTop: 13, color: "#ffc71c", fontSize: 11, fontWeight: 1000, letterSpacing: "2px" }}>
+                        TOP BOWLERS
+                      </div>
+                      <div style={{ marginTop: 7 }}>
+                        {bowlingRows.length ? bowlingRows.map((row) => (
+                          <div
+                            key={row.player.player_id}
+                            style={{
+                              minHeight: 29,
+                              display: "grid",
+                              gridTemplateColumns: "1fr auto",
+                              alignItems: "center",
+                              gap: 10,
+                              borderBottom: "1px solid rgba(255,255,255,.06)",
+                              fontSize: 14,
+                            }}
+                          >
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 900 }}>
+                              {row.player.player_name}
+                            </span>
+                            <strong style={{ color: "#b9ff2e", fontSize: 16 }}>
+                              {row.wickets}/{row.runs} <span style={{ color: "rgba(255,255,255,.55)", fontSize: 12 }}>({overs(row.legalBalls)})</span>
+                            </strong>
+                          </div>
+                        )) : (
+                          <div style={{ color: "rgba(255,255,255,.35)", fontSize: 13 }}>No bowling figures</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div
+                style={{
+                  gridColumn: 2,
+                  gridRow: 1,
+                  alignSelf: "center",
+                  justifySelf: "center",
+                  fontSize: 40,
+                  fontWeight: 1000,
+                  textShadow: "0 4px 12px rgba(0,0,0,.7)",
+                }}
+              >
+                VS
+              </div>
+            </div>
+
+            <div
+              style={{
+                margin: "0 70px 23px",
+                minHeight: 77,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "13px 28px",
+                textAlign: "center",
+                clipPath: "polygon(5% 0,95% 0,100% 50%,95% 100%,5% 100%,0 50%)",
+                borderTop: `3px solid ${gold}`,
+                borderBottom: `3px solid ${gold}`,
+                background:
+                  "linear-gradient(90deg,#092963 0%,#1263ce 18%,#092963 50%,#1263ce 82%,#092963 100%)",
+              }}
+            >
+              <div
+                style={{
+                  color: "#b9ff2e",
+                  fontSize: 33,
+                  lineHeight: 1,
+                  fontWeight: 1000,
+                  letterSpacing: "1px",
+                  textShadow: "0 3px 5px rgba(0,0,0,.55)",
+                }}
+              >
+                {completedResultText}
+              </div>
+            </div>
+
+            <div
+              style={{
+                height: 34,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderTop: "1px solid rgba(255,255,255,.08)",
+                color: "rgba(255,255,255,.5)",
+                background: "rgba(0,0,0,.23)",
+                fontSize: 10,
+                fontWeight: 950,
+                letterSpacing: "2px",
+              }}
+            >
+              VCTB 3.0 • TENETELOW SPORTS GROUND, SOUTHALL
+            </div>
+          </div>
+        </div>
+      )}
 
       {eventAnimation && (
         <div style={{
@@ -951,6 +1417,7 @@ export default function VCTBOverlayPage() {
         </div>
       )}
 
+      {!isCompletedMatch && (
       <div
         style={{
           position: "absolute",
@@ -1375,6 +1842,7 @@ export default function VCTBOverlayPage() {
           LIVE
         </div>
       </div>
+      )}
     </main>
   );
 }
