@@ -570,11 +570,11 @@ export default function PublicMatchPage() {
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="mx-auto max-w-5xl px-3 py-5 sm:px-4 md:py-8">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto max-w-5xl px-2.5 py-3 sm:px-4 md:px-3 md:py-8">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 md:mb-4 md:gap-3">
           <Link
             href="/vctb/2026#live"
-            className="text-sm font-bold text-white/50 hover:text-yellow-400"
+            className="text-xs font-bold text-white/50 hover:text-yellow-400 md:text-sm"
           >
             ← VCTB 2026
           </Link>
@@ -598,32 +598,32 @@ export default function PublicMatchPage() {
           </div>
         </div>
 
-        <section className="overflow-hidden rounded-[24px] border border-white/10 bg-[#080808] shadow-2xl">
-          <div className="border-b border-white/10 bg-gradient-to-r from-red-950/50 via-black to-yellow-950/30 p-5">
+        <section className="overflow-hidden rounded-[18px] border border-white/10 bg-[#080808] shadow-2xl md:rounded-[24px]">
+          <div className="border-b border-white/10 bg-gradient-to-r from-red-950/50 via-black to-yellow-950/30 p-3 md:p-5">
             <p className="text-xs font-black uppercase tracking-[0.3em] text-yellow-400">
               VCTB 3.0 • 2026
             </p>
 
-            <div className="mt-4 grid items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
+            <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:mt-4 md:gap-4 md:grid-cols-[1fr_auto_1fr]">
               <div>
-                <p className="text-xl font-black">
+                <p className="text-sm font-black leading-tight md:text-xl">
                   {displayTeamName(match.team_a)}
                 </p>
               </div>
 
-              <div className="text-center text-xs font-black uppercase tracking-[0.3em] text-white/25">
+              <div className="text-center text-[9px] font-black uppercase tracking-[0.2em] text-white/25 md:text-xs md:tracking-[0.3em]">
                 VS
               </div>
 
               <div className="md:text-right">
-                <p className="text-xl font-black">
+                <p className="text-sm font-black leading-tight md:text-xl">
                   {displayTeamName(match.team_b)}
                 </p>
               </div>
             </div>
 
             {match.toss_winner && (
-              <p className="mt-4 text-sm text-white/45">
+              <p className="mt-2 text-[10px] text-white/45 md:mt-4 md:text-sm">
                 Toss:{" "}
                 <span className="font-bold text-white/70">
                   {displayTeamName(match.toss_winner)}
@@ -634,19 +634,19 @@ export default function PublicMatchPage() {
           </div>
 
           {currentInnings && (
-            <div className="p-4 sm:p-5">
-              <div className="rounded-[22px] border border-yellow-400/20 bg-yellow-400/5 p-5">
+            <div className="p-2.5 sm:p-5 md:p-4">
+              <div className="rounded-[16px] border border-yellow-400/20 bg-yellow-400/5 p-3 md:rounded-[22px] md:p-5">
                 <div className="flex flex-wrap items-end justify-between gap-4">
                   <div>
                     <p className="text-xs font-black uppercase tracking-wider text-yellow-400">
                       {displayTeamName(currentInnings.batting_team)}
                     </p>
 
-                    <h1 className="mt-2 text-5xl font-black">
+                    <h1 className="mt-1 text-3xl font-black md:mt-2 md:text-5xl">
                       {currentInnings.total_runs}/{currentInnings.wickets}
                     </h1>
 
-                    <p className="mt-2 text-sm font-bold text-white/50">
+                    <p className="mt-1 text-[10px] font-bold text-white/50 md:mt-2 md:text-sm">
                       {oversFromBalls(currentInnings.legal_balls)} / {MAX_OVERS} overs
                     </p>
                   </div>
@@ -655,14 +655,14 @@ export default function PublicMatchPage() {
                     <p className="text-xs font-black uppercase text-white/35">
                       CRR
                     </p>
-                    <p className="text-2xl font-black text-yellow-400">
+                    <p className="text-xl font-black text-yellow-400 md:text-2xl">
                       {currentRunRate}
                     </p>
                   </div>
                 </div>
 
                 {target && (
-                  <div className="mt-5 grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-black/30 p-3 text-center">
+                  <div className="mt-3 grid grid-cols-3 gap-1.5 rounded-lg border border-white/10 bg-black/30 p-2 text-center md:mt-5 md:gap-2 md:rounded-xl md:p-3">
                     <MiniStat label="Target" value={String(target)} />
                     <MiniStat
                       label="Need"
@@ -673,7 +673,7 @@ export default function PublicMatchPage() {
                 )}
               </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="mt-2 grid grid-cols-3 gap-1.5 md:mt-4 md:gap-3 md:grid-cols-3">
                 <PublicPlayerCard
                   title="Striker"
                   name={
@@ -758,7 +758,7 @@ export default function PublicMatchPage() {
                 />
               </div>
 
-              <div className="mt-4 rounded-2xl border border-white/10 bg-black p-4">
+              <div className="mt-2 rounded-xl border border-white/10 bg-black p-2.5 md:mt-4 md:rounded-2xl md:p-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
                     Recent Balls
@@ -772,7 +772,7 @@ export default function PublicMatchPage() {
                   </button>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-2 flex flex-wrap gap-1.5 md:mt-3 md:gap-2">
                   {recentBalls.length === 0 ? (
                     <span className="text-sm text-white/30">
                       Waiting for first delivery
@@ -797,13 +797,13 @@ export default function PublicMatchPage() {
                 </div>
               </div>
 
-              <section className="mt-5">
-                <div className="mb-3 flex items-end justify-between gap-3">
+              <section className="mt-3 md:mt-5">
+                <div className="mb-2 flex items-end justify-between gap-3 md:mb-3">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
                       Live Commentary
                     </p>
-                    <h2 className="mt-1 text-2xl font-black">
+                    <h2 className="mt-0.5 text-lg font-black md:mt-1 md:text-2xl">
                       Ball-by-Ball
                     </h2>
                   </div>
@@ -813,7 +813,7 @@ export default function PublicMatchPage() {
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 md:space-y-2">
                   {currentDeliveries.length === 0 ? (
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/40">
                       Ball-by-ball commentary will appear here once the match starts.
@@ -824,9 +824,9 @@ export default function PublicMatchPage() {
                       .map((delivery) => (
                         <div
                           key={delivery.id}
-                          className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 md:rounded-2xl md:p-4"
                         >
-                          <p className="text-sm font-bold text-white/75">
+                          <p className="text-[11px] font-bold text-white/75 md:text-sm">
                             {deliveryCommentary(delivery)}
                           </p>
                         </div>
@@ -851,14 +851,14 @@ export default function PublicMatchPage() {
       </div>
 
       {showScorecard && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/95 p-3 sm:p-6">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/95 p-0 md:p-6">
           <div className="mx-auto max-w-5xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between rounded-2xl border border-white/10 bg-[#080808] p-4">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#080808]/95 px-3 py-2.5 backdrop-blur md:rounded-2xl md:border md:p-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
                   VCTB 3.0
                 </p>
-                <h2 className="mt-1 text-2xl font-black">
+                <h2 className="mt-0.5 text-lg font-black md:mt-1 md:text-2xl">
                   Full Scorecard
                 </h2>
               </div>
@@ -871,7 +871,7 @@ export default function PublicMatchPage() {
               </button>
             </div>
 
-            <div className="mt-4 space-y-6">
+            <div className="space-y-2.5 md:mt-4 md:space-y-6">
               {innings.map((inningsRow) => {
                 const inningsDeliveries = deliveries.filter(
                   (delivery) => delivery.innings_id === inningsRow.id
@@ -896,7 +896,7 @@ export default function PublicMatchPage() {
                 return (
                   <section
                     key={inningsRow.id}
-                    className="rounded-[24px] border border-white/10 bg-[#080808] p-4 sm:p-5"
+                    className="border-y border-white/10 bg-[#080808] px-2.5 py-3 md:rounded-[24px] md:border md:p-4 sm:md:p-5"
                   >
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
@@ -916,7 +916,22 @@ export default function PublicMatchPage() {
                       </p>
                     </div>
 
-                    <div className="mt-5 overflow-x-auto">
+                    <div className="mt-3 md:hidden">
+                      <div className="grid grid-cols-[1fr_28px_28px_28px_28px_45px] items-center border-b border-white/10 px-1 pb-2 text-[8px] font-black uppercase text-white/35">
+                        <span>Batter</span><span className="text-right">R</span><span className="text-right">B</span><span className="text-right">4s</span><span className="text-right">6s</span><span className="text-right">SR</span>
+                      </div>
+                      <div className="divide-y divide-white/5">
+                        {batters.map((row) => (
+                          <div key={row.player.player_id} className="grid grid-cols-[1fr_28px_28px_28px_28px_45px] items-start px-1 py-2">
+                            <div className="min-w-0 pr-1"><p className="truncate text-[10px] font-black leading-tight text-white">{playerLabel(row.player)}</p><p className="mt-0.5 truncate text-[8px] leading-tight text-white/40">{row.dismissal}</p></div>
+                            <span className="text-right text-[10px] font-black">{row.runs}</span><span className="text-right text-[10px]">{row.balls}</span><span className="text-right text-[10px]">{row.fours}</span><span className="text-right text-[10px]">{row.sixes}</span><span className="text-right text-[10px]">{row.balls ? ((row.runs / row.balls) * 100).toFixed(1) : "0.0"}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 flex items-center justify-between border-t border-white/10 pt-2 text-[10px]"><span className="font-bold text-white/45">Extras</span><span className="font-black">{extras}</span></div>
+                    </div>
+
+                    <div className="mt-5 hidden overflow-x-auto md:block">
                       <table className="w-full min-w-[680px] text-sm">
                         <thead className="text-left text-xs uppercase text-white/35">
                           <tr>
@@ -974,11 +989,24 @@ export default function PublicMatchPage() {
                       </table>
                     </div>
 
-                    <p className="mt-3 text-sm font-bold text-white/45">
+                    <p className="mt-3 hidden text-sm font-bold text-white/45 md:block">
                       Extras: {extras}
                     </p>
 
-                    <div className="mt-6 overflow-x-auto">
+                    <div className="mt-4 md:hidden">
+                      <div className="grid grid-cols-[1fr_35px_35px_35px_50px] items-center border-b border-white/10 px-1 pb-2 text-[8px] font-black uppercase text-white/35">
+                        <span>Bowler</span><span className="text-right">O</span><span className="text-right">R</span><span className="text-right">W</span><span className="text-right">Econ</span>
+                      </div>
+                      <div className="divide-y divide-white/5">
+                        {bowlers.map((row) => (
+                          <div key={row.player.player_id} className="grid grid-cols-[1fr_35px_35px_35px_50px] items-center px-1 py-2">
+                            <span className="truncate pr-1 text-[10px] font-black">{playerLabel(row.player)}</span><span className="text-right text-[10px]">{oversFromBalls(row.legalBalls)}</span><span className="text-right text-[10px]">{row.runs}</span><span className="text-right text-[10px] font-black">{row.wickets}</span><span className="text-right text-[10px]">{row.legalBalls ? ((row.runs / row.legalBalls) * BALLS_PER_OVER).toFixed(2) : "0.00"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 hidden overflow-x-auto md:block">
                       <table className="w-full min-w-[560px] text-sm">
                         <thead className="text-left text-xs uppercase text-white/35">
                           <tr>
@@ -1068,27 +1096,16 @@ function PublicPlayerCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-4 ${
+      className={`min-w-0 rounded-xl border p-2 md:rounded-2xl md:p-4 ${
         active
           ? "border-yellow-400/40 bg-yellow-400/5"
           : "border-white/10 bg-black"
       }`}
     >
-      <p className="text-[10px] font-black uppercase tracking-wider text-white/35">
-        {title}
-      </p>
-
-      <p
-        className={`mt-2 truncate font-black ${
-          active ? "text-yellow-400" : ""
-        }`}
-      >
-        {name}
-      </p>
-
-      <p className="mt-2 text-2xl font-black">{primary}</p>
-
-      <p className="mt-1 text-xs text-white/45">{secondary}</p>
+      <p className="text-[7px] font-black uppercase tracking-wider text-white/35 md:text-[10px]">{title}</p>
+      <p className={`mt-1 truncate text-[10px] font-black leading-tight md:mt-2 md:text-base ${active ? "text-yellow-400" : ""}`}>{name}</p>
+      <p className="mt-1 text-sm font-black md:mt-2 md:text-2xl">{primary}</p>
+      <p className="mt-0.5 truncate text-[7px] text-white/45 md:mt-1 md:text-xs">{secondary}</p>
     </div>
   );
 }
