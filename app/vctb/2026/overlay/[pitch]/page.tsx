@@ -1,6 +1,6 @@
 "use client";
 
-import { CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
@@ -109,6 +109,10 @@ export default function VCTBOverlayPage() {
   const [players, setPlayers] = useState<MatchPlayer[]>([]);
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
 
+  const [centreCard, setCentreCard] = useState<"batting" | "bowling" | null>(null);
+  const lastOverCardKey = useRef<string | null>(null);
+  const overCardTimers = useRef<number[]>([]);
+
   const load = useCallback(async () => {
     const { data: matchRows, error: matchError } = await supabase
       .from("matches")
@@ -176,9 +180,114 @@ export default function VCTBOverlayPage() {
     innings[innings.length - 1] ||
     null;
 
+  const firstInnings =
+    innings.find((row) => row.innings_number === 1) || null;
+
+  const secondInnings =
+    innings.find((row) => row.innings_number === 2) || null;
+
+  const secondInningsDeliveries = secondInnings
+    ? deliveries.filter((d) => d.innings_id === secondInnings.id)
+    : [];
+
+  const secondInningsStarted =
+    !!secondInnings &&
+    (secondInnings.legal_balls > 0 || secondInningsDeliveries.length > 0);
+
+  const betweenInnings =
+    !!firstInnings?.completed && !secondInningsStarted;
+
+  const popupInnings = betweenInnings ? firstInnings : currentInnings;
+
   const inningsDeliveries = currentInnings
     ? deliveries.filter((d) => d.innings_id === currentInnings.id)
     : [];
+
+  const popupDeliveries = popupInnings
+    ? deliveries.filter((d) => d.innings_id === popupInnings.id)
+    : [];
+
+  // Every completed over:
+  // batting scorecard 10 sec -> bowling scorecard 10 sec -> hide.
+  useEffect(() => {
+    if (!match || !currentInnings || betweenInnings || currentInnings.completed) {
+      return;
+    }
+
+    const legalBalls = currentInnings.legal_balls || 0;
+
+    if (legalBalls <= 0 || legalBalls % BALLS_PER_OVER !== 0) {
+      return;
+    }
+
+    const key = `${match.id}-${currentInnings.id}-${legalBalls}`;
+
+    if (lastOverCardKey.current === key) {
+      return;
+    }
+
+    lastOverCardKey.current = key;
+
+    overCardTimers.current.forEach((timer) => window.clearTimeout(timer));
+    overCardTimers.current = [];
+
+    setCentreCard("batting");
+
+    const bowlingTimer = window.setTimeout(() => {
+      setCentreCard("bowling");
+    }, 10000);
+
+    const hideTimer = window.setTimeout(() => {
+      setCentreCard(null);
+    }, 20000);
+
+    overCardTimers.current = [bowlingTimer, hideTimer];
+
+    return () => {};
+  }, [
+    match?.id,
+    currentInnings?.id,
+    currentInnings?.legal_balls,
+    currentInnings?.completed,
+    betweenInnings,
+  ]);
+
+  // At the end of the first innings:
+  // batting scorecard 20 sec -> bowling scorecard 20 sec -> repeat
+  // until the second innings actually starts.
+  useEffect(() => {
+    if (!betweenInnings) {
+      return;
+    }
+
+    overCardTimers.current.forEach((timer) => window.clearTimeout(timer));
+    overCardTimers.current = [];
+
+    setCentreCard("batting");
+
+    const cycle = window.setInterval(() => {
+      setCentreCard((current) =>
+        current === "batting" ? "bowling" : "batting"
+      );
+    }, 20000);
+
+    return () => {
+      window.clearInterval(cycle);
+    };
+  }, [betweenInnings, firstInnings?.id]);
+
+  // As soon as the next innings starts, remove the repeating innings-break card.
+  useEffect(() => {
+    if (secondInningsStarted) {
+      setCentreCard(null);
+    }
+  }, [secondInningsStarted]);
+
+  useEffect(() => {
+    return () => {
+      overCardTimers.current.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, []);
 
   const playerById = (id?: string | null) =>
     players.find((p) => p.player_id === id);
@@ -220,6 +329,119 @@ export default function VCTBOverlayPage() {
 
   const batting = currentInnings?.batting_team || match?.team_a || "";
   const bowling = currentInnings?.bowling_team || match?.team_b || "";
+
+  const popupBattingTeam = popupInnings?.batting_team || batting;
+  const popupBowlingTeam = popupInnings?.bowling_team || bowling;
+
+  const popupBattingPlayers = players
+    .filter((player) => player.team === popupBattingTeam)
+    .map((player, originalIndex) => {
+      const faced = popupDeliveries.filter(
+        (delivery) => delivery.striker_id === player.player_id
+      );
+
+      const runs = faced.reduce(
+        (sum, delivery) => sum + Number(delivery.runs_batter || 0),
+        0
+      );
+
+      const balls = faced.filter(
+        (delivery) =>
+          delivery.is_legal_ball && delivery.extra_type !== "wide"
+      ).length;
+
+      const fours = faced.filter(
+        (delivery) => Number(delivery.runs_batter || 0) === 4
+      ).length;
+
+      const sixes = faced.filter(
+        (delivery) => Number(delivery.runs_batter || 0) === 6
+      ).length;
+
+      const wicketDelivery = popupDeliveries.find(
+        (delivery) =>
+          delivery.wicket &&
+          delivery.dismissed_player_id === player.player_id
+      );
+
+      const firstAppearance = popupDeliveries.findIndex(
+        (delivery) =>
+          delivery.striker_id === player.player_id ||
+          delivery.non_striker_id === player.player_id ||
+          delivery.dismissed_player_id === player.player_id
+      );
+
+      const hasAppeared = firstAppearance >= 0;
+
+      return {
+        player,
+        runs,
+        balls,
+        fours,
+        sixes,
+        strikeRate: balls ? ((runs / balls) * 100).toFixed(1) : "0.0",
+        dismissal: wicketDelivery
+          ? wicketDelivery.wicket_type || "OUT"
+          : hasAppeared
+          ? "NOT OUT"
+          : "DNB",
+        hasAppeared,
+        order: hasAppeared ? firstAppearance : 100000 + originalIndex,
+      };
+    })
+    .sort((a, b) => a.order - b.order);
+
+  const popupBowlingPlayers = players
+    .filter((player) => player.team === popupBowlingTeam)
+    .map((player) => {
+      const bowled = popupDeliveries.filter(
+        (delivery) => delivery.bowler_id === player.player_id
+      );
+
+      const legalBalls = bowled.filter(
+        (delivery) => delivery.is_legal_ball
+      ).length;
+
+      const runs = bowled.reduce((sum, delivery) => {
+        const kind = delivery.extra_type || "";
+
+        if (kind === "bye" || kind === "leg_bye") {
+          return sum + Number(delivery.runs_batter || 0);
+        }
+
+        if (kind === "no_ball_bye" || kind === "no_ball_leg_bye") {
+          return sum + Number(delivery.runs_batter || 0) + 1;
+        }
+
+        return (
+          sum +
+          Number(delivery.runs_batter || 0) +
+          Number(delivery.extras || 0)
+        );
+      }, 0);
+
+      const wickets = bowled.filter(
+        (delivery) =>
+          delivery.wicket &&
+          !["Run Out", "Retired Out"].includes(delivery.wicket_type || "")
+      ).length;
+
+      return {
+        player,
+        legalBalls,
+        runs,
+        wickets,
+        economy: legalBalls
+          ? ((runs / legalBalls) * BALLS_PER_OVER).toFixed(2)
+          : "0.00",
+      };
+    })
+    .filter((row) => row.legalBalls > 0)
+    .sort((a, b) => {
+      if (b.wickets !== a.wickets) return b.wickets - a.wickets;
+      if (a.runs !== b.runs) return a.runs - b.runs;
+      return a.player.player_name.localeCompare(b.player.player_name);
+    });
 
   if (!match) {
     return (
@@ -320,6 +542,313 @@ export default function VCTBOverlayPage() {
 
   return (
     <main style={shell}>
+      {centreCard && popupInnings && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "47%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 100,
+            width: 900,
+            maxHeight: 560,
+            overflow: "hidden",
+            borderRadius: 28,
+            border: `3px solid ${gold}`,
+            background:
+              "radial-gradient(circle at 50% -15%,rgba(38,111,215,.28),transparent 42%),linear-gradient(180deg,#0b2c61 0%,#071831 40%,#030914 100%)",
+            color: "#fff",
+            boxShadow:
+              "0 24px 65px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.14)",
+          }}
+        >
+          <div
+            style={{
+              height: 88,
+              display: "grid",
+              gridTemplateColumns: "82px 1fr auto",
+              alignItems: "center",
+              gap: 18,
+              padding: "0 24px",
+              background:
+                "linear-gradient(90deg,#a50a17 0%,#d91827 38%,#091a3a 72%,#06142e 100%)",
+              borderBottom: `2px solid ${gold}`,
+            }}
+          >
+            <div
+              style={{
+                width: 66,
+                height: 66,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 5,
+                background: "#fff",
+                boxShadow: "0 0 0 3px #194d8a",
+              }}
+            >
+              <img
+                src={
+                  TEAM_LOGOS[
+                    centreCard === "batting"
+                      ? popupBattingTeam
+                      : popupBowlingTeam
+                  ] || "/vctb/2026/vctb-3-logo.png"
+                }
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </div>
+
+            <div>
+              <div
+                style={{
+                  color: "#ffc71c",
+                  fontSize: 13,
+                  fontWeight: 1000,
+                  letterSpacing: "3px",
+                }}
+              >
+                {betweenInnings ? "INNINGS BREAK" : "END OF OVER"}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 30,
+                  lineHeight: 1,
+                  fontWeight: 1000,
+                }}
+              >
+                {centreCard === "batting"
+                  ? `${displayTeam(popupBattingTeam)} • BATTING`
+                  : `${displayTeam(popupBowlingTeam)} • BOWLING`}
+              </div>
+            </div>
+
+            <div style={{ textAlign: "right" }}>
+              <div
+                style={{
+                  fontSize: 33,
+                  lineHeight: 1,
+                  fontWeight: 1000,
+                  color: "#fff",
+                }}
+              >
+                {popupInnings.total_runs}-{popupInnings.wickets}
+              </div>
+              <div
+                style={{
+                  marginTop: 5,
+                  color: "#ffc71c",
+                  fontSize: 15,
+                  fontWeight: 950,
+                }}
+              >
+                {overs(popupInnings.legal_balls)} OVERS
+              </div>
+            </div>
+          </div>
+
+          {centreCard === "batting" ? (
+            <div style={{ padding: "16px 22px 18px" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "38px 1fr 155px 48px 48px 48px 48px 68px",
+                  gap: 8,
+                  alignItems: "center",
+                  padding: "0 10px 10px",
+                  color: "rgba(255,255,255,.48)",
+                  fontSize: 11,
+                  fontWeight: 1000,
+                  letterSpacing: "1px",
+                  borderBottom: "1px solid rgba(255,255,255,.14)",
+                }}
+              >
+                <span>#</span>
+                <span>BATTER</span>
+                <span>STATUS</span>
+                <span style={{ textAlign: "right" }}>R</span>
+                <span style={{ textAlign: "right" }}>B</span>
+                <span style={{ textAlign: "right" }}>4s</span>
+                <span style={{ textAlign: "right" }}>6s</span>
+                <span style={{ textAlign: "right" }}>SR</span>
+              </div>
+
+              {popupBattingPlayers.map((row, index) => (
+                <div
+                  key={row.player.player_id}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "38px 1fr 155px 48px 48px 48px 48px 68px",
+                    gap: 8,
+                    alignItems: "center",
+                    minHeight: 35,
+                    padding: "4px 10px",
+                    borderBottom: "1px solid rgba(255,255,255,.07)",
+                    opacity: row.dismissal === "DNB" ? 0.42 : 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      color: index < 2 ? "#ffc71c" : "rgba(255,255,255,.36)",
+                      fontSize: 12,
+                      fontWeight: 950,
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      fontSize: 15,
+                      fontWeight: 950,
+                    }}
+                  >
+                    {row.player.player_name}
+                    {row.player.is_captain ? " (c)" : ""}
+                    {row.player.is_wicket_keeper ? " (wk)" : ""}
+                  </span>
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      color:
+                        row.dismissal === "NOT OUT"
+                          ? "#59ef9b"
+                          : "rgba(255,255,255,.48)",
+                      fontSize: 11,
+                      fontWeight: 850,
+                    }}
+                  >
+                    {row.dismissal}
+                  </span>
+                  <strong style={{ textAlign: "right", fontSize: 16 }}>
+                    {row.runs}
+                  </strong>
+                  <span style={{ textAlign: "right", fontSize: 14 }}>
+                    {row.balls}
+                  </span>
+                  <span style={{ textAlign: "right", fontSize: 14 }}>
+                    {row.fours}
+                  </span>
+                  <span style={{ textAlign: "right", fontSize: 14 }}>
+                    {row.sixes}
+                  </span>
+                  <span style={{ textAlign: "right", fontSize: 14 }}>
+                    {row.strikeRate}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ padding: "16px 22px 22px" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "42px 1fr 80px 80px 80px 95px",
+                  gap: 10,
+                  alignItems: "center",
+                  padding: "0 12px 11px",
+                  color: "rgba(255,255,255,.48)",
+                  fontSize: 11,
+                  fontWeight: 1000,
+                  letterSpacing: "1px",
+                  borderBottom: "1px solid rgba(255,255,255,.14)",
+                }}
+              >
+                <span>#</span>
+                <span>BOWLER</span>
+                <span style={{ textAlign: "right" }}>O</span>
+                <span style={{ textAlign: "right" }}>R</span>
+                <span style={{ textAlign: "right" }}>W</span>
+                <span style={{ textAlign: "right" }}>ECON</span>
+              </div>
+
+              {popupBowlingPlayers.length ? (
+                popupBowlingPlayers.map((row, index) => (
+                  <div
+                    key={row.player.player_id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "42px 1fr 80px 80px 80px 95px",
+                      gap: 10,
+                      alignItems: "center",
+                      minHeight: 51,
+                      padding: "6px 12px",
+                      borderBottom: "1px solid rgba(255,255,255,.08)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: index === 0 ? "#ffc71c" : "rgba(255,255,255,.38)",
+                        fontWeight: 950,
+                      }}
+                    >
+                      {index + 1}
+                    </span>
+                    <span style={{ fontSize: 17, fontWeight: 950 }}>
+                      {row.player.player_name}
+                    </span>
+                    <span style={{ textAlign: "right", fontSize: 16 }}>
+                      {overs(row.legalBalls)}
+                    </span>
+                    <span style={{ textAlign: "right", fontSize: 16 }}>
+                      {row.runs}
+                    </span>
+                    <strong
+                      style={{
+                        textAlign: "right",
+                        color: "#ffc71c",
+                        fontSize: 18,
+                      }}
+                    >
+                      {row.wickets}
+                    </strong>
+                    <span style={{ textAlign: "right", fontSize: 16 }}>
+                      {row.economy}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    padding: 55,
+                    textAlign: "center",
+                    color: "rgba(255,255,255,.4)",
+                    fontSize: 18,
+                    fontWeight: 850,
+                  }}
+                >
+                  NO BOWLING FIGURES YET
+                </div>
+              )}
+            </div>
+          )}
+
+          <div
+            style={{
+              height: 32,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "rgba(255,255,255,.48)",
+              background: "rgba(0,0,0,.25)",
+              borderTop: "1px solid rgba(255,255,255,.08)",
+              fontSize: 10,
+              fontWeight: 950,
+              letterSpacing: "2px",
+            }}
+          >
+            VCTB 3.0 • TENETELOW SPORTS GROUND, SOUTHALL
+          </div>
+        </div>
+      )}
+
       <div
         style={{
           position: "absolute",
