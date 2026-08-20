@@ -864,7 +864,7 @@ export default function VCTBOverlayPage() {
             transform: "translateX(-50%)",
             display: "flex",
             alignItems: "center",
-            gap: 14,
+            gap: 10,
             padding: "9px 22px 9px 10px",
             border: `2px solid ${gold}`,
             borderRadius: 999,
@@ -1027,7 +1027,7 @@ export default function VCTBOverlayPage() {
                     color: "#ffc71c",
                     fontSize: 14,
                     fontWeight: 1000,
-                    letterSpacing: "5px",
+                    letterSpacing: "3.5px",
                   }}
                 >
                   VCTB 3.0 • 2026
@@ -1058,7 +1058,7 @@ export default function VCTBOverlayPage() {
                     background: "rgba(0,0,0,.22)",
                     fontSize: 12,
                     fontWeight: 1000,
-                    letterSpacing: "2px",
+                    letterSpacing: "1.5px",
                   }}
                 >
                   FINAL
@@ -1100,7 +1100,7 @@ export default function VCTBOverlayPage() {
                         display: "grid",
                         gridTemplateColumns: "88px 1fr",
                         alignItems: "center",
-                        gap: 14,
+                        gap: 10,
                         padding: "13px 18px",
                         borderBottom: "1px solid rgba(255,255,255,.12)",
                       }}
@@ -1257,9 +1257,9 @@ export default function VCTBOverlayPage() {
                 borderTop: "1px solid rgba(255,255,255,.08)",
                 color: "rgba(255,255,255,.5)",
                 background: "rgba(0,0,0,.23)",
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: 950,
-                letterSpacing: "2px",
+                letterSpacing: "1.5px",
               }}
             >
               VCTB 3.0 • TENETELOW SPORTS GROUND, SOUTHALL
@@ -1273,10 +1273,10 @@ export default function VCTBOverlayPage() {
           style={{
             position: "absolute",
             left: "50%",
-            top: "42%",
+            top: "40%",
             transform: "translate(-50%,-50%)",
             zIndex: 360,
-            width: 760,
+            width: 590,
             pointerEvents: "none",
             overflow: "hidden",
             borderRadius: 30,
@@ -1289,7 +1289,7 @@ export default function VCTBOverlayPage() {
           {/* TOP TITLE - kept outside the photograph */}
           <div
             style={{
-              height: 68,
+              height: 54,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1299,9 +1299,9 @@ export default function VCTBOverlayPage() {
                   ? "linear-gradient(180deg,#df1f2d 0%,#9f0813 100%)"
                   : "linear-gradient(180deg,#154aa0 0%,#09275e 100%)",
               borderBottom: `3px solid ${gold}`,
-              fontSize: 28,
+              fontSize: 17,
               fontWeight: 1000,
-              letterSpacing: "5px",
+              letterSpacing: "3.5px",
               textShadow: "0 3px 6px rgba(0,0,0,.55)",
             }}
           >
@@ -1315,7 +1315,7 @@ export default function VCTBOverlayPage() {
             style={{
               position: "relative",
               width: "100%",
-              height: 390,
+              height: 285,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1358,14 +1358,14 @@ export default function VCTBOverlayPage() {
             {/* PLAYER NAME */}
             <div
               style={{
-                minHeight: 66,
+                minHeight: 50,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "10px 24px",
+                padding: "7px 18px",
                 textAlign: "center",
                 borderBottom: "1px solid rgba(255,255,255,.12)",
-                fontSize: 31,
+                fontSize: 24,
                 lineHeight: 1.05,
                 fontWeight: 1000,
               }}
@@ -1380,12 +1380,12 @@ export default function VCTBOverlayPage() {
                 {/* RUNS + BALLS */}
                 <div
                   style={{
-                    minHeight: 82,
+                    minHeight: 60,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 22,
-                    padding: "8px 20px",
+                    gap: 16,
+                    padding: "6px 14px",
                     background:
                       "linear-gradient(90deg,#740812 0%,#b40d19 50%,#740812 100%)",
                     borderBottom: `2px solid ${gold}`,
@@ -1394,7 +1394,7 @@ export default function VCTBOverlayPage() {
                   <strong
                     style={{
                       color: "#ffc71c",
-                      fontSize: 58,
+                      fontSize: 44,
                       lineHeight: 1,
                       fontWeight: 1000,
                     }}
@@ -1404,7 +1404,7 @@ export default function VCTBOverlayPage() {
 
                   <span
                     style={{
-                      height: 45,
+                      height: 34,
                       width: 1,
                       background: "rgba(255,255,255,.35)",
                     }}
@@ -1413,7 +1413,7 @@ export default function VCTBOverlayPage() {
                   <span
                     style={{
                       color: "#fff",
-                      fontSize: 22,
+                      fontSize: 17,
                       fontWeight: 1000,
                     }}
                   >
@@ -1424,7 +1424,7 @@ export default function VCTBOverlayPage() {
                 {/* DISMISSAL DETAILS */}
                 <div
                   style={{
-                    minHeight: 82,
+                    minHeight: 60,
                     display: "grid",
                     gridTemplateColumns: "1fr 1fr",
                     alignItems: "stretch",
@@ -1437,7 +1437,7 @@ export default function VCTBOverlayPage() {
                       flexDirection: "column",
                       justifyContent: "center",
                       alignItems: "center",
-                      padding: "10px 18px",
+                      padding: "7px 12px",
                       borderRight: "1px solid rgba(255,255,255,.14)",
                     }}
                   >
@@ -1446,7 +1446,7 @@ export default function VCTBOverlayPage() {
                         color: "#ffc71c",
                         fontSize: 11,
                         fontWeight: 1000,
-                        letterSpacing: "2px",
+                        letterSpacing: "1.5px",
                       }}
                     >
                       HOW OUT
@@ -1455,7 +1455,7 @@ export default function VCTBOverlayPage() {
                       style={{
                         marginTop: 6,
                         color: "#fff",
-                        fontSize: 19,
+                        fontSize: 15,
                         lineHeight: 1.15,
                         fontWeight: 1000,
                         textAlign: "center",
@@ -1471,7 +1471,7 @@ export default function VCTBOverlayPage() {
                       flexDirection: "column",
                       justifyContent: "center",
                       alignItems: "center",
-                      padding: "10px 18px",
+                      padding: "7px 12px",
                     }}
                   >
                     <div
@@ -1479,7 +1479,7 @@ export default function VCTBOverlayPage() {
                         color: "#ffc71c",
                         fontSize: 11,
                         fontWeight: 1000,
-                        letterSpacing: "2px",
+                        letterSpacing: "1.5px",
                       }}
                     >
                       BOWLER
@@ -1488,7 +1488,7 @@ export default function VCTBOverlayPage() {
                       style={{
                         marginTop: 6,
                         color: "#ff6570",
-                        fontSize: 19,
+                        fontSize: 15,
                         lineHeight: 1.15,
                         fontWeight: 1000,
                         textAlign: "center",
@@ -1504,12 +1504,12 @@ export default function VCTBOverlayPage() {
                 {/* TEAM / WAITING */}
                 <div
                   style={{
-                    minHeight: 58,
+                    minHeight: 44,
                     display: "grid",
                     gridTemplateColumns: "1fr auto",
                     alignItems: "center",
-                    gap: 14,
-                    padding: "8px 20px",
+                    gap: 10,
+                    padding: "6px 14px",
                   }}
                 >
                   <div
@@ -1527,8 +1527,8 @@ export default function VCTBOverlayPage() {
                       }
                       alt=""
                       style={{
-                        width: 38,
-                        height: 38,
+                        width: 30,
+                        height: 30,
                         objectFit: "contain",
                         padding: 3,
                         borderRadius: "50%",
@@ -1537,7 +1537,7 @@ export default function VCTBOverlayPage() {
                     />
                     <span
                       style={{
-                        fontSize: 13,
+                        fontSize: 11,
                         fontWeight: 1000,
                       }}
                     >
@@ -1547,13 +1547,13 @@ export default function VCTBOverlayPage() {
 
                   <div
                     style={{
-                      padding: "8px 12px",
+                      padding: "6px 9px",
                       borderRadius: 999,
                       border: "1px solid rgba(255,199,28,.35)",
                       color: "rgba(255,255,255,.56)",
-                      fontSize: 9,
+                      fontSize: 8,
                       fontWeight: 1000,
-                      letterSpacing: "1.5px",
+                      letterSpacing: "1px",
                     }}
                   >
                     WAITING FOR NEXT BATSMAN
@@ -1565,7 +1565,7 @@ export default function VCTBOverlayPage() {
                 {/* NEXT BATSMAN DETAILS */}
                 <div
                   style={{
-                    minHeight: 82,
+                    minHeight: 60,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1577,7 +1577,7 @@ export default function VCTBOverlayPage() {
                   <div
                     style={{
                       color: "#61f0a1",
-                      fontSize: 23,
+                      fontSize: 18,
                       fontWeight: 1000,
                     }}
                   >
@@ -1587,12 +1587,12 @@ export default function VCTBOverlayPage() {
 
                 <div
                   style={{
-                    minHeight: 59,
+                    minHeight: 46,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                     gap: 15,
-                    padding: "8px 20px",
+                    padding: "6px 14px",
                   }}
                 >
                   <div
@@ -1609,29 +1609,29 @@ export default function VCTBOverlayPage() {
                       }
                       alt=""
                       style={{
-                        width: 39,
-                        height: 39,
+                        width: 31,
+                        height: 31,
                         objectFit: "contain",
                         padding: 3,
                         borderRadius: "50%",
                         background: "#fff",
                       }}
                     />
-                    <span style={{ fontSize: 13, fontWeight: 1000 }}>
+                    <span style={{ fontSize: 11, fontWeight: 1000 }}>
                       {displayTeam(transitionPlayer.team).toUpperCase()}
                     </span>
                   </div>
 
                   <div
                     style={{
-                      padding: "10px 15px",
+                      padding: "7px 11px",
                       borderRadius: 999,
                       border: "1px solid rgba(255,199,28,.42)",
                       color: "#ffc71c",
                       background: "rgba(0,0,0,.22)",
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: 1000,
-                      letterSpacing: "2px",
+                      letterSpacing: "1.5px",
                     }}
                   >
                     VCTB 3.0 • NEXT BATSMAN
@@ -1758,7 +1758,7 @@ export default function VCTBOverlayPage() {
               <div
                 style={{
                   color: "#ffc71c",
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: 1000,
                   letterSpacing: "3px",
                 }}
@@ -1992,9 +1992,9 @@ export default function VCTBOverlayPage() {
               color: "rgba(255,255,255,.48)",
               background: "rgba(0,0,0,.25)",
               borderTop: "1px solid rgba(255,255,255,.08)",
-              fontSize: 10,
+              fontSize: 9,
               fontWeight: 950,
-              letterSpacing: "2px",
+              letterSpacing: "1.5px",
             }}
           >
             VCTB 3.0 • TENETELOW SPORTS GROUND, SOUTHALL
@@ -2148,7 +2148,7 @@ export default function VCTBOverlayPage() {
               }}
             >
               <div style={{ fontSize: 12, fontWeight: 950 }}>OVERS</div>
-              <div style={{ marginTop: 3, color: "#ffc81d", fontSize: 31, fontWeight: 1000 }}>
+              <div style={{ marginTop: 3, color: "#ffc81d", fontSize: 24, fontWeight: 1000 }}>
                 {overs(currentInnings?.legal_balls || 0)}
               </div>
             </div>
@@ -2200,7 +2200,7 @@ export default function VCTBOverlayPage() {
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  fontSize: 19,
+                  fontSize: 15,
                   fontWeight: 1000,
                 }}
               >
@@ -2230,7 +2230,7 @@ export default function VCTBOverlayPage() {
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  fontSize: 19,
+                  fontSize: 15,
                   fontWeight: 1000,
                 }}
               >
@@ -2340,7 +2340,7 @@ export default function VCTBOverlayPage() {
                   whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
                   color: "#35afff",
-                  fontSize: 22,
+                  fontSize: 17,
                   fontWeight: 1000,
                 }}
               >
@@ -2350,7 +2350,7 @@ export default function VCTBOverlayPage() {
               <div
                 style={{
                   marginTop: 7,
-                  fontSize: 31,
+                  fontSize: 24,
                   lineHeight: 1,
                   fontWeight: 1000,
                   whiteSpace: "nowrap",
@@ -2419,7 +2419,7 @@ export default function VCTBOverlayPage() {
             border: `2px solid ${gold}`,
             background: "linear-gradient(180deg,#ff2633 0%,#a8050e 100%)",
             boxShadow: "0 4px 8px rgba(0,0,0,.45)",
-            fontSize: 23,
+            fontSize: 18,
             fontWeight: 1000,
           }}
         >
