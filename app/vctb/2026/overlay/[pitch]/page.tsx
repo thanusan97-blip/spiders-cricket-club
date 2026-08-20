@@ -69,6 +69,26 @@ const TEAM_LOGOS: Record<string, string> = {
   "Vallvai Blues SC UK": "/vctb/2026/teams/vallvai-blues.png",
 };
 
+
+const SPONSORS = [
+  {
+    label: "TITLE SPONSOR",
+    name: "KWIK MART",
+    src: "/sponsors/kiwikmart.png",
+  },
+  {
+    label: "GOLD SPONSOR",
+    name: "JATHEESAN LTD",
+    src: "/sponsors/jatheesan.png",
+  },
+  {
+    label: "POWERED BY",
+    name: "SAM ACCOUNTANTS",
+    src: "/sponsors/sam.jpg",
+  },
+];
+
+
 function displayTeam(team: string) {
   return team === "Vallvai Blues SC UK" ? "Vallvai Kadalodikal" : team;
 }
@@ -112,6 +132,7 @@ export default function VCTBOverlayPage() {
   const supabase = useMemo(() => createClient(), []);
 
   const [match, setMatch] = useState<MatchRow | null>(null);
+  const [sponsorIndex, setSponsorIndex] = useState(0);
   const [innings, setInnings] = useState<InningsRow[]>([]);
   const [players, setPlayers] = useState<MatchPlayer[]>([]);
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
@@ -246,6 +267,21 @@ export default function VCTBOverlayPage() {
       supabase.removeChannel(channel);
     };
   }, [load, slug, supabase]);
+
+  // Rotate the three tournament sponsors throughout a live match.
+  // The card disappears automatically as soon as this pitch is no longer live.
+  useEffect(() => {
+    if (match?.status !== "live") {
+      setSponsorIndex(0);
+      return;
+    }
+
+    const sponsorTimer = window.setInterval(() => {
+      setSponsorIndex((current) => (current + 1) % SPONSORS.length);
+    }, 6000);
+
+    return () => window.clearInterval(sponsorTimer);
+  }, [match?.id, match?.status]);
 
   const currentInnings =
     innings.find((row) => !row.completed) ||
@@ -956,7 +992,77 @@ export default function VCTBOverlayPage() {
         @keyframes eventBack {0%{opacity:0}12%{opacity:1}82%{opacity:1}100%{opacity:0}}
         @keyframes eventWord {0%{opacity:0;transform:scale(.2) rotate(-8deg);filter:blur(10px)}22%{opacity:1;transform:scale(1.15) rotate(2deg);filter:blur(0)}38%{transform:scale(.98)}72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.22);filter:blur(3px)}}
         @keyframes eventRing {0%{opacity:.95;transform:translate(-50%,-50%) scale(.15)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}}
+        @keyframes sponsorInOut {
+          0% { opacity: 0; transform: translateX(-28px) scale(.94); }
+          10% { opacity: 1; transform: translateX(0) scale(1); }
+          82% { opacity: 1; transform: translateX(0) scale(1); }
+          100% { opacity: 0; transform: translateX(-12px) scale(.97); }
+        }
+        @keyframes sponsorGlow {
+          0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,.38), 0 0 0 rgba(231,180,58,0); }
+          50% { box-shadow: 0 8px 28px rgba(0,0,0,.45), 0 0 22px rgba(231,180,58,.28); }
+        }
       `}</style>
+
+      {match?.status === "live" && (
+        <div
+          key={`${match.id}-${sponsorIndex}`}
+          style={{
+            position: "absolute",
+            left: 24,
+            top: 24,
+            zIndex: 440,
+            width: 245,
+            minHeight: 108,
+            overflow: "hidden",
+            pointerEvents: "none",
+            borderRadius: 18,
+            border: `2px solid ${gold}`,
+            background: "rgba(255,255,255,.97)",
+            animation:
+              "sponsorInOut 6s ease-in-out both, sponsorGlow 3s ease-in-out infinite",
+          }}
+        >
+          <div
+            style={{
+              height: 27,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              background:
+                "linear-gradient(90deg,#071831 0%,#103a79 52%,#9e0b16 100%)",
+              borderBottom: `1px solid ${gold}`,
+              fontSize: 9,
+              fontWeight: 1000,
+              letterSpacing: "2px",
+            }}
+          >
+            {SPONSORS[sponsorIndex].label}
+          </div>
+
+          <div
+            style={{
+              height: 79,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px 13px",
+            }}
+          >
+            <img
+              src={SPONSORS[sponsorIndex].src}
+              alt={SPONSORS[sponsorIndex].name}
+              style={{
+                display: "block",
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {isCompletedMatch && match && (
         <div
