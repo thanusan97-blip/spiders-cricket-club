@@ -1273,235 +1273,372 @@ export default function VCTBOverlayPage() {
           style={{
             position: "absolute",
             left: "50%",
-            top: "43%",
+            top: "42%",
             transform: "translate(-50%,-50%)",
             zIndex: 360,
             width: 760,
-            minHeight: 350,
             pointerEvents: "none",
             overflow: "hidden",
-            borderRadius: 34,
+            borderRadius: 30,
             border: `4px solid ${gold}`,
-            background:
-              batsmanTransition.kind === "OUT"
-                ? "radial-gradient(circle at 20% 35%,rgba(215,25,39,.32),transparent 38%),linear-gradient(135deg,#41050b 0%,#071831 50%,#030914 100%)"
-                : "radial-gradient(circle at 20% 35%,rgba(34,119,218,.35),transparent 38%),linear-gradient(135deg,#071831 0%,#0b397c 48%,#030914 100%)",
+            background: "#030914",
             boxShadow:
-              "0 24px 75px rgba(0,0,0,.75),inset 0 2px 0 rgba(255,255,255,.16),0 0 38px rgba(231,180,58,.32)",
+              "0 24px 75px rgba(0,0,0,.78), inset 0 2px 0 rgba(255,255,255,.14), 0 0 38px rgba(231,180,58,.32)",
           }}
         >
+          {/* TOP TITLE - kept outside the photograph */}
           <div
             style={{
-              height: 67,
+              height: 68,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 14,
               color: "#fff",
               background:
                 batsmanTransition.kind === "OUT"
-                  ? "linear-gradient(90deg,#8f0711,#e01d2b,#8f0711)"
-                  : "linear-gradient(90deg,#092658,#1261c6,#092658)",
+                  ? "linear-gradient(180deg,#df1f2d 0%,#9f0813 100%)"
+                  : "linear-gradient(180deg,#154aa0 0%,#09275e 100%)",
               borderBottom: `3px solid ${gold}`,
               fontSize: 28,
               fontWeight: 1000,
-              letterSpacing: "4px",
+              letterSpacing: "5px",
+              textShadow: "0 3px 6px rgba(0,0,0,.55)",
             }}
           >
-            {batsmanTransition.kind === "OUT" ? "WICKET • BATTER OUT" : "NEXT BATSMAN"}
+            {batsmanTransition.kind === "OUT"
+              ? "WICKET • BATTER OUT"
+              : "NEXT BATSMAN"}
           </div>
 
+          {/* FULL PLAYER PICTURE - nothing sits on top of it */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "270px 1fr",
-              minHeight: 280,
+              position: "relative",
+              width: "100%",
+              height: 390,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              background:
+                batsmanTransition.kind === "OUT"
+                  ? "radial-gradient(circle at center,#421018 0%,#12070b 68%,#02050b 100%)"
+                  : "radial-gradient(circle at center,#0b3c83 0%,#071831 68%,#02050b 100%)",
+              borderBottom: `2px solid ${gold}`,
             }}
           >
+            <img
+              src={playerPhoto(
+                transitionPlayer.player_id,
+                transitionPlayer.photo_url
+              )}
+              alt={transitionPlayer.player_name}
+              onError={(event) => {
+                event.currentTarget.style.display = "none";
+              }}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                objectPosition: "center center",
+                display: "block",
+              }}
+            />
+          </div>
+
+          {/* ALL INFORMATION IS BELOW THE PICTURE */}
+          <div
+            style={{
+              background:
+                batsmanTransition.kind === "OUT"
+                  ? "linear-gradient(180deg,#091a38 0%,#050d1d 100%)"
+                  : "linear-gradient(180deg,#0a2a61 0%,#06152f 100%)",
+            }}
+          >
+            {/* PLAYER NAME */}
             <div
               style={{
-                position: "relative",
-                overflow: "hidden",
-                background:
-                  batsmanTransition.kind === "OUT"
-                    ? "linear-gradient(180deg,#3a070c,#0a1935)"
-                    : "linear-gradient(180deg,#09285c,#071831)",
-                borderRight: "1px solid rgba(255,255,255,.12)",
+                minHeight: 66,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "10px 24px",
+                textAlign: "center",
+                borderBottom: "1px solid rgba(255,255,255,.12)",
+                fontSize: 31,
+                lineHeight: 1.05,
+                fontWeight: 1000,
               }}
             >
-              <img
-                src={playerPhoto(transitionPlayer.player_id, transitionPlayer.photo_url)}
-                alt={transitionPlayer.player_name}
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                }}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "center top",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "linear-gradient(180deg,transparent 48%,rgba(3,9,20,.9) 100%)",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  left: 16,
-                  bottom: 13,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 9,
-                }}
-              >
-                <img
-                  src={TEAM_LOGOS[transitionPlayer.team] || "/vctb/2026/vctb-3-logo.png"}
-                  alt=""
-                  style={{
-                    width: 44,
-                    height: 44,
-                    objectFit: "contain",
-                    padding: 3,
-                    borderRadius: "50%",
-                    background: "#fff",
-                  }}
-                />
-                <span style={{ fontSize: 12, fontWeight: 1000 }}>
-                  {displayTeam(transitionPlayer.team).toUpperCase()}
-                </span>
-              </div>
+              {transitionPlayer.player_name.toUpperCase()}
+              {transitionPlayer.is_captain ? " (C)" : ""}
+              {transitionPlayer.is_wicket_keeper ? " (WK)" : ""}
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                padding: "28px 34px",
-              }}
-            >
-              <div
-                style={{
-                  color: "#ffc71c",
-                  fontSize: 13,
-                  fontWeight: 1000,
-                  letterSpacing: "4px",
-                }}
-              >
-                {batsmanTransition.kind === "OUT" ? "DEPARTING BATTER" : "COMING TO THE CREASE"}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 38,
-                  lineHeight: 1.05,
-                  fontWeight: 1000,
-                }}
-              >
-                {transitionPlayer.player_name.toUpperCase()}
-                {transitionPlayer.is_captain ? " (C)" : ""}
-                {transitionPlayer.is_wicket_keeper ? " (WK)" : ""}
-              </div>
-
-              {batsmanTransition.kind === "OUT" ? (
-                <>
-                  <div
+            {batsmanTransition.kind === "OUT" ? (
+              <>
+                {/* RUNS + BALLS */}
+                <div
+                  style={{
+                    minHeight: 82,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 22,
+                    padding: "8px 20px",
+                    background:
+                      "linear-gradient(90deg,#740812 0%,#b40d19 50%,#740812 100%)",
+                    borderBottom: `2px solid ${gold}`,
+                  }}
+                >
+                  <strong
                     style={{
-                      marginTop: 20,
-                      display: "flex",
-                      alignItems: "baseline",
-                      gap: 13,
+                      color: "#ffc71c",
+                      fontSize: 58,
+                      lineHeight: 1,
+                      fontWeight: 1000,
                     }}
                   >
-                    <strong
+                    {batsmanTransition.runs ?? 0}
+                  </strong>
+
+                  <span
+                    style={{
+                      height: 45,
+                      width: 1,
+                      background: "rgba(255,255,255,.35)",
+                    }}
+                  />
+
+                  <span
+                    style={{
+                      color: "#fff",
+                      fontSize: 22,
+                      fontWeight: 1000,
+                    }}
+                  >
+                    ({batsmanTransition.balls ?? 0} BALLS)
+                  </span>
+                </div>
+
+                {/* DISMISSAL DETAILS */}
+                <div
+                  style={{
+                    minHeight: 82,
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    alignItems: "stretch",
+                    borderBottom: "1px solid rgba(255,255,255,.10)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: "10px 18px",
+                      borderRight: "1px solid rgba(255,255,255,.14)",
+                    }}
+                  >
+                    <div
                       style={{
+                        color: "#ffc71c",
+                        fontSize: 11,
+                        fontWeight: 1000,
+                        letterSpacing: "2px",
+                      }}
+                    >
+                      HOW OUT
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
                         color: "#fff",
-                        fontSize: 64,
-                        lineHeight: .9,
+                        fontSize: 19,
+                        lineHeight: 1.15,
+                        fontWeight: 1000,
+                        textAlign: "center",
+                      }}
+                    >
+                      {(batsmanTransition.wicketType || "OUT").toUpperCase()}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: "10px 18px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        color: "#ffc71c",
+                        fontSize: 11,
+                        fontWeight: 1000,
+                        letterSpacing: "2px",
+                      }}
+                    >
+                      BOWLER
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        color: "#ff6570",
+                        fontSize: 19,
+                        lineHeight: 1.15,
+                        fontWeight: 1000,
+                        textAlign: "center",
+                      }}
+                    >
+                      {transitionBowler
+                        ? transitionBowler.player_name.toUpperCase()
+                        : "—"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* TEAM / WAITING */}
+                <div
+                  style={{
+                    minHeight: 58,
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: "8px 20px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <img
+                      src={
+                        TEAM_LOGOS[transitionPlayer.team] ||
+                        "/vctb/2026/vctb-3-logo.png"
+                      }
+                      alt=""
+                      style={{
+                        width: 38,
+                        height: 38,
+                        objectFit: "contain",
+                        padding: 3,
+                        borderRadius: "50%",
+                        background: "#fff",
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 13,
                         fontWeight: 1000,
                       }}
                     >
-                      {batsmanTransition.runs ?? 0}
-                    </strong>
-                    <span
-                      style={{
-                        color: "rgba(255,255,255,.62)",
-                        fontSize: 21,
-                        fontWeight: 900,
-                      }}
-                    >
-                      ({batsmanTransition.balls ?? 0} BALLS)
+                      {displayTeam(transitionPlayer.team).toUpperCase()}
                     </span>
                   </div>
 
                   <div
                     style={{
-                      marginTop: 18,
-                      paddingTop: 14,
-                      borderTop: "1px solid rgba(255,255,255,.14)",
-                      color: "#ff5e69",
-                      fontSize: 18,
-                      lineHeight: 1.25,
+                      padding: "8px 12px",
+                      borderRadius: 999,
+                      border: "1px solid rgba(255,199,28,.35)",
+                      color: "rgba(255,255,255,.56)",
+                      fontSize: 9,
                       fontWeight: 1000,
-                      letterSpacing: "1px",
-                    }}
-                  >
-                    {dismissalDescription}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 12,
-                      color: "rgba(255,255,255,.45)",
-                      fontSize: 11,
-                      fontWeight: 900,
-                      letterSpacing: "2px",
+                      letterSpacing: "1.5px",
                     }}
                   >
                     WAITING FOR NEXT BATSMAN
                   </div>
-                </>
-              ) : (
-                <>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* NEXT BATSMAN DETAILS */}
+                <div
+                  style={{
+                    minHeight: 82,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 16,
+                    padding: "12px 22px",
+                    borderBottom: "1px solid rgba(255,255,255,.1)",
+                  }}
+                >
                   <div
                     style={{
-                      marginTop: 18,
                       color: "#61f0a1",
-                      fontSize: 24,
+                      fontSize: 23,
                       fontWeight: 1000,
                     }}
                   >
                     {transitionPlayer.role?.toUpperCase() || "BATTER"}
                   </div>
+                </div>
+
+                <div
+                  style={{
+                    minHeight: 59,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 15,
+                    padding: "8px 20px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <img
+                      src={
+                        TEAM_LOGOS[transitionPlayer.team] ||
+                        "/vctb/2026/vctb-3-logo.png"
+                      }
+                      alt=""
+                      style={{
+                        width: 39,
+                        height: 39,
+                        objectFit: "contain",
+                        padding: 3,
+                        borderRadius: "50%",
+                        background: "#fff",
+                      }}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 1000 }}>
+                      {displayTeam(transitionPlayer.team).toUpperCase()}
+                    </span>
+                  </div>
 
                   <div
                     style={{
-                      marginTop: 23,
-                      padding: "12px 17px",
-                      alignSelf: "flex-start",
+                      padding: "10px 15px",
                       borderRadius: 999,
-                      border: "1px solid rgba(255,199,28,.45)",
+                      border: "1px solid rgba(255,199,28,.42)",
                       color: "#ffc71c",
-                      background: "rgba(0,0,0,.25)",
-                      fontSize: 12,
+                      background: "rgba(0,0,0,.22)",
+                      fontSize: 10,
                       fontWeight: 1000,
                       letterSpacing: "2px",
                     }}
                   >
                     VCTB 3.0 • NEXT BATSMAN
                   </div>
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
