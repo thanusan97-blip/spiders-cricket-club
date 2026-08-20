@@ -228,28 +228,46 @@ export default function VCTBOverlayPage() {
           style={{
             position: "absolute",
             left: "50%",
-            bottom: 40,
+            bottom: 36,
             transform: "translateX(-50%)",
             display: "flex",
             alignItems: "center",
-            gap: 16,
-            padding: "10px 24px 10px 12px",
-            borderRadius: 999,
+            gap: 14,
+            padding: "9px 22px 9px 10px",
             border: `2px solid ${gold}`,
-            background: "linear-gradient(90deg,#071936,#030915,#67111a)",
+            borderRadius: 999,
+            background: "linear-gradient(90deg,#06162f,#020817,#681019)",
             boxShadow: "0 10px 35px rgba(0,0,0,.65)",
           }}
         >
-          <img
-            src="/vctb/2026/vctb-3-logo.png"
-            alt="VCTB"
-            style={{ width: 62, height: 62, objectFit: "contain" }}
-          />
+          <div
+            style={{
+              width: 66,
+              height: 66,
+              borderRadius: "50%",
+              overflow: "hidden",
+              border: `2px solid ${gold}`,
+              background: "#071831",
+            }}
+          >
+            <img
+              src="/vctb/2026/vctb-3-logo.png"
+              alt="VCTB 3.0"
+              style={{
+                width: "112%",
+                height: "112%",
+                marginLeft: "-6%",
+                marginTop: "-6%",
+                objectFit: "cover",
+                borderRadius: "50%",
+              }}
+            />
+          </div>
           <div>
             <div style={{ color: "#ffc71c", fontSize: 12, fontWeight: 900, letterSpacing: 2 }}>
               VCTB 3.0 • {pitch.toUpperCase()}
             </div>
-            <div style={{ marginTop: 3, fontSize: 20, fontWeight: 900 }}>
+            <div style={{ marginTop: 2, fontSize: 20, fontWeight: 950 }}>
               WAITING FOR LIVE MATCH
             </div>
           </div>
@@ -258,111 +276,166 @@ export default function VCTBOverlayPage() {
     );
   }
 
-  const board: CSSProperties = {
-    position: "absolute",
-    left: "50%",
-    bottom: 34,
-    transform: "translateX(-50%)",
-    width: "calc(100vw - 60px)",
-    maxWidth: 1760,
-    height: 188,
-    display: "grid",
-    gridTemplateColumns: "175px 420px minmax(600px,1fr) 400px",
-    gridTemplateRows: "148px 40px",
-    filter: "drop-shadow(0 16px 26px rgba(0,0,0,.65))",
+  const width = "min(1840px, calc(100vw - 34px))";
+
+  const teamHeader: CSSProperties = {
+    height: 44,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 18px",
+    color: "#fff",
+    background: "linear-gradient(180deg,#df1e2c 0%,#ad0815 100%)",
+    borderBottom: "1px solid rgba(255,217,105,.82)",
+    fontSize: 21,
+    lineHeight: 1,
+    fontWeight: 1000,
+    whiteSpace: "nowrap",
+    textShadow: "0 2px 3px rgba(0,0,0,.45)",
   };
 
-  const panelBase: CSSProperties = {
-    position: "relative",
-    overflow: "hidden",
-    background: "linear-gradient(180deg,#0c2b5d 0%,#071936 52%,#050e20 100%)",
+  const panelSurface: CSSProperties = {
+    background:
+      "radial-gradient(circle at 85% 120%,rgba(26,98,191,.24),transparent 43%),linear-gradient(180deg,#0c2d61 0%,#071a39 50%,#050f22 100%)",
     borderTop: `2px solid ${gold}`,
     borderBottom: `2px solid ${gold}`,
+    boxShadow:
+      "inset 0 1px 0 rgba(255,255,255,.12), inset 0 -12px 28px rgba(0,0,0,.20)",
   };
+
+  const teamLogoCircle = (team: string): CSSProperties => ({
+    width: 82,
+    height: 82,
+    flex: "0 0 82px",
+    borderRadius: "50%",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 6,
+    background: "#fff",
+    border: "3px solid rgba(255,255,255,.95)",
+    boxShadow: "0 0 0 3px #174e91, 0 5px 12px rgba(0,0,0,.35)",
+  });
 
   return (
     <main style={shell}>
-      <div style={board}>
-        {/* VCTB BRAND */}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: 28,
+          transform: "translateX(-50%)",
+          width,
+          height: 205,
+          display: "grid",
+          gridTemplateColumns: "235px 430px minmax(650px,1fr) 405px 72px",
+          gridTemplateRows: "164px 41px",
+          alignItems: "stretch",
+          filter: "drop-shadow(0 15px 22px rgba(0,0,0,.68))",
+        }}
+      >
+        {/* LEFT DECORATIVE WING + VCTB LOGO */}
         <div
           style={{
-            gridRow: "1 / span 2",
             position: "relative",
-            zIndex: 5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            gridColumn: 1,
+            gridRow: "1 / span 2",
+            zIndex: 8,
+            overflow: "visible",
           }}
         >
           <div
             style={{
               position: "absolute",
-              inset: "28px 0 10px 18px",
+              left: 0,
+              top: 34,
+              width: 224,
+              height: 161,
+              borderRadius: "26px 0 0 26px",
               border: `2px solid ${gold}`,
               borderRight: 0,
-              borderRadius: "95px 0 0 95px",
-              background: "linear-gradient(135deg,#0b2a59 0%,#07152d 58%,#8f101b 100%)",
+              background:
+                "radial-gradient(circle at 8% 42%,rgba(229,25,36,.85),transparent 34%),radial-gradient(circle at 80% 92%,rgba(22,91,183,.5),transparent 46%),linear-gradient(135deg,#310712,#071a39 45%,#09142d)",
+              boxShadow: "inset 0 0 26px rgba(29,92,191,.28)",
             }}
           />
-          <img
-            src="/vctb/2026/vctb-3-logo.png"
-            alt="VCTB 3.0"
-            style={{
-              position: "relative",
-              zIndex: 2,
-              width: 142,
-              height: 142,
-              objectFit: "contain",
-              filter: "drop-shadow(0 5px 8px rgba(0,0,0,.55))",
-            }}
-          />
-        </div>
 
-        {/* BATTING TEAM */}
-        <section
-          style={{
-            ...panelBase,
-            borderLeft: `2px solid ${gold}`,
-            borderRadius: "25px 0 0 25px",
-          }}
-        >
+          {/* subtle red/blue texture bars */}
           <div
             style={{
-              height: 41,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0 16px",
-              background: "linear-gradient(90deg,#9d0915,#ed2632,#a30916)",
-              borderBottom: "1px solid rgba(255,215,110,.75)",
-              fontSize: 20,
-              fontWeight: 1000,
-              whiteSpace: "nowrap",
+              position: "absolute",
+              left: 0,
+              bottom: 11,
+              width: 220,
+              height: 35,
+              opacity: 0.42,
+              background:
+                "repeating-linear-gradient(135deg,rgba(230,27,40,.9) 0 8px,rgba(230,27,40,0) 8px 18px),linear-gradient(90deg,#79101b,#071936)",
+            }}
+          />
+
+          {/* circular masked logo removes white corners */}
+          <div
+            style={{
+              position: "absolute",
+              left: 27,
+              top: 2,
+              width: 192,
+              height: 192,
+              borderRadius: "50%",
+              overflow: "hidden",
+              background:
+                "radial-gradient(circle,#0a346e 0%,#07162e 72%,#020712 100%)",
+              border: "4px solid #e6e7eb",
+              boxShadow:
+                `0 0 0 4px #b51320, 0 0 0 7px ${gold}, 0 8px 22px rgba(0,0,0,.65)`,
             }}
           >
+            <img
+              src="/vctb/2026/vctb-3-logo.png"
+              alt="VCTB 3.0"
+              style={{
+                width: "116%",
+                height: "116%",
+                marginLeft: "-8%",
+                marginTop: "-8%",
+                objectFit: "cover",
+                borderRadius: "50%",
+                display: "block",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* BATTING SCORE PANEL */}
+        <section
+          style={{
+            ...panelSurface,
+            position: "relative",
+            gridColumn: 2,
+            gridRow: 1,
+            overflow: "hidden",
+            borderLeft: `2px solid ${gold}`,
+            borderRadius: "25px 0 0 25px",
+            marginLeft: -26,
+            zIndex: 4,
+          }}
+        >
+          <div style={{ ...teamHeader, paddingLeft: 74 }}>
             {displayTeam(batting).toUpperCase()}
           </div>
 
           <div
             style={{
-              height: 107,
+              height: 120,
               display: "flex",
               alignItems: "center",
               gap: 15,
-              padding: "7px 16px",
+              padding: "8px 18px 8px 58px",
             }}
           >
-            <div
-              style={{
-                width: 78,
-                height: 78,
-                flex: "0 0 78px",
-                borderRadius: "50%",
-                background: "#fff",
-                padding: 5,
-                boxShadow: "0 0 0 3px rgba(9,49,102,.9)",
-              }}
-            >
+            <div style={teamLogoCircle(batting)}>
               <img
                 src={TEAM_LOGOS[batting] || "/vctb/2026/vctb-3-logo.png"}
                 alt={displayTeam(batting)}
@@ -372,129 +445,173 @@ export default function VCTBOverlayPage() {
 
             <div
               style={{
-                fontSize: 58,
-                lineHeight: 1,
+                fontSize: 64,
+                lineHeight: .93,
                 fontWeight: 1000,
-                letterSpacing: "-3px",
+                letterSpacing: "-4px",
                 whiteSpace: "nowrap",
+                textShadow: "0 3px 4px rgba(0,0,0,.45)",
               }}
             >
               {currentInnings?.total_runs ?? 0}-{currentInnings?.wickets ?? 0}
             </div>
 
-            <div style={{ marginLeft: "auto", textAlign: "center", minWidth: 65 }}>
-              <div style={{ fontSize: 12, fontWeight: 900 }}>OVERS</div>
-              <div style={{ color: "#ffc71c", fontSize: 29, fontWeight: 1000 }}>
+            <div
+              style={{
+                marginLeft: "auto",
+                minWidth: 70,
+                textAlign: "center",
+                paddingRight: 5,
+              }}
+            >
+              <div style={{ fontSize: 12, fontWeight: 950 }}>OVERS</div>
+              <div style={{ marginTop: 3, color: "#ffc81d", fontSize: 31, fontWeight: 1000 }}>
                 {overs(currentInnings?.legal_balls || 0)}
               </div>
             </div>
           </div>
         </section>
 
-        {/* MIDDLE */}
+        {/* CENTER BATTERS + RECENT BALLS */}
         <section
           style={{
-            ...panelBase,
-            zIndex: 3,
-            marginLeft: -14,
-            marginRight: -14,
+            ...panelSurface,
+            position: "relative",
+            zIndex: 7,
+            gridColumn: 3,
+            gridRow: 1,
+            marginLeft: -18,
+            marginRight: -18,
+            overflow: "hidden",
             borderLeft: `2px solid ${gold}`,
             borderRight: `2px solid ${gold}`,
-            borderRadius: 34,
-            background: "linear-gradient(180deg,#102f66 0%,#071831 52%,#040c1d 100%)",
+            borderRadius: 38,
+            background:
+              "radial-gradient(circle at 50% -10%,rgba(46,119,217,.23),transparent 45%),linear-gradient(180deg,#102f66 0%,#071831 51%,#040c1d 100%)",
           }}
         >
           <div
             style={{
-              height: 74,
+              height: 81,
               display: "grid",
               gridTemplateColumns: "1fr 1px 1fr",
               alignItems: "center",
-              padding: "0 28px",
-              borderBottom: "1px solid rgba(232,37,48,.55)",
+              padding: "0 32px",
+              borderBottom: "1px solid rgba(230,30,43,.58)",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-              <span style={{ color: "#ffc71c", fontSize: 14 }}>▶</span>
+            <div
+              style={{
+                minWidth: 0,
+                display: "grid",
+                gridTemplateColumns: "20px 1fr auto auto",
+                gap: 10,
+                alignItems: "center",
+                paddingRight: 23,
+              }}
+            >
+              <span style={{ color: "#ffc71d", fontSize: 17 }}>▶</span>
               <span
                 style={{
-                  flex: 1,
+                  minWidth: 0,
                   overflow: "hidden",
-                  whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
-                  fontSize: 18,
-                  fontWeight: 950,
+                  whiteSpace: "nowrap",
+                  fontSize: 19,
+                  fontWeight: 1000,
                 }}
               >
                 {(striker?.player_name || "—").toUpperCase()}
               </span>
-              <strong style={{ color: "#ffc71c", fontSize: 30 }}>{s.runs}</strong>
-              <small style={{ fontSize: 14, fontWeight: 900 }}>{s.balls}</small>
+              <strong style={{ color: "#ffc71d", fontSize: 34, lineHeight: 1 }}>{s.runs}</strong>
+              <span style={{ alignSelf: "end", paddingBottom: 5, fontSize: 14, fontWeight: 900 }}>
+                {s.balls}
+              </span>
             </div>
 
-            <div style={{ width: 1, height: 37, background: "rgba(255,255,255,.45)" }} />
+            <div style={{ width: 1, height: 41, background: "rgba(255,255,255,.45)" }} />
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10, paddingLeft: 22, minWidth: 0 }}>
+            <div
+              style={{
+                minWidth: 0,
+                display: "grid",
+                gridTemplateColumns: "1fr auto auto",
+                gap: 10,
+                alignItems: "center",
+                paddingLeft: 25,
+              }}
+            >
               <span
                 style={{
-                  flex: 1,
+                  minWidth: 0,
                   overflow: "hidden",
-                  whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
-                  fontSize: 18,
-                  fontWeight: 950,
+                  whiteSpace: "nowrap",
+                  fontSize: 19,
+                  fontWeight: 1000,
                 }}
               >
                 {(nonStriker?.player_name || "—").toUpperCase()}
               </span>
-              <strong style={{ color: "#ffc71c", fontSize: 30 }}>{ns.runs}</strong>
-              <small style={{ fontSize: 14, fontWeight: 900 }}>{ns.balls}</small>
+              <strong style={{ color: "#ffc71d", fontSize: 34, lineHeight: 1 }}>{ns.runs}</strong>
+              <span style={{ alignSelf: "end", paddingBottom: 5, fontSize: 14, fontWeight: 900 }}>
+                {ns.balls}
+              </span>
             </div>
           </div>
 
           <div
             style={{
-              height: 74,
+              height: 83,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 28,
+              gap: 34,
             }}
           >
-            <span style={{ fontSize: 14, fontWeight: 950 }}>RECENT BALLS</span>
-            <div style={{ display: "flex", gap: 10 }}>
+            <span style={{ fontSize: 14, fontWeight: 1000 }}>RECENT BALLS</span>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
               {Array.from({ length: 6 }).map((_, i) => {
                 const d = recent[i];
+
                 if (!d) {
                   return (
                     <span
                       key={i}
                       style={{
-                        width: 34,
-                        height: 34,
+                        width: 36,
+                        height: 36,
                         borderRadius: "50%",
-                        border: "2px solid #fff",
+                        border: "2px solid rgba(255,255,255,.96)",
+                        background: "transparent",
                       }}
                     />
                   );
                 }
 
                 const special = d.wicket || d.runs_batter === 4 || d.runs_batter === 6;
+
                 return (
                   <span
                     key={d.id}
                     style={{
-                      width: 34,
-                      height: 34,
+                      width: 36,
+                      height: 36,
                       borderRadius: "50%",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      background: d.wicket ? "#e11e2c" : special ? "#168ddd" : "#fff",
-                      color: special ? "#fff" : "#08152e",
+                      color: special ? "#fff" : "#07142c",
+                      background: d.wicket
+                        ? "#e41d2d"
+                        : d.runs_batter === 4 || d.runs_batter === 6
+                        ? "#168ee1"
+                        : "#fff",
                       border: "2px solid #fff",
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: 1000,
+                      boxShadow: "inset 0 -2px 4px rgba(0,0,0,.18)",
                     }}
                   >
                     {deliveryBadge(d)}
@@ -505,69 +622,62 @@ export default function VCTBOverlayPage() {
           </div>
         </section>
 
-        {/* BOWLING TEAM */}
+        {/* BOWLING PANEL */}
         <section
           style={{
-            ...panelBase,
+            ...panelSurface,
+            position: "relative",
+            gridColumn: 4,
+            gridRow: 1,
+            overflow: "hidden",
             borderRight: `2px solid ${gold}`,
             borderRadius: "0 25px 25px 0",
+            marginRight: -18,
+            zIndex: 4,
+            background:
+              "radial-gradient(circle at 94% 95%,rgba(206,26,35,.25),transparent 42%),linear-gradient(180deg,#0c2d61 0%,#071a39 50%,#050f22 100%)",
           }}
         >
-          <div
-            style={{
-              height: 41,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0 16px",
-              background: "linear-gradient(90deg,#9d0915,#ed2632,#a30916)",
-              borderBottom: "1px solid rgba(255,215,110,.75)",
-              fontSize: 20,
-              fontWeight: 1000,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {displayTeam(bowling).toUpperCase()}
-          </div>
+          <div style={teamHeader}>{displayTeam(bowling).toUpperCase()}</div>
 
           <div
             style={{
-              height: 107,
+              height: 120,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "7px 15px 7px 24px",
+              gap: 10,
+              padding: "8px 17px 8px 24px",
             }}
           >
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div
                 style={{
                   overflow: "hidden",
                   whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
-                  color: "#39afff",
-                  fontSize: 20,
+                  color: "#35afff",
+                  fontSize: 22,
                   fontWeight: 1000,
                 }}
               >
                 {(bowler?.player_name || "—").toUpperCase()}
               </div>
-              <div style={{ marginTop: 5, fontSize: 29, fontWeight: 1000 }}>
+
+              <div
+                style={{
+                  marginTop: 7,
+                  fontSize: 31,
+                  lineHeight: 1,
+                  fontWeight: 1000,
+                  whiteSpace: "nowrap",
+                }}
+              >
                 {overs(bf.balls)}-{bf.runs}-{bf.wickets}
               </div>
             </div>
 
-            <div
-              style={{
-                width: 82,
-                height: 82,
-                flex: "0 0 82px",
-                borderRadius: "50%",
-                background: "#fff",
-                padding: 5,
-                boxShadow: "0 0 0 3px rgba(9,49,102,.9)",
-              }}
-            >
+            <div style={teamLogoCircle(bowling)}>
               <img
                 src={TEAM_LOGOS[bowling] || "/vctb/2026/vctb-3-logo.png"}
                 alt={displayTeam(bowling)}
@@ -577,53 +687,113 @@ export default function VCTBOverlayPage() {
           </div>
         </section>
 
-        {/* VENUE */}
+        {/* RIGHT CRICKET BALL / FLAME WING */}
         <div
           style={{
+            position: "relative",
+            gridColumn: 5,
+            gridRow: "1 / span 2",
+            zIndex: 5,
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: 0,
+              top: 32,
+              width: 91,
+              height: 163,
+              border: `2px solid ${gold}`,
+              borderLeft: 0,
+              borderRadius: "0 28px 28px 0",
+              background:
+                "radial-gradient(circle at 88% 62%,rgba(236,42,42,.82),transparent 33%),linear-gradient(145deg,#081d41,#510913)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: 8,
+              bottom: 34,
+              width: 66,
+              height: 66,
+              borderRadius: "50%",
+              transform: "rotate(-18deg)",
+              background:
+                "radial-gradient(circle at 37% 30%,#ff7272 0 4%,#d91924 24%,#7e0710 70%,#350309 100%)",
+              border: "2px solid #ffb225",
+              boxShadow: "0 0 20px rgba(255,85,15,.65)",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                left: 29,
+                top: 4,
+                width: 3,
+                height: 56,
+                borderRadius: 999,
+                background: "#f4e4d3",
+                boxShadow: "6px 0 0 rgba(244,228,211,.8)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* VENUE STRIP */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 6,
             gridColumn: "2 / 5",
             gridRow: 2,
-            zIndex: 4,
-            height: 40,
+            marginLeft: -26,
+            marginRight: -18,
+            height: 41,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 16,
-            background: "linear-gradient(90deg,#071733,#030915,#071733)",
+            gap: 19,
             border: `2px solid ${gold}`,
             borderTop: 0,
-            borderRadius: "0 0 20px 20px",
-            fontSize: 15,
-            fontWeight: 900,
-            letterSpacing: "3px",
+            borderRadius: "0 0 23px 23px",
+            background:
+              "repeating-linear-gradient(135deg,rgba(18,71,148,.34) 0 16px,rgba(3,12,28,.05) 16px 32px),linear-gradient(90deg,#071831,#030814,#071831)",
+            fontSize: 16,
+            fontWeight: 1000,
+            letterSpacing: "3.1px",
+            whiteSpace: "nowrap",
           }}
         >
-          <span style={{ color: red, fontSize: 23 }}>››</span>
+          <span style={{ color: "#ee1e2d", fontSize: 26, letterSpacing: "-5px" }}>›››</span>
           LIVE FROM TENETELOW SPORTS GROUND, SOUTHALL
-          <span style={{ color: red, fontSize: 23 }}>‹‹</span>
+          <span style={{ color: "#ee1e2d", fontSize: 26, letterSpacing: "-5px" }}>‹‹‹</span>
         </div>
 
         {/* LIVE BADGE */}
         <div
           style={{
             position: "absolute",
-            right: 72,
-            bottom: -3,
-            zIndex: 8,
-            height: 47,
-            minWidth: 124,
-            padding: "0 18px",
+            right: 120,
+            bottom: -2,
+            zIndex: 12,
+            minWidth: 132,
+            height: 49,
+            padding: "0 19px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 8,
+            gap: 9,
+            color: "#fff",
             borderRadius: 999,
             border: `2px solid ${gold}`,
-            background: "linear-gradient(180deg,#ff2732,#a8050d)",
-            fontSize: 22,
+            background: "linear-gradient(180deg,#ff2633 0%,#a8050e 100%)",
+            boxShadow: "0 4px 8px rgba(0,0,0,.45)",
+            fontSize: 23,
             fontWeight: 1000,
           }}
         >
-          <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#fff" }} />
+          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#fff" }} />
           LIVE
         </div>
       </div>
