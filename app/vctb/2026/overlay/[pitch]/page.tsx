@@ -110,6 +110,10 @@ export default function VCTBOverlayPage() {
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
 
   const [centreCard, setCentreCard] = useState<"batting" | "bowling" | null>(null);
+  const [eventAnimation, setEventAnimation] = useState<"FOUR" | "SIX" | "WICKET" | null>(null);
+  const lastAnimatedDeliveryId = useRef<number | null>(null);
+  const animationTimer = useRef<number | null>(null);
+  const hasInitialDeliverySnapshot = useRef(false);
   const lastOverCardKey = useRef<string | null>(null);
   const overCardTimers = useRef<number[]>([]);
 
@@ -207,6 +211,45 @@ export default function VCTBOverlayPage() {
     ? deliveries.filter((d) => d.innings_id === popupInnings.id)
     : [];
 
+  // FOUR / SIX / WICKET animation: trigger only for a newly arriving delivery.
+  useEffect(() => {
+    if (!match || !currentInnings) {
+      hasInitialDeliverySnapshot.current = false;
+      lastAnimatedDeliveryId.current = null;
+      setEventAnimation(null);
+      return;
+    }
+
+    const latest = inningsDeliveries[inningsDeliveries.length - 1];
+    if (!latest) {
+      hasInitialDeliverySnapshot.current = true;
+      lastAnimatedDeliveryId.current = null;
+      return;
+    }
+
+    if (!hasInitialDeliverySnapshot.current) {
+      hasInitialDeliverySnapshot.current = true;
+      lastAnimatedDeliveryId.current = latest.id;
+      return;
+    }
+
+    if (lastAnimatedDeliveryId.current === latest.id) return;
+    lastAnimatedDeliveryId.current = latest.id;
+
+    let next: "FOUR" | "SIX" | "WICKET" | null = null;
+    if (latest.wicket) next = "WICKET";
+    else if (Number(latest.runs_batter || 0) === 6) next = "SIX";
+    else if (Number(latest.runs_batter || 0) === 4) next = "FOUR";
+    if (!next) return;
+
+    if (animationTimer.current) window.clearTimeout(animationTimer.current);
+    setEventAnimation(next);
+    animationTimer.current = window.setTimeout(() => {
+      setEventAnimation(null);
+      animationTimer.current = null;
+    }, next === "WICKET" ? 2600 : 2200);
+  }, [match?.id, currentInnings?.id, inningsDeliveries.length, inningsDeliveries[inningsDeliveries.length - 1]?.id]);
+
   // Every completed over:
   // batting scorecard 10 sec -> bowling scorecard 10 sec -> hide.
   useEffect(() => {
@@ -286,6 +329,7 @@ export default function VCTBOverlayPage() {
   useEffect(() => {
     return () => {
       overCardTimers.current.forEach((timer) => window.clearTimeout(timer));
+      if (animationTimer.current) window.clearTimeout(animationTimer.current);
     };
   }, []);
 
@@ -542,6 +586,64 @@ export default function VCTBOverlayPage() {
 
   return (
     <main style={shell}>
+      <style>{`
+        @keyframes eventBack {0%{opacity:0}12%{opacity:1}82%{opacity:1}100%{opacity:0}}
+        @keyframes eventWord {0%{opacity:0;transform:scale(.2) rotate(-8deg);filter:blur(10px)}22%{opacity:1;transform:scale(1.15) rotate(2deg);filter:blur(0)}38%{transform:scale(.98)}72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.22);filter:blur(3px)}}
+        @keyframes eventRing {0%{opacity:.95;transform:translate(-50%,-50%) scale(.15)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}}
+      `}</style>
+
+      {eventAnimation && (
+        <div style={{
+          position:"absolute", inset:0, zIndex:500, pointerEvents:"none",
+          display:"flex", alignItems:"center", justifyContent:"center",
+          animation:`eventBack ${eventAnimation==="WICKET"?"2.6s":"2.2s"} ease-out both`,
+          background:eventAnimation==="WICKET"
+            ?"radial-gradient(circle,rgba(220,18,34,.58),rgba(70,0,8,.18) 38%,transparent 68%)"
+            :eventAnimation==="SIX"
+            ?"radial-gradient(circle,rgba(255,194,20,.45),rgba(9,61,143,.18) 40%,transparent 70%)"
+            :"radial-gradient(circle,rgba(22,145,230,.48),rgba(5,40,100,.18) 40%,transparent 70%)"
+        }}>
+          <div style={{
+            position:"absolute", left:"50%", top:"50%", width:520, height:520,
+            borderRadius:"50%", border:`8px solid ${eventAnimation==="WICKET"?"#ef1e2d":"#ffc71c"}`,
+            boxShadow:`0 0 60px ${eventAnimation==="WICKET"?"rgba(239,30,45,.9)":"rgba(255,199,28,.8)"}`,
+            animation:"eventRing 1.35s ease-out both"
+          }}/>
+
+          <div style={{
+            position:"relative", minWidth:eventAnimation==="WICKET"?820:510,
+            padding:eventAnimation==="WICKET"?"48px 82px":"30px 78px 42px",
+            textAlign:"center", borderRadius:42, border:`4px solid ${gold}`,
+            background:eventAnimation==="WICKET"
+              ?"linear-gradient(135deg,#4d0209,#d71927 48%,#071831)"
+              :"linear-gradient(135deg,#071831,#0b3d82 48%,#071831)",
+            boxShadow:"0 22px 70px rgba(0,0,0,.72),inset 0 2px 0 rgba(255,255,255,.2),0 0 45px rgba(231,180,58,.45)",
+            animation:`eventWord ${eventAnimation==="WICKET"?"2.6s":"2.2s"} cubic-bezier(.2,.8,.2,1) both`
+          }}>
+            <div style={{
+              position:"absolute",left:-64,top:"50%",transform:"translateY(-50%)",
+              width:128,height:128,borderRadius:"50%",overflow:"hidden",
+              border:`4px solid ${gold}`,background:"#071831",boxShadow:"0 8px 25px rgba(0,0,0,.55)"
+            }}>
+              <img src="/vctb/2026/vctb-3-logo.png" alt="" style={{width:"116%",height:"116%",marginLeft:"-8%",marginTop:"-8%",objectFit:"cover"}}/>
+            </div>
+            <div style={{color:"#ffc71c",fontSize:18,fontWeight:1000,letterSpacing:"6px",textShadow:"0 2px 5px #000"}}>VCTB 3.0</div>
+            <div style={{
+              marginTop:2,color:"#fff",fontSize:eventAnimation==="WICKET"?104:154,lineHeight:.92,
+              fontWeight:1000,letterSpacing:eventAnimation==="WICKET"?"-5px":"-10px",
+              textShadow:eventAnimation==="WICKET"?"0 6px 0 #8d0711,0 12px 25px rgba(0,0,0,.7)":"0 6px 0 #0a3977,0 12px 25px rgba(0,0,0,.7)"
+            }}>
+              {eventAnimation==="FOUR"?"4":eventAnimation==="SIX"?"6":"WICKET"}
+            </div>
+            {eventAnimation!=="WICKET" && (
+              <div style={{marginTop:-3,color:"#fff",fontSize:25,fontWeight:1000,letterSpacing:"8px"}}>
+                {eventAnimation==="FOUR"?"FOUR":"SIX"}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {centreCard && popupInnings && (
         <div
           style={{
