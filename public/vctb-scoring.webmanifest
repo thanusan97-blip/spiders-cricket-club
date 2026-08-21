@@ -1,0 +1,20 @@
+{
+  "id": "/vctb/2026/scoring",
+  "name": "VCTB Scoring",
+  "short_name": "VCTB Scoring",
+  "description": "VCTB 3.0 live cricket scoring centre",
+  "start_url": "/vctb/2026/scoring",
+  "scope": "/vctb/2026/scoring",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/vctb/2026/vctb-3-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
