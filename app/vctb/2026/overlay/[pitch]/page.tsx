@@ -162,8 +162,16 @@ export default function VCTBOverlayPage() {
   const overCardTimers = useRef<number[]>([]);
 
   const load = useCallback(async () => {
-    // Prefer the live match. If there is no live match, retain the
-    // latest completed match on this pitch until the next one starts.
+    // IMPORTANT:
+    // 1) Always prefer the match that is currently LIVE on this pitch.
+    // 2) Remember that exact live match ID in localStorage.
+    // 3) When it completes, keep showing ONLY that remembered match result.
+    // 4) If the scorer RESTARTS the fixture, restart deletes that match row.
+    //    The remembered ID will then no longer exist, so the overlay clears.
+    // This prevents an unrelated older completed test match (for example
+    // "Match 10") from appearing when nothing is actually live.
+    const storageKey = `vctb-overlay-last-live-${slug}`;
+
     const { data: liveRows, error: liveError } = await supabase
       .from("matches")
       .select("id,match_number,pitch,team_a,team_b,status")
@@ -179,21 +187,59 @@ export default function VCTBOverlayPage() {
 
     let selectedMatch = (liveRows?.[0] || null) as MatchRow | null;
 
-    if (!selectedMatch) {
-      const { data: completedRows, error: completedError } = await supabase
-        .from("matches")
-        .select("id,match_number,pitch,team_a,team_b,status")
-        .eq("pitch", pitch)
-        .eq("status", "completed")
-        .order("id", { ascending: false })
-        .limit(1);
+    if (selectedMatch) {
+      // Remember only a match that this overlay has genuinely seen LIVE.
+      try {
+        window.localStorage.setItem(storageKey, String(selectedMatch.id));
+      } catch {
+        // OBS/browser storage can occasionally be unavailable; live display
+        // still works even if persistence is unavailable.
+      }
+    } else {
+      let rememberedMatchId: number | null = null;
 
-      if (completedError) {
-        console.error(completedError);
-        return;
+      try {
+        const stored = window.localStorage.getItem(storageKey);
+        if (stored && Number.isFinite(Number(stored))) {
+          rememberedMatchId = Number(stored);
+        }
+      } catch {
+        rememberedMatchId = null;
       }
 
-      selectedMatch = (completedRows?.[0] || null) as MatchRow | null;
+      if (rememberedMatchId !== null) {
+        const { data: rememberedRows, error: rememberedError } = await supabase
+          .from("matches")
+          .select("id,match_number,pitch,team_a,team_b,status")
+          .eq("id", rememberedMatchId)
+          .eq("pitch", pitch)
+          .limit(1);
+
+        if (rememberedError) {
+          console.error(rememberedError);
+          return;
+        }
+
+        const rememberedMatch =
+          (rememberedRows?.[0] || null) as MatchRow | null;
+
+        // Keep the result only when the SAME remembered live match is completed.
+        if (rememberedMatch?.status === "completed") {
+          selectedMatch = rememberedMatch;
+        } else {
+          selectedMatch = null;
+
+          // If restart deleted the row, or it is no longer a completed/live
+          // match, clear the stale remembered reference.
+          if (!rememberedMatch || rememberedMatch.status !== "live") {
+            try {
+              window.localStorage.removeItem(storageKey);
+            } catch {
+              // Ignore storage cleanup failures.
+            }
+          }
+        }
+      }
     }
 
     setMatch(selectedMatch);
