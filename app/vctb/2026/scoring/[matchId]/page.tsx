@@ -1597,9 +1597,9 @@ export default function MatchScorerPage() {
                   const extras = ds.reduce((sum,d) => sum + Number(d.extras||0),0);
                   return <section key={inn.id} className="rounded-[24px] border border-white/10 bg-[#080808] p-4 sm:p-5">
                     <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wider text-yellow-400">Innings {inn.innings_number}</p><h3 className="mt-1 text-2xl font-black">{displayTeamName(inn.batting_team)}</h3></div><p className="text-2xl font-black">{inn.total_runs}/{inn.wickets} <span className="text-sm text-white/40">({oversFromBalls(inn.legal_balls)})</span></p></div>
-                    <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[680px] text-sm"><thead className="text-left text-xs uppercase text-white/35"><tr><th>Batter</th><th>Dismissal</th><th className="text-right">R</th><th className="text-right">B</th><th className="text-right">4s</th><th className="text-right">6s</th><th className="text-right">SR</th></tr></thead><tbody>{bat.map((r:any)=><tr key={r.player.player_id} className="border-t border-white/5"><td className="py-3 font-black">{playerLabel(r.player)}</td><td className="py-3 text-white/45">{r.dismissal}</td><td className="py-3 text-right font-black">{r.runs}</td><td className="py-3 text-right">{r.balls}</td><td className="py-3 text-right">{r.fours}</td><td className="py-3 text-right">{r.sixes}</td><td className="py-3 text-right">{r.balls ? ((r.runs/r.balls)*100).toFixed(1) : "0.0"}</td></tr>)}</tbody></table></div>
+                    <div className="mt-5 overflow-x-auto"><table className="w-full table-fixed text-[11px] sm:text-sm"><thead className="text-left text-[9px] uppercase text-white/35 sm:text-xs"><tr><th className="w-[30%] pr-1">Batter</th><th className="w-[25%] pr-1">Dismissal</th><th className="w-[7%] text-right">R</th><th className="w-[7%] text-right">B</th><th className="w-[7%] text-right">4s</th><th className="w-[7%] text-right">6s</th><th className="w-[17%] text-right">SR</th></tr></thead><tbody>{bat.map((r:any)=><tr key={r.player.player_id} className="border-t border-white/5"><td className="truncate py-3 pr-1 font-black">{scorecardPlayerLabel(r.player)}</td><td className="truncate py-3 pr-1 text-white/45">{r.dismissal}</td><td className="py-3 text-right font-black">{r.runs}</td><td className="py-3 text-right">{r.balls}</td><td className="py-3 text-right">{r.fours}</td><td className="py-3 text-right">{r.sixes}</td><td className="py-3 text-right">{r.balls ? ((r.runs/r.balls)*100).toFixed(1) : "0.0"}</td></tr>)}</tbody></table></div>
                     <p className="mt-3 text-sm font-bold text-white/45">Extras: {extras}</p>
-                    <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[560px] text-sm"><thead className="text-left text-xs uppercase text-white/35"><tr><th>Bowler</th><th className="text-right">O</th><th className="text-right">R</th><th className="text-right">W</th><th className="text-right">Econ</th></tr></thead><tbody>{bowl.map((r:any)=><tr key={r.player.player_id} className="border-t border-white/5"><td className="py-3 font-black">{playerLabel(r.player)}</td><td className="py-3 text-right">{oversFromBalls(r.legalBalls)}</td><td className="py-3 text-right">{r.runs}</td><td className="py-3 text-right font-black">{r.wickets}</td><td className="py-3 text-right">{r.legalBalls ? ((r.runs/r.legalBalls)*BALLS_PER_OVER).toFixed(2) : "0.00"}</td></tr>)}</tbody></table></div>
+                    <div className="mt-6 overflow-x-auto"><table className="w-full table-fixed text-[11px] sm:text-sm"><thead className="text-left text-xs uppercase text-white/35"><tr><th>Bowler</th><th className="text-right">O</th><th className="text-right">R</th><th className="text-right">W</th><th className="text-right">Econ</th></tr></thead><tbody>{bowl.map((r:any)=><tr key={r.player.player_id} className="border-t border-white/5"><td className="py-3 font-black">{scorecardPlayerLabel(r.player)}</td><td className="py-3 text-right">{oversFromBalls(r.legalBalls)}</td><td className="py-3 text-right">{r.runs}</td><td className="py-3 text-right font-black">{r.wickets}</td><td className="py-3 text-right">{r.legalBalls ? ((r.runs/r.legalBalls)*BALLS_PER_OVER).toFixed(2) : "0.00"}</td></tr>)}</tbody></table></div>
                   </section>;
                 })}
               </div>
@@ -1609,6 +1609,23 @@ export default function MatchScorerPage() {
       </div>
     </main>
   );
+}
+
+function scorecardPlayerLabel(player: MatchPlayer) {
+  const full = playerLabel(player).trim();
+
+  // Keep role markers such as (c) and (wk), but shorten the personal name
+  // to "First I" for the mobile scorecard.
+  const roleMatch = full.match(/\s*((?:\([^)]*\)\s*)+)$/);
+  const roles = roleMatch ? roleMatch[1].trim() : "";
+  const nameOnly = roleMatch ? full.slice(0, roleMatch.index).trim() : full;
+
+  const parts = nameOnly.split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return `${nameOnly}${roles ? ` ${roles}` : ""}`;
+
+  const first = parts[0];
+  const initial = parts[parts.length - 1].charAt(0).toUpperCase();
+  return `${first} ${initial}${roles ? ` ${roles}` : ""}`;
 }
 
 function MiniStat({ label, value }: { label: string; value: string }) {
