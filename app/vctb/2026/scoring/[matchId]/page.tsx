@@ -192,6 +192,8 @@ export default function MatchScorerPage() {
     useState<"bat" | "bye" | "leg_bye">("bat");
 
   const [showScorecard, setShowScorecard] = useState(false);
+  const [playerOfMatchId, setPlayerOfMatchId] = useState<string>("");
+  const [savingAward, setSavingAward] = useState(false);
   const [extraSheet, setExtraSheet] = useState<
     "wide" | "no_ball" | "bye" | "leg_bye" | null
   >(null);
@@ -287,6 +289,13 @@ export default function MatchScorerPage() {
 
       if (deliveryError) throw deliveryError;
 
+      const { data: awardData } = await supabase
+        .from("match_awards")
+        .select("player_of_match_id")
+        .eq("match_id", matchId)
+        .maybeSingle();
+
+      setPlayerOfMatchId(awardData?.player_of_match_id || "");
       setMatch(matchData as MatchRow);
       setPlayers((playerData || []) as MatchPlayer[]);
       setInnings((inningsData || []) as InningsRow[]);
@@ -553,6 +562,38 @@ export default function MatchScorerPage() {
     if (type === "nonStriker") { nn = value; setNonStrikerId(value); }
     if (type === "bowler") { nb = value; setBowlerId(value); }
     await persistCurrentPlayers(ns, nn, nb);
+  }
+
+  async function savePlayerOfMatch() {
+    if (!playerOfMatchId) {
+      setMessage("Select the Player of the Match first.");
+      return;
+    }
+
+    setSavingAward(true);
+    try {
+      const selected = players.find((p) => p.player_id === playerOfMatchId);
+      const { error } = await supabase
+        .from("match_awards")
+        .upsert(
+          {
+            match_id: matchId,
+            player_of_match_id: playerOfMatchId,
+            player_of_match_name: selected?.player_name || null,
+            player_of_match_team: selected?.team || null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "match_id" }
+        );
+
+      if (error) throw error;
+      setMessage(`Player of the Match saved: ${selected?.player_name || "selected player"}.`);
+    } catch (error) {
+      console.error(error);
+      setMessage("Could not save Player of the Match. Run the match_awards SQL setup first.");
+    } finally {
+      setSavingAward(false);
+    }
   }
 
   async function recordDelivery({
@@ -1580,6 +1621,40 @@ export default function MatchScorerPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {match?.status === "completed" && (
+          <section className="mt-3 shrink-0 rounded-2xl border border-yellow-400/25 bg-gradient-to-r from-yellow-400/[0.08] to-red-950/10 p-3 md:p-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🏆</span>
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-400">Match Awards</p>
+                <p className="text-sm font-black">Select Player of the Match</p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto]">
+              <select
+                value={playerOfMatchId}
+                onChange={(e) => setPlayerOfMatchId(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-black px-3 py-3 text-sm font-bold text-white"
+              >
+                <option value="">Select from both Playing XIs</option>
+                {players.map((player) => (
+                  <option key={player.player_id} value={player.player_id}>
+                    {playerLabel(player)} — {displayTeamName(player.team)}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={savePlayerOfMatch}
+                disabled={!playerOfMatchId || savingAward}
+                className="rounded-xl bg-yellow-400 px-4 py-3 text-xs font-black uppercase text-black disabled:opacity-40"
+              >
+                {savingAward ? "Saving..." : "Confirm"}
+              </button>
+            </div>
+          </section>
         )}
 
         {showScorecard && (

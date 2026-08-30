@@ -161,7 +161,8 @@ export default function PublicMatchPage() {
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"info" | "live" | "scorecard" | "squads">("live");
+  const [activeTab, setActiveTab] = useState<"info" | "live" | "scorecard" | "squads" | "awards">("live");
+  const [playerOfMatchId, setPlayerOfMatchId] = useState<string>("");
   const [squadTeam, setSquadTeam] = useState<"a" | "b">("a");
 
   const loadMatch = useCallback(async () => {
@@ -198,6 +199,13 @@ export default function PublicMatchPage() {
       if (inningsError) throw inningsError;
       if (deliveryError) throw deliveryError;
 
+      const { data: awardData } = await supabase
+        .from("match_awards")
+        .select("player_of_match_id")
+        .eq("match_id", matchId)
+        .maybeSingle();
+
+      setPlayerOfMatchId(awardData?.player_of_match_id || "");
       setMatch(matchData as MatchRow);
       setPlayers((playerData || []) as MatchPlayer[]);
       setInnings((inningsData || []) as InningsRow[]);
@@ -248,8 +256,23 @@ export default function PublicMatchPage() {
       )
       .subscribe();
 
+    const awardsChannel = supabase
+      .channel(`vctb-match-awards-${matchId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "match_awards",
+          filter: `match_id=eq.${matchId}`,
+        },
+        () => loadMatch()
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(awardsChannel);
     };
   }, [matchId, supabase, loadMatch]);
 
@@ -589,6 +612,89 @@ export default function PublicMatchPage() {
   const selectedSquad = squadTeam === "a" ? teamAPlayers : teamBPlayers;
   const selectedSquadName = squadTeam === "a" ? match?.team_a : match?.team_b;
 
+  const allBatterStats = innings.flatMap((inn) =>
+    getBatterStats(inn, deliveries.filter((d) => d.innings_id === inn.id))
+  );
+  const appearedBatters = allBatterStats.filter((row) => row.dismissal !== "DNB");
+
+  const allBowlerStats = innings.flatMap((inn) =>
+    getBowlerStats(inn, deliveries.filter((d) => d.innings_id === inn.id))
+  );
+
+  const bestBatsman = [...appearedBatters].sort((a, b) => {
+    if (b.runs !== a.runs) return b.runs - a.runs;
+    const bSr = b.balls ? (b.runs / b.balls) * 100 : 0;
+    const aSr = a.balls ? (a.runs / a.balls) * 100 : 0;
+    return bSr - aSr;
+  })[0];
+
+  const bestBowler = [...allBowlerStats].sort((a, b) => {
+    if (b.wickets !== a.wickets) return b.wickets - a.wickets;
+    const aEcon = a.legalBalls ? (a.runs / a.legalBalls) * BALLS_PER_OVER : Infinity;
+    const bEcon = b.legalBalls ? (b.runs / b.legalBalls) * BALLS_PER_OVER : Infinity;
+    return aEcon - bEcon;
+  })[0];
+
+  const strikeRateKing = [...appearedBatters]
+    .filter((row) => row.runs >= 20 && row.balls > 0)
+    .sort((a, b) => {
+      const aSr = (a.runs / a.balls) * 100;
+      const bSr = (b.runs / b.balls) * 100;
+      return bSr - aSr || b.runs - a.runs;
+    })[0];
+
+  const economyKing = [...allBowlerStats]
+    .filter((row) => row.legalBalls >= 2 * BALLS_PER_OVER)
+    .sort((a, b) => {
+      const aEcon = (a.runs / a.legalBalls) * BALLS_PER_OVER;
+      const bEcon = (b.runs / b.legalBalls) * BALLS_PER_OVER;
+      return aEcon - bEcon || b.wickets - a.wickets;
+    })[0];
+
+  function findBattingStreak(required: number, boundaryMode: boolean) {
+    for (const player of players) {
+      const faced = deliveries.filter((d) => d.striker_id === player.player_id);
+      let streak = 0;
+      for (const d of faced) {
+        const hit = boundaryMode
+          ? d.runs_batter === 4 || d.runs_batter === 6
+          : d.runs_batter === 6;
+        streak = hit ? streak + 1 : 0;
+        if (streak >= required) return player;
+      }
+    }
+    return undefined;
+  }
+
+  const sixHatTrickPlayer = findBattingStreak(3, false);
+  const boundaryKingPlayer = findBattingStreak(4, true);
+
+  const maidenOvers = (() => {
+    const found: { player: MatchPlayer; innings: number; over: number }[] = [];
+    for (const inn of innings) {
+      const ds = deliveries.filter((d) => d.innings_id === inn.id);
+      const overKeys = Array.from(new Set(ds.map((d) => d.over_number)));
+      for (const over of overKeys) {
+        const overBalls = ds.filter((d) => d.over_number === over);
+        const legal = overBalls.filter((d) => d.is_legal_ball);
+        if (legal.length !== BALLS_PER_OVER) continue;
+        const bowlerId = overBalls[0]?.bowler_id;
+        if (!bowlerId || overBalls.some((d) => d.bowler_id !== bowlerId)) continue;
+        const conceded = overBalls.reduce((sum, d) => {
+          const kind = d.extra_type || "";
+          if (kind === "bye" || kind === "leg_bye") return sum + Number(d.runs_batter || 0);
+          if (kind === "no_ball_bye" || kind === "no_ball_leg_bye") return sum + Number(d.runs_batter || 0) + 1;
+          return sum + Number(d.runs_batter || 0) + Number(d.extras || 0);
+        }, 0);
+        const player = players.find((p) => p.player_id === bowlerId);
+        if (conceded === 0 && player) found.push({ player, innings: inn.innings_number, over });
+      }
+    }
+    return found;
+  })();
+
+  const playerOfMatch = players.find((p) => p.player_id === playerOfMatchId);
+
   if (loading) {
     return (
       <main className="min-h-screen bg-black p-10 text-center text-white">
@@ -622,6 +728,7 @@ export default function PublicMatchPage() {
     ["live", "Live"],
     ["scorecard", "Scorecard"],
     ["squads", "Squads"],
+    ["awards", "Awards"],
   ] as const;
 
   return (
@@ -663,12 +770,12 @@ export default function PublicMatchPage() {
               </div>
             </div>
 
-            <nav className="mt-3 grid grid-cols-4 border-t border-white/5">
+            <nav className="mt-3 grid grid-cols-5 border-t border-white/5">
               {tabs.map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`relative py-3 text-[11px] font-black uppercase tracking-wide transition md:text-sm ${
+                  className={`relative py-3 text-[9px] font-black uppercase tracking-[0.04em] transition sm:text-[11px] md:text-sm ${
                     activeTab === key
                       ? "text-yellow-400"
                       : "text-white/45 hover:text-white"
@@ -862,12 +969,7 @@ export default function PublicMatchPage() {
                       <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/35">
                         Recent Balls
                       </p>
-                      <button
-                        onClick={() => setActiveTab("scorecard")}
-                        className="rounded-lg border border-yellow-400/20 bg-yellow-400/5 px-3 py-2 text-[10px] font-black uppercase text-yellow-400"
-                      >
-                        Full Scorecard
-                      </button>
+
                     </div>
 
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -1064,6 +1166,86 @@ export default function PublicMatchPage() {
             </section>
           )}
 
+          {activeTab === "awards" && (
+            <section className="mt-3">
+              {match.status !== "completed" ? (
+                <div className="rounded-[22px] border border-white/10 bg-[#080808] p-8 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-yellow-400/20 bg-yellow-400/5 text-3xl">🏆</div>
+                  <h2 className="mt-4 text-xl font-black">Match Awards</h2>
+                  <p className="mt-2 text-sm leading-6 text-white/45">
+                    Awards will be confirmed automatically when the match is completed.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <AwardCard
+                    icon="⭐"
+                    title="Player of the Match"
+                    player={playerOfMatch}
+                    detail={playerOfMatch ? `${displayTeamName(playerOfMatch.team)} • Selected by scorer` : "Awaiting scorer selection"}
+                    featured
+                  />
+                  <AwardCard
+                    icon="🏏"
+                    title="Best Batsman"
+                    player={bestBatsman?.player}
+                    detail={bestBatsman ? `${bestBatsman.runs} (${bestBatsman.balls}) • SR ${bestBatsman.balls ? ((bestBatsman.runs / bestBatsman.balls) * 100).toFixed(1) : "0.0"}` : "Not achieved"}
+                  />
+                  <AwardCard
+                    icon="🎯"
+                    title="Best Bowler"
+                    player={bestBowler?.player}
+                    detail={bestBowler ? `${oversFromBalls(bestBowler.legalBalls)}-${bestBowler.runs}-${bestBowler.wickets} • Econ ${bestBowler.legalBalls ? ((bestBowler.runs / bestBowler.legalBalls) * BALLS_PER_OVER).toFixed(2) : "0.00"}` : "Not achieved"}
+                  />
+                  <AwardCard
+                    icon="⚡"
+                    title="Strike Rate King"
+                    player={strikeRateKing?.player}
+                    detail={strikeRateKing ? `${strikeRateKing.runs} (${strikeRateKing.balls}) • SR ${((strikeRateKing.runs / strikeRateKing.balls) * 100).toFixed(1)} • Min 20 runs` : "Not achieved • Minimum 20 runs"}
+                  />
+                  <AwardCard
+                    icon="🔒"
+                    title="Economy King"
+                    player={economyKing?.player}
+                    detail={economyKing ? `${oversFromBalls(economyKing.legalBalls)} overs • Econ ${((economyKing.runs / economyKing.legalBalls) * BALLS_PER_OVER).toFixed(2)} • ${economyKing.wickets} wkts` : "Not achieved • Minimum 2 overs"}
+                  />
+                  <AwardCard
+                    icon="🔥"
+                    title="Hat-trick of Sixes"
+                    player={sixHatTrickPlayer}
+                    detail={sixHatTrickPlayer ? "3 consecutive sixes" : "Not achieved"}
+                  />
+                  <AwardCard
+                    icon="💥"
+                    title="Boundary King"
+                    player={boundaryKingPlayer}
+                    detail={boundaryKingPlayer ? "4 consecutive boundaries" : "Not achieved"}
+                  />
+                  <div className="rounded-[20px] border border-white/10 bg-[#080808] p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-xl">⭕</div>
+                      <div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">Maiden Over Award</p>
+                        {maidenOvers.length ? (
+                          <div className="mt-2 space-y-1">
+                            {maidenOvers.map((item, index) => (
+                              <p key={`${item.player.player_id}-${item.innings}-${item.over}-${index}`} className="text-sm font-black">
+                                {playerLabel(item.player)}
+                                <span className="ml-2 text-xs font-bold text-white/40">Innings {item.innings} • Over {item.over}</span>
+                              </p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-1 text-sm font-bold text-white/45">Not achieved</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
           {activeTab === "squads" && (
             <section className="mt-3">
               <div className="rounded-[22px] border border-white/10 bg-[#080808] p-3">
@@ -1184,6 +1366,35 @@ function InfoRow({
     <div className={`grid grid-cols-[105px_1fr] gap-4 py-3.5 ${last ? "" : "border-b border-white/5"}`}>
       <span className="text-xs font-bold text-white/35">{label}</span>
       <span className="text-sm font-black leading-5 text-white/90">{value}</span>
+    </div>
+  );
+}
+
+function AwardCard({
+  icon,
+  title,
+  player,
+  detail,
+  featured = false,
+}: {
+  icon: string;
+  title: string;
+  player?: MatchPlayer;
+  detail: string;
+  featured?: boolean;
+}) {
+  return (
+    <div className={`rounded-[20px] border p-4 ${featured ? "border-yellow-400/30 bg-gradient-to-r from-yellow-400/[0.09] to-red-950/10" : "border-white/10 bg-[#080808]"}`}>
+      <div className="flex items-center gap-3">
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl ${featured ? "bg-yellow-400 text-black" : "bg-white/5"}`}>
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">{title}</p>
+          <p className="mt-1 text-base font-black">{player ? playerLabel(player) : detail}</p>
+          {player && <p className="mt-1 text-[11px] font-bold text-white/45">{detail}</p>}
+        </div>
+      </div>
     </div>
   );
 }
