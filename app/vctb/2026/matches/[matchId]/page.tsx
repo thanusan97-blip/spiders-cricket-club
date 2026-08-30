@@ -90,6 +90,49 @@ function displayTeamName(team: string) {
   return team === "Vallvai Blues SC UK" ? "Vallvai Kadalodikal" : team;
 }
 
+const teamLogoMap: Record<string, string> = {
+  "Aathiyadi JL Super Kings": "/vctb/2026/teams/aathiyadi.png",
+  "Balmoral Fighters": "/vctb/2026/teams/balmoral.png",
+  "Niruvaththampai Knights": "/vctb/2026/teams/niruvaththampai.png",
+  "Team Tiger": "/vctb/2026/teams/team-tiger.png",
+  "Thunnalai Royals": "/vctb/2026/teams/thunnalai.png",
+  "Vallvai Blues SC UK": "/vctb/2026/teams/vallvai-blues.png",
+};
+
+function teamLogo(team: string) {
+  return teamLogoMap[team] || "/vctb/2026/vctb-3-logo.png";
+}
+
+function shortTeamName(team: string) {
+  const display = displayTeamName(team);
+  if (display === "Aathiyadi JL Super Kings") return "Aathiyadi";
+  if (display === "Balmoral Fighters") return "Balmoral";
+  if (display === "Niruvaththampai Knights") return "Niruvaththampai";
+  if (display === "Team Tiger") return "Team Tiger";
+  if (display === "Thunnalai Royals") return "Thunnalai";
+  if (display === "Vallvai Kadalodikal") return "Vallvai";
+  return display;
+}
+
+function scorecardPlayerLabel(player: MatchPlayer) {
+  const parts = player.player_name.trim().split(/\s+/).filter(Boolean);
+  const shortName =
+    parts.length <= 1
+      ? player.player_name
+      : `${parts[0]} ${parts[parts.length - 1].charAt(0).toUpperCase()}`;
+
+  const tags = [
+    player.is_captain ? "c" : "",
+    player.is_wicket_keeper ? "wk" : "",
+  ].filter(Boolean);
+
+  return `${shortName}${tags.length ? ` (${tags.join(" & ")})` : ""}`;
+}
+
+function playerRoleLabel(player: MatchPlayer) {
+  return player.role || "Player";
+}
+
 function oversFromBalls(legalBalls: number) {
   const overs = Math.floor(legalBalls / BALLS_PER_OVER);
   const balls = legalBalls % BALLS_PER_OVER;
@@ -118,7 +161,8 @@ export default function PublicMatchPage() {
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [showScorecard, setShowScorecard] = useState(false);
+  const [activeTab, setActiveTab] = useState<"info" | "live" | "scorecard" | "squads">("live");
+  const [squadTeam, setSquadTeam] = useState<"a" | "b">("a");
 
   const loadMatch = useCallback(async () => {
     if (!matchId || Number.isNaN(matchId)) return;
@@ -540,6 +584,11 @@ export default function PublicMatchPage() {
     }`;
   }
 
+  const teamAPlayers = players.filter((player) => player.team === match?.team_a);
+  const teamBPlayers = players.filter((player) => player.team === match?.team_b);
+  const selectedSquad = squadTeam === "a" ? teamAPlayers : teamBPlayers;
+  const selectedSquadName = squadTeam === "a" ? match?.team_a : match?.team_b;
+
   if (loading) {
     return (
       <main className="min-h-screen bg-black p-10 text-center text-white">
@@ -568,499 +617,574 @@ export default function PublicMatchPage() {
     );
   }
 
+  const tabs = [
+    ["info", "Info"],
+    ["live", "Live"],
+    ["scorecard", "Scorecard"],
+    ["squads", "Squads"],
+  ] as const;
+
   return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="mx-auto max-w-5xl px-2.5 py-3 sm:px-4 md:px-3 md:py-8">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 md:mb-4 md:gap-3">
-          <Link
-            href="/vctb/2026#live"
-            className="text-xs font-bold text-white/50 hover:text-yellow-400 md:text-sm"
-          >
-            ← VCTB 2026
-          </Link>
+    <main className="min-h-[100dvh] bg-black text-white">
+      <div
+        className="mx-auto max-w-5xl"
+        style={{ paddingTop: "max(8px, env(safe-area-inset-top))" }}
+      >
+        {/* Professional match-centre header */}
+        <header className="sticky top-0 z-40 border-b border-white/10 bg-black/95 backdrop-blur-xl">
+          <div className="px-3 pb-2 pt-2 sm:px-4 md:px-5">
+            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+              <Link
+                href="/vctb/2026#live"
+                className="whitespace-nowrap text-xs font-black text-white/60 transition hover:text-yellow-400 md:text-sm"
+              >
+                ← Back
+              </Link>
 
-          <div className="flex items-center gap-2">
-            {match.status === "live" && (
-              <span className="rounded-full bg-red-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider">
-                ● Live
-              </span>
-            )}
-
-            {match.status === "completed" && (
-              <span className="rounded-full bg-green-600/20 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-green-300">
-                ✓ Completed
-              </span>
-            )}
-
-            <span className="rounded-full border border-yellow-400/20 bg-yellow-400/5 px-3 py-1.5 text-[10px] font-black uppercase text-yellow-400">
-              {match.pitch} • Match {match.match_number}
-            </span>
-          </div>
-        </div>
-
-        <section className="overflow-hidden rounded-[18px] border border-white/10 bg-[#080808] shadow-2xl md:rounded-[24px]">
-          <div className="border-b border-white/10 bg-gradient-to-r from-red-950/50 via-black to-yellow-950/30 p-3 md:p-5">
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-yellow-400">
-              VCTB 3.0 • 2026
-            </p>
-
-            <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:mt-4 md:gap-4 md:grid-cols-[1fr_auto_1fr]">
-              <div>
-                <p className="text-sm font-black leading-tight md:text-xl">
-                  {displayTeamName(match.team_a)}
+              <div className="min-w-0 text-center">
+                <p className="truncate text-[15px] font-black md:text-xl">
+                  {shortTeamName(match.team_a)}
+                  <span className="mx-2 text-white/30">v</span>
+                  {shortTeamName(match.team_b)}
                 </p>
               </div>
 
-              <div className="text-center text-[9px] font-black uppercase tracking-[0.2em] text-white/25 md:text-xs md:tracking-[0.3em]">
-                VS
-              </div>
-
-              <div className="md:text-right">
-                <p className="text-sm font-black leading-tight md:text-xl">
-                  {displayTeamName(match.team_b)}
-                </p>
-              </div>
-            </div>
-
-            {match.toss_winner && (
-              <p className="mt-2 text-[10px] text-white/45 md:mt-4 md:text-sm">
-                Toss:{" "}
-                <span className="font-bold text-white/70">
-                  {displayTeamName(match.toss_winner)}
-                </span>{" "}
-                chose to {match.toss_decision}
-              </p>
-            )}
-          </div>
-
-          {currentInnings && (
-            <div className="p-2.5 sm:p-5 md:p-4">
-              <div className="rounded-[16px] border border-yellow-400/20 bg-yellow-400/5 p-3 md:rounded-[22px] md:p-5">
-                <div className="flex flex-wrap items-end justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-wider text-yellow-400">
-                      {displayTeamName(currentInnings.batting_team)}
-                    </p>
-
-                    <h1 className="mt-1 text-3xl font-black md:mt-2 md:text-5xl">
-                      {currentInnings.total_runs}/{currentInnings.wickets}
-                    </h1>
-
-                    <p className="mt-1 text-[10px] font-bold text-white/50 md:mt-2 md:text-sm">
-                      {oversFromBalls(currentInnings.legal_balls)} / {MAX_OVERS} overs
-                    </p>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="text-xs font-black uppercase text-white/35">
-                      CRR
-                    </p>
-                    <p className="text-xl font-black text-yellow-400 md:text-2xl">
-                      {currentRunRate}
-                    </p>
-                  </div>
-                </div>
-
-                {target && (
-                  <div className="mt-3 grid grid-cols-3 gap-1.5 rounded-lg border border-white/10 bg-black/30 p-2 text-center md:mt-5 md:gap-2 md:rounded-xl md:p-3">
-                    <MiniStat label="Target" value={String(target)} />
-                    <MiniStat
-                      label="Need"
-                      value={`${runsNeeded} from ${ballsRemaining}`}
-                    />
-                    <MiniStat label="RRR" value={requiredRunRate} />
-                  </div>
+              <div className="flex items-center justify-end gap-1.5">
+                {match.status === "live" && (
+                  <span className="rounded-full bg-red-600 px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider">
+                    ● Live
+                  </span>
+                )}
+                {match.status === "completed" && (
+                  <span className="rounded-full border border-green-400/20 bg-green-950/30 px-2.5 py-1.5 text-[9px] font-black uppercase text-green-300">
+                    ✓ Done
+                  </span>
                 )}
               </div>
+            </div>
 
-              <div className="mt-2 grid grid-cols-3 gap-1.5 md:mt-4 md:gap-3 md:grid-cols-3">
-                <PublicPlayerCard
-                  title="Striker"
-                  name={
-                    strikerStat
-                      ? playerLabel(strikerStat.player)
-                      : "Waiting for batter"
-                  }
-                  primary={
-                    strikerStat
-                      ? `${strikerStat.runs} (${strikerStat.balls})`
-                      : "-"
-                  }
-                  secondary={
-                    strikerStat
-                      ? `4s ${strikerStat.fours} • 6s ${strikerStat.sixes} • SR ${
-                          strikerStat.balls
-                            ? (
-                                (strikerStat.runs / strikerStat.balls) *
-                                100
-                              ).toFixed(1)
-                            : "0.0"
-                        }`
-                      : ""
-                  }
-                  active
-                />
-
-                <PublicPlayerCard
-                  title="Non-Striker"
-                  name={
-                    nonStrikerStat
-                      ? playerLabel(nonStrikerStat.player)
-                      : "Waiting for batter"
-                  }
-                  primary={
-                    nonStrikerStat
-                      ? `${nonStrikerStat.runs} (${nonStrikerStat.balls})`
-                      : "-"
-                  }
-                  secondary={
-                    nonStrikerStat
-                      ? `4s ${nonStrikerStat.fours} • 6s ${nonStrikerStat.sixes} • SR ${
-                          nonStrikerStat.balls
-                            ? (
-                                (nonStrikerStat.runs /
-                                  nonStrikerStat.balls) *
-                                100
-                              ).toFixed(1)
-                            : "0.0"
-                        }`
-                      : ""
-                  }
-                />
-
-                <PublicPlayerCard
-                  title="Bowler"
-                  name={
-                    activeBowlerStat
-                      ? playerLabel(activeBowlerStat.player)
-                      : "Waiting for bowler"
-                  }
-                  primary={
-                    activeBowlerStat
-                      ? `${oversFromBalls(
-                          activeBowlerStat.legalBalls
-                        )}-${activeBowlerStat.runs}-${activeBowlerStat.wickets}`
-                      : "-"
-                  }
-                  secondary={
-                    activeBowlerStat
-                      ? `Economy ${
-                          activeBowlerStat.legalBalls
-                            ? (
-                                (activeBowlerStat.runs /
-                                  activeBowlerStat.legalBalls) *
-                                BALLS_PER_OVER
-                              ).toFixed(2)
-                            : "0.00"
-                        }`
-                      : ""
-                  }
-                />
-              </div>
-
-              <div className="mt-2 rounded-xl border border-white/10 bg-black p-2.5 md:mt-4 md:rounded-2xl md:p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
-                    Recent Balls
-                  </p>
-
-                  <button
-                    onClick={() => setShowScorecard(true)}
-                    className="rounded-lg bg-white/5 px-3 py-2 text-xs font-black uppercase text-yellow-400"
-                  >
-                    Full Scorecard
-                  </button>
-                </div>
-
-                <div className="mt-2 flex flex-wrap gap-1.5 md:mt-3 md:gap-2">
-                  {recentBalls.length === 0 ? (
-                    <span className="text-sm text-white/30">
-                      Waiting for first delivery
-                    </span>
-                  ) : (
-                    recentBalls.map((delivery) => (
-                      <span
-                        key={delivery.id}
-                        className={`flex h-9 min-w-9 items-center justify-center rounded-full px-2 text-xs font-black ${
-                          delivery.wicket
-                            ? "bg-red-600"
-                            : delivery.runs_batter === 4 ||
-                              delivery.runs_batter === 6
-                            ? "bg-yellow-400 text-black"
-                            : "bg-white/10"
-                        }`}
-                      >
-                        {deliveryBadge(delivery)}
-                      </span>
-                    ))
+            <nav className="mt-3 grid grid-cols-4 border-t border-white/5">
+              {tabs.map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`relative py-3 text-[11px] font-black uppercase tracking-wide transition md:text-sm ${
+                    activeTab === key
+                      ? "text-yellow-400"
+                      : "text-white/45 hover:text-white"
+                  }`}
+                >
+                  {label}
+                  {activeTab === key && (
+                    <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-yellow-400" />
                   )}
-                </div>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </header>
+
+        <div className="px-2.5 pb-8 pt-3 sm:px-4 md:px-3 md:pt-5">
+          {/* Match identity card shared by all tabs */}
+          <section className="overflow-hidden rounded-[22px] border border-white/10 bg-[#080808] shadow-2xl">
+            <div className="bg-gradient-to-r from-red-950/50 via-[#080808] to-yellow-950/30 px-3 py-3.5 md:px-5 md:py-5">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-yellow-400 md:text-xs">
+                  VCTB 3.0 • 2026
+                </p>
+                <span className="rounded-full border border-yellow-400/20 bg-yellow-400/5 px-2.5 py-1 text-[9px] font-black uppercase text-yellow-400 md:text-[10px]">
+                  {match.pitch} • Match {match.match_number}
+                </span>
               </div>
 
-              <section className="mt-3 md:mt-5">
-                <div className="mb-2 flex items-end justify-between gap-3 md:mb-3">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
-                      Live Commentary
-                    </p>
-                    <h2 className="mt-0.5 text-lg font-black md:mt-1 md:text-2xl">
-                      Ball-by-Ball
-                    </h2>
+              <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                <TeamIdentity team={match.team_a} align="left" />
+                <div className="rounded-full border border-white/10 bg-black/40 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
+                  VS
+                </div>
+                <TeamIdentity team={match.team_b} align="right" />
+              </div>
+            </div>
+          </section>
+
+          {activeTab === "info" && (
+            <section className="mt-3 space-y-3">
+              <Panel title="Match Info" eyebrow="Tournament Details">
+                <InfoRow label="Match" value={`Match ${match.match_number}`} />
+                <InfoRow label="Series" value="Vadamaradchy Champion T10 Blast 3.0" />
+                <InfoRow label="Match Type" value="T10 • 10 overs • 5 balls per over" />
+                <InfoRow label="Date" value="Sunday, 6 September 2026" />
+                <InfoRow label="Start Time" value={match.start_time ? `${match.start_time} UK time` : "TBC"} />
+                <InfoRow label="Pitch" value={match.pitch} />
+                <InfoRow label="Venue" value="Tenetelow Sports Ground, UB2 4LW" />
+                <InfoRow
+                  label="Toss"
+                  value={
+                    match.toss_winner
+                      ? `${displayTeamName(match.toss_winner)} chose to ${match.toss_decision}`
+                      : "Toss not completed"
+                  }
+                  last
+                />
+              </Panel>
+
+              <Panel title="Playing XI" eyebrow="Match Squads">
+                <button
+                  onClick={() => {
+                    setSquadTeam("a");
+                    setActiveTab("squads");
+                  }}
+                  className="flex w-full items-center gap-3 border-b border-white/10 py-3 text-left"
+                >
+                  <img src={teamLogo(match.team_a)} alt="" className="h-10 w-10 rounded-full object-contain" />
+                  <span className="min-w-0 flex-1 font-black">{displayTeamName(match.team_a)}</span>
+                  <span className="text-xl text-white/30">›</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setSquadTeam("b");
+                    setActiveTab("squads");
+                  }}
+                  className="flex w-full items-center gap-3 py-3 text-left"
+                >
+                  <img src={teamLogo(match.team_b)} alt="" className="h-10 w-10 rounded-full object-contain" />
+                  <span className="min-w-0 flex-1 font-black">{displayTeamName(match.team_b)}</span>
+                  <span className="text-xl text-white/30">›</span>
+                </button>
+              </Panel>
+            </section>
+          )}
+
+          {activeTab === "live" && (
+            <section className="mt-3">
+              {currentInnings ? (
+                <>
+                  <div className="rounded-[22px] border border-yellow-400/20 bg-gradient-to-br from-yellow-400/[0.08] via-[#0a0a0a] to-red-950/10 p-4 md:p-5">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <img
+                          src={teamLogo(currentInnings.batting_team)}
+                          alt=""
+                          className="h-12 w-12 shrink-0 rounded-full object-contain md:h-14 md:w-14"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-black uppercase tracking-wider text-yellow-400">
+                            {displayTeamName(currentInnings.batting_team)}
+                          </p>
+                          <div className="mt-1 flex items-end gap-2">
+                            <h1 className="text-4xl font-black leading-none md:text-5xl">
+                              {currentInnings.total_runs}/{currentInnings.wickets}
+                            </h1>
+                            <span className="pb-0.5 text-xs font-bold text-white/45 md:text-sm">
+                              ({oversFromBalls(currentInnings.legal_balls)})
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 text-right">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-white/35">
+                          CRR
+                        </p>
+                        <p className="mt-1 text-xl font-black text-yellow-400 md:text-2xl">
+                          {currentRunRate}
+                        </p>
+                      </div>
+                    </div>
+
+                    {target && (
+                      <div className="mt-4 grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-black/30 py-2.5 text-center">
+                        <MiniStat label="Target" value={String(target)} />
+                        <MiniStat label="Need" value={`${runsNeeded} / ${ballsRemaining}`} />
+                        <MiniStat label="RRR" value={requiredRunRate} />
+                      </div>
+                    )}
                   </div>
 
-                  <span className="text-xs font-bold text-white/35">
-                    Latest first
-                  </span>
-                </div>
-
-                <div className="space-y-1.5 md:space-y-2">
-                  {currentDeliveries.length === 0 ? (
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/40">
-                      Ball-by-ball commentary will appear here once the match starts.
+                  <div className="mt-3 overflow-hidden rounded-[18px] border border-white/10 bg-[#080808]">
+                    <div className="grid grid-cols-[1fr_42px_42px_42px_42px_58px] border-b border-white/10 px-3 py-2 text-[8px] font-black uppercase text-white/35 md:text-[10px]">
+                      <span>Batter</span><span className="text-right">R</span><span className="text-right">B</span><span className="text-right">4s</span><span className="text-right">6s</span><span className="text-right">SR</span>
                     </div>
-                  ) : (
-                    [...currentDeliveries]
-                      .reverse()
-                      .map((delivery) => (
-                        <div
-                          key={delivery.id}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 md:rounded-2xl md:p-4"
-                        >
-                          <p className="text-[11px] font-bold text-white/75 md:text-sm">
-                            {deliveryCommentary(delivery)}
+
+                    {[strikerStat, nonStrikerStat].map((row, index) => (
+                      <div
+                        key={row?.player.player_id || index}
+                        className={`grid grid-cols-[1fr_42px_42px_42px_42px_58px] items-center px-3 py-3 ${
+                          index === 0 ? "border-b border-white/5" : ""
+                        }`}
+                      >
+                        <div className="min-w-0 pr-2">
+                          <p className={`text-[12px] font-black leading-tight md:text-sm ${index === 0 ? "text-yellow-400" : "text-white"}`}>
+                            {row ? playerLabel(row.player) : "Waiting for batter"}
+                            {index === 0 && row ? " *" : ""}
                           </p>
                         </div>
-                      ))
-                  )}
-                </div>
-              </section>
+                        <span className="text-right text-[12px] font-black">{row?.runs ?? "-"}</span>
+                        <span className="text-right text-[11px]">{row?.balls ?? "-"}</span>
+                        <span className="text-right text-[11px]">{row?.fours ?? "-"}</span>
+                        <span className="text-right text-[11px]">{row?.sixes ?? "-"}</span>
+                        <span className="text-right text-[11px]">
+                          {row
+                            ? row.balls
+                              ? ((row.runs / row.balls) * 100).toFixed(1)
+                              : "0.0"
+                            : "-"}
+                        </span>
+                      </div>
+                    ))}
 
-              {match.status === "completed" && (
-                <div className="mt-6 rounded-2xl border border-green-400/30 bg-green-950/30 p-5 text-center">
-                  <p className="text-xs font-black uppercase tracking-[0.25em] text-green-300">
-                    Match Completed
-                  </p>
-                  <p className="mt-2 text-xl font-black">
-                    {match.result_text}
-                  </p>
+                    <div className="border-t border-white/10 bg-black/30">
+                      <div className="grid grid-cols-[1fr_48px_48px_48px_60px] px-3 py-2 text-[8px] font-black uppercase text-white/35 md:text-[10px]">
+                        <span>Bowler</span><span className="text-right">O</span><span className="text-right">R</span><span className="text-right">W</span><span className="text-right">Econ</span>
+                      </div>
+                      <div className="grid grid-cols-[1fr_48px_48px_48px_60px] items-center px-3 pb-3">
+                        <span className="pr-2 text-[12px] font-black md:text-sm">
+                          {activeBowlerStat ? playerLabel(activeBowlerStat.player) : "Waiting for bowler"}
+                        </span>
+                        <span className="text-right text-[11px]">
+                          {activeBowlerStat ? oversFromBalls(activeBowlerStat.legalBalls) : "-"}
+                        </span>
+                        <span className="text-right text-[11px]">{activeBowlerStat?.runs ?? "-"}</span>
+                        <span className="text-right text-[11px] font-black">{activeBowlerStat?.wickets ?? "-"}</span>
+                        <span className="text-right text-[11px]">
+                          {activeBowlerStat
+                            ? activeBowlerStat.legalBalls
+                              ? ((activeBowlerStat.runs / activeBowlerStat.legalBalls) * BALLS_PER_OVER).toFixed(2)
+                              : "0.00"
+                            : "-"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 rounded-[18px] border border-white/10 bg-[#080808] p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/35">
+                        Recent Balls
+                      </p>
+                      <button
+                        onClick={() => setActiveTab("scorecard")}
+                        className="rounded-lg border border-yellow-400/20 bg-yellow-400/5 px-3 py-2 text-[10px] font-black uppercase text-yellow-400"
+                      >
+                        Full Scorecard
+                      </button>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {recentBalls.length === 0 ? (
+                        <span className="text-sm text-white/30">Waiting for first delivery</span>
+                      ) : (
+                        recentBalls.map((delivery) => (
+                          <span
+                            key={delivery.id}
+                            className={`flex h-9 min-w-9 items-center justify-center rounded-full px-2 text-xs font-black ${
+                              delivery.wicket
+                                ? "bg-red-600"
+                                : delivery.runs_batter === 4 || delivery.runs_batter === 6
+                                ? "bg-yellow-400 text-black"
+                                : "bg-white/10"
+                            }`}
+                          >
+                            {deliveryBadge(delivery)}
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <section className="mt-4">
+                    <div className="mb-2 flex items-end justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-red-400">
+                          Live Commentary
+                        </p>
+                        <h2 className="mt-1 text-xl font-black">Ball-by-Ball</h2>
+                      </div>
+                      <span className="text-[10px] font-bold text-white/30">Latest first</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {currentDeliveries.length === 0 ? (
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/40">
+                          Ball-by-ball commentary will appear here once the match starts.
+                        </div>
+                      ) : (
+                        [...currentDeliveries].reverse().map((delivery) => (
+                          <div
+                            key={delivery.id}
+                            className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 md:p-4"
+                          >
+                            <p className="text-[11px] font-bold leading-5 text-white/75 md:text-sm">
+                              {deliveryCommentary(delivery)}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </section>
+
+                  {match.status === "completed" && (
+                    <div className="mt-5 rounded-2xl border border-green-400/30 bg-green-950/30 p-5 text-center">
+                      <p className="text-xs font-black uppercase tracking-[0.25em] text-green-300">
+                        Match Completed
+                      </p>
+                      <p className="mt-2 text-xl font-black">{match.result_text}</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center text-white/50">
+                  Waiting for innings data.
                 </div>
               )}
-            </div>
+            </section>
           )}
-        </section>
-      </div>
 
-      {showScorecard && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/95 p-0 md:p-6">
-          <div className="mx-auto max-w-5xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#080808]/95 px-3 py-2.5 backdrop-blur md:rounded-2xl md:border md:p-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">
-                  VCTB 3.0
-                </p>
-                <h2 className="mt-0.5 text-lg font-black md:mt-1 md:text-2xl">
-                  Full Scorecard
-                </h2>
-              </div>
-
-              <button
-                onClick={() => setShowScorecard(false)}
-                className="rounded-xl bg-white/10 px-4 py-2 font-black"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="space-y-2.5 md:mt-4 md:space-y-6">
+          {activeTab === "scorecard" && (
+            <section className="mt-3 space-y-3">
               {innings.map((inningsRow) => {
                 const inningsDeliveries = deliveries.filter(
                   (delivery) => delivery.innings_id === inningsRow.id
                 );
-
-                const batters = getBatterStats(
-                  inningsRow,
-                  inningsDeliveries
-                );
-
-                const bowlers = getBowlerStats(
-                  inningsRow,
-                  inningsDeliveries
-                );
-
+                const batters = getBatterStats(inningsRow, inningsDeliveries);
+                const bowlers = getBowlerStats(inningsRow, inningsDeliveries);
                 const extras = inningsDeliveries.reduce(
-                  (sum, delivery) =>
-                    sum + Number(delivery.extras || 0),
+                  (sum, delivery) => sum + Number(delivery.extras || 0),
                   0
                 );
+                const yetToBat = batters.filter((row) => row.dismissal === "DNB");
 
                 return (
                   <section
                     key={inningsRow.id}
-                    className="border-y border-white/10 bg-[#080808] px-2.5 py-3 md:rounded-[24px] md:border md:p-4 sm:md:p-5"
+                    className="overflow-hidden rounded-[22px] border border-white/10 bg-[#080808]"
                   >
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-yellow-400">
-                          Innings {inningsRow.innings_number}
-                        </p>
-                        <h3 className="mt-1 text-2xl font-black">
-                          {displayTeamName(inningsRow.batting_team)}
-                        </h3>
+                    <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-gradient-to-r from-yellow-950/20 to-transparent p-3.5">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <img
+                          src={teamLogo(inningsRow.batting_team)}
+                          alt=""
+                          className="h-10 w-10 shrink-0 rounded-full object-contain"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-black uppercase tracking-wider text-yellow-400">
+                            Innings {inningsRow.innings_number}
+                          </p>
+                          <h3 className="truncate text-base font-black md:text-xl">
+                            {displayTeamName(inningsRow.batting_team)}
+                          </h3>
+                        </div>
                       </div>
-
-                      <p className="text-2xl font-black">
+                      <p className="shrink-0 text-xl font-black md:text-2xl">
                         {inningsRow.total_runs}/{inningsRow.wickets}
-                        <span className="ml-2 text-sm text-white/40">
+                        <span className="ml-1 text-xs text-white/40">
                           ({oversFromBalls(inningsRow.legal_balls)})
                         </span>
                       </p>
                     </div>
 
-                    <div className="mt-3 md:hidden">
-                      <div className="grid grid-cols-[1fr_28px_28px_28px_28px_45px] items-center border-b border-white/10 px-1 pb-2 text-[8px] font-black uppercase text-white/35">
+                    <div className="px-2.5 py-3 sm:px-4">
+                      <div className="grid grid-cols-[minmax(0,1fr)_30px_30px_30px_30px_48px] border-b border-white/10 pb-2 text-[8px] font-black uppercase text-white/35 sm:grid-cols-[minmax(0,1fr)_42px_42px_42px_42px_62px] sm:text-[10px]">
                         <span>Batter</span><span className="text-right">R</span><span className="text-right">B</span><span className="text-right">4s</span><span className="text-right">6s</span><span className="text-right">SR</span>
                       </div>
+
                       <div className="divide-y divide-white/5">
-                        {batters.map((row) => (
-                          <div key={row.player.player_id} className="grid grid-cols-[1fr_28px_28px_28px_28px_45px] items-start px-1 py-2">
-                            <div className="min-w-0 pr-1"><p className="truncate text-[10px] font-black leading-tight text-white">{playerLabel(row.player)}</p><p className="mt-0.5 truncate text-[8px] leading-tight text-white/40">{row.dismissal}</p></div>
-                            <span className="text-right text-[10px] font-black">{row.runs}</span><span className="text-right text-[10px]">{row.balls}</span><span className="text-right text-[10px]">{row.fours}</span><span className="text-right text-[10px]">{row.sixes}</span><span className="text-right text-[10px]">{row.balls ? ((row.runs / row.balls) * 100).toFixed(1) : "0.0"}</span>
+                        {batters.filter((row) => row.dismissal !== "DNB").map((row) => (
+                          <div
+                            key={row.player.player_id}
+                            className="grid grid-cols-[minmax(0,1fr)_30px_30px_30px_30px_48px] items-start py-2.5 sm:grid-cols-[minmax(0,1fr)_42px_42px_42px_42px_62px]"
+                          >
+                            <div className="min-w-0 pr-2">
+                              <p className="text-[10px] font-black leading-tight sm:text-sm">
+                                {scorecardPlayerLabel(row.player)}
+                              </p>
+                              <p className="mt-1 text-[8px] leading-tight text-white/40 sm:text-[10px]">
+                                {row.dismissal}
+                              </p>
+                            </div>
+                            <span className="text-right text-[10px] font-black sm:text-sm">{row.runs}</span>
+                            <span className="text-right text-[10px] sm:text-sm">{row.balls}</span>
+                            <span className="text-right text-[10px] sm:text-sm">{row.fours}</span>
+                            <span className="text-right text-[10px] sm:text-sm">{row.sixes}</span>
+                            <span className="text-right text-[10px] sm:text-sm">
+                              {row.balls ? ((row.runs / row.balls) * 100).toFixed(1) : "0.0"}
+                            </span>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-2 flex items-center justify-between border-t border-white/10 pt-2 text-[10px]"><span className="font-bold text-white/45">Extras</span><span className="font-black">{extras}</span></div>
-                    </div>
 
-                    <div className="mt-5 hidden overflow-x-auto md:block">
-                      <table className="w-full min-w-[680px] text-sm">
-                        <thead className="text-left text-xs uppercase text-white/35">
-                          <tr>
-                            <th className="pb-3">Batter</th>
-                            <th className="pb-3">Dismissal</th>
-                            <th className="pb-3 text-right">R</th>
-                            <th className="pb-3 text-right">B</th>
-                            <th className="pb-3 text-right">4s</th>
-                            <th className="pb-3 text-right">6s</th>
-                            <th className="pb-3 text-right">SR</th>
-                          </tr>
-                        </thead>
+                      <div className="mt-2 grid grid-cols-[1fr_auto] border-t border-white/10 py-2.5 text-xs">
+                        <span className="font-black text-white/45">Extras</span>
+                        <span className="font-black">{extras}</span>
+                      </div>
+                      <div className="grid grid-cols-[1fr_auto] border-t border-white/10 py-2.5">
+                        <span className="font-black">Total</span>
+                        <span className="font-black">
+                          {inningsRow.total_runs}-{inningsRow.wickets} ({oversFromBalls(inningsRow.legal_balls)} Ov)
+                        </span>
+                      </div>
 
-                        <tbody>
-                          {batters.map((row) => (
-                            <tr
-                              key={row.player.player_id}
-                              className="border-t border-white/5"
-                            >
-                              <td className="py-3 font-black">
-                                {playerLabel(row.player)}
-                              </td>
+                      {yetToBat.length > 0 && (
+                        <div className="border-t border-white/10 py-3">
+                          <p className="text-[9px] font-black uppercase tracking-wider text-white/35">
+                            Yet to bat
+                          </p>
+                          <p className="mt-2 text-xs font-bold leading-5 text-white/70 sm:text-sm">
+                            {yetToBat.map((row) => scorecardPlayerLabel(row.player)).join(", ")}
+                          </p>
+                        </div>
+                      )}
 
-                              <td className="py-3 text-white/45">
-                                {row.dismissal}
-                              </td>
-
-                              <td className="py-3 text-right font-black">
-                                {row.runs}
-                              </td>
-
-                              <td className="py-3 text-right">
-                                {row.balls}
-                              </td>
-
-                              <td className="py-3 text-right">
-                                {row.fours}
-                              </td>
-
-                              <td className="py-3 text-right">
-                                {row.sixes}
-                              </td>
-
-                              <td className="py-3 text-right">
-                                {row.balls
-                                  ? (
-                                      (row.runs / row.balls) *
-                                      100
-                                    ).toFixed(1)
-                                  : "0.0"}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <p className="mt-3 hidden text-sm font-bold text-white/45 md:block">
-                      Extras: {extras}
-                    </p>
-
-                    <div className="mt-4 md:hidden">
-                      <div className="grid grid-cols-[1fr_35px_35px_35px_50px] items-center border-b border-white/10 px-1 pb-2 text-[8px] font-black uppercase text-white/35">
+                      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_38px_38px_38px_52px] border-b border-white/10 pb-2 text-[8px] font-black uppercase text-white/35 sm:grid-cols-[minmax(0,1fr)_48px_48px_48px_65px] sm:text-[10px]">
                         <span>Bowler</span><span className="text-right">O</span><span className="text-right">R</span><span className="text-right">W</span><span className="text-right">Econ</span>
                       </div>
+
                       <div className="divide-y divide-white/5">
                         {bowlers.map((row) => (
-                          <div key={row.player.player_id} className="grid grid-cols-[1fr_35px_35px_35px_50px] items-center px-1 py-2">
-                            <span className="truncate pr-1 text-[10px] font-black">{playerLabel(row.player)}</span><span className="text-right text-[10px]">{oversFromBalls(row.legalBalls)}</span><span className="text-right text-[10px]">{row.runs}</span><span className="text-right text-[10px] font-black">{row.wickets}</span><span className="text-right text-[10px]">{row.legalBalls ? ((row.runs / row.legalBalls) * BALLS_PER_OVER).toFixed(2) : "0.00"}</span>
+                          <div
+                            key={row.player.player_id}
+                            className="grid grid-cols-[minmax(0,1fr)_38px_38px_38px_52px] items-center py-2.5 sm:grid-cols-[minmax(0,1fr)_48px_48px_48px_65px]"
+                          >
+                            <span className="pr-2 text-[10px] font-black sm:text-sm">
+                              {scorecardPlayerLabel(row.player)}
+                            </span>
+                            <span className="text-right text-[10px] sm:text-sm">{oversFromBalls(row.legalBalls)}</span>
+                            <span className="text-right text-[10px] sm:text-sm">{row.runs}</span>
+                            <span className="text-right text-[10px] font-black sm:text-sm">{row.wickets}</span>
+                            <span className="text-right text-[10px] sm:text-sm">
+                              {row.legalBalls ? ((row.runs / row.legalBalls) * BALLS_PER_OVER).toFixed(2) : "0.00"}
+                            </span>
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    <div className="mt-6 hidden overflow-x-auto md:block">
-                      <table className="w-full min-w-[560px] text-sm">
-                        <thead className="text-left text-xs uppercase text-white/35">
-                          <tr>
-                            <th className="pb-3">Bowler</th>
-                            <th className="pb-3 text-right">O</th>
-                            <th className="pb-3 text-right">R</th>
-                            <th className="pb-3 text-right">W</th>
-                            <th className="pb-3 text-right">Econ</th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {bowlers.map((row) => (
-                            <tr
-                              key={row.player.player_id}
-                              className="border-t border-white/5"
-                            >
-                              <td className="py-3 font-black">
-                                {playerLabel(row.player)}
-                              </td>
-
-                              <td className="py-3 text-right">
-                                {oversFromBalls(row.legalBalls)}
-                              </td>
-
-                              <td className="py-3 text-right">
-                                {row.runs}
-                              </td>
-
-                              <td className="py-3 text-right font-black">
-                                {row.wickets}
-                              </td>
-
-                              <td className="py-3 text-right">
-                                {row.legalBalls
-                                  ? (
-                                      (row.runs / row.legalBalls) *
-                                      BALLS_PER_OVER
-                                    ).toFixed(2)
-                                  : "0.00"}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
                     </div>
                   </section>
                 );
               })}
-            </div>
-          </div>
+            </section>
+          )}
+
+          {activeTab === "squads" && (
+            <section className="mt-3">
+              <div className="rounded-[22px] border border-white/10 bg-[#080808] p-3">
+                <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-yellow-400/25">
+                  <button
+                    onClick={() => setSquadTeam("a")}
+                    className={`flex items-center justify-center gap-2 px-2 py-3 text-xs font-black ${
+                      squadTeam === "a" ? "bg-yellow-400 text-black" : "bg-black text-white/55"
+                    }`}
+                  >
+                    <img src={teamLogo(match.team_a)} alt="" className="h-7 w-7 rounded-full object-contain" />
+                    <span className="truncate">{shortTeamName(match.team_a)}</span>
+                  </button>
+                  <button
+                    onClick={() => setSquadTeam("b")}
+                    className={`flex items-center justify-center gap-2 px-2 py-3 text-xs font-black ${
+                      squadTeam === "b" ? "bg-yellow-400 text-black" : "bg-black text-white/55"
+                    }`}
+                  >
+                    <img src={teamLogo(match.team_b)} alt="" className="h-7 w-7 rounded-full object-contain" />
+                    <span className="truncate">{shortTeamName(match.team_b)}</span>
+                  </button>
+                </div>
+
+                <div className="mt-4 flex items-center gap-3 border-b border-white/10 pb-3">
+                  <img
+                    src={teamLogo(selectedSquadName || "")}
+                    alt=""
+                    className="h-12 w-12 rounded-full object-contain"
+                  />
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-400">
+                      Playing XI
+                    </p>
+                    <h2 className="mt-0.5 text-lg font-black">
+                      {displayTeamName(selectedSquadName || "")}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="divide-y divide-white/5">
+                  {selectedSquad.map((player, index) => (
+                    <div key={player.player_id} className="flex items-center gap-3 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-black text-white/40">
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-black leading-tight">{playerLabel(player)}</p>
+                        <p className="mt-1 text-xs font-bold text-white/40">
+                          {playerRoleLabel(player)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
         </div>
-      )}
+      </div>
     </main>
+  );
+}
+
+function TeamIdentity({
+  team,
+  align,
+}: {
+  team: string;
+  align: "left" | "right";
+}) {
+  return (
+    <div className={`flex min-w-0 items-center gap-2.5 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
+      <img
+        src={teamLogo(team)}
+        alt={`${displayTeamName(team)} logo`}
+        className="h-12 w-12 shrink-0 rounded-full object-contain md:h-16 md:w-16"
+      />
+      <div className="min-w-0">
+        <p className="text-[12px] font-black leading-tight md:text-lg">
+          {displayTeamName(team)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Panel({
+  eyebrow,
+  title,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-[22px] border border-white/10 bg-[#080808]">
+      <div className="border-b border-white/10 px-4 py-3">
+        <p className="text-[9px] font-black uppercase tracking-[0.22em] text-yellow-400">{eyebrow}</p>
+        <h2 className="mt-1 text-xl font-black">{title}</h2>
+      </div>
+      <div className="px-4">{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  last = false,
+}: {
+  label: string;
+  value: string;
+  last?: boolean;
+}) {
+  return (
+    <div className={`grid grid-cols-[105px_1fr] gap-4 py-3.5 ${last ? "" : "border-b border-white/5"}`}>
+      <span className="text-xs font-bold text-white/35">{label}</span>
+      <span className="text-sm font-black leading-5 text-white/90">{value}</span>
+    </div>
   );
 }
 
@@ -1073,39 +1197,10 @@ function MiniStat({
 }) {
   return (
     <div>
-      <p className="text-[10px] font-black uppercase tracking-wider text-white/35">
+      <p className="text-[9px] font-black uppercase tracking-wider text-white/35">
         {label}
       </p>
-      <p className="mt-1 font-black text-yellow-400">{value}</p>
-    </div>
-  );
-}
-
-function PublicPlayerCard({
-  title,
-  name,
-  primary,
-  secondary,
-  active = false,
-}: {
-  title: string;
-  name: string;
-  primary: string;
-  secondary: string;
-  active?: boolean;
-}) {
-  return (
-    <div
-      className={`min-w-0 rounded-xl border p-2 md:rounded-2xl md:p-4 ${
-        active
-          ? "border-yellow-400/40 bg-yellow-400/5"
-          : "border-white/10 bg-black"
-      }`}
-    >
-      <p className="text-[7px] font-black uppercase tracking-wider text-white/35 md:text-[10px]">{title}</p>
-      <p className={`mt-1 truncate text-[10px] font-black leading-tight md:mt-2 md:text-base ${active ? "text-yellow-400" : ""}`}>{name}</p>
-      <p className="mt-1 text-sm font-black md:mt-2 md:text-2xl">{primary}</p>
-      <p className="mt-0.5 truncate text-[7px] text-white/45 md:mt-1 md:text-xs">{secondary}</p>
+      <p className="mt-1 text-sm font-black text-yellow-400">{value}</p>
     </div>
   );
 }
