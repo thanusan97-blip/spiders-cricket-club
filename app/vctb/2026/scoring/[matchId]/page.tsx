@@ -999,51 +999,51 @@ export default function MatchScorerPage() {
   }
 
   return (
-    <main className="h-[100dvh] overflow-hidden bg-black text-white md:min-h-screen md:h-auto md:overflow-visible">
-      <div className="mx-auto flex h-full max-w-3xl flex-col px-2 py-1.5 sm:px-3 md:block md:h-auto md:py-5">
+    <main className="min-h-[100dvh] bg-[#030303] text-white md:min-h-screen">
+      <div className="mx-auto flex min-h-[100dvh] max-w-3xl flex-col px-3 pb-4 pt-2 sm:px-4 md:block md:min-h-0 md:py-5">
 
-        <div className="mb-1 flex shrink-0 items-center justify-between gap-1.5 md:mb-2 md:gap-2">
+        <div className="mb-2 flex shrink-0 items-center justify-between gap-2 md:mb-2">
           <Link
             href="/vctb/2026/scoring"
-            className="text-sm font-bold text-white/50 hover:text-yellow-400"
+            className="text-[13px] font-bold text-white/55 hover:text-yellow-400 md:text-sm"
           >
             ← Scoring Centre
           </Link>
 
           <div className="flex items-center gap-1 md:gap-2">
-            <button onClick={() => setShowScorecard(true)} className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[9px] font-black uppercase text-white md:px-3 md:py-1.5 md:text-[10px]">Scorecard</button>
+            <button onClick={() => setShowScorecard(true)} className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-2 text-[10px] font-black uppercase tracking-wide text-white md:px-3 md:py-1.5">Scorecard</button>
             <div className="hidden rounded-full border border-yellow-400/20 bg-yellow-400/5 px-3 py-1.5 text-[10px] font-black uppercase text-yellow-400 sm:block">
               {match.pitch} • Match {match.match_number}
             </div>
             <button
               onClick={signOutScorer}
-              className="rounded-full border border-red-400/20 bg-red-950/30 px-2 py-1 text-[9px] font-black uppercase text-red-200 md:px-3 md:py-1.5 md:text-[10px]"
+              className="rounded-full border border-red-400/25 bg-red-950/25 px-3 py-2 text-[10px] font-black uppercase tracking-wide text-red-200 md:px-3 md:py-1.5"
             >
               Sign Out
             </button>
           </div>
         </div>
 
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[16px] border border-white/10 bg-[#080808] shadow-2xl md:block md:rounded-[20px]">
-          <div className="shrink-0 border-b border-white/10 bg-gradient-to-r from-red-950/50 via-black to-yellow-950/30 px-2.5 py-1.5 md:p-3">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-400 md:text-xs md:tracking-[0.25em]">
+        <section className="flex flex-1 flex-col overflow-hidden rounded-[22px] border border-white/10 bg-[#080808] shadow-2xl md:block md:rounded-[20px]">
+          <div className="shrink-0 border-b border-white/10 bg-gradient-to-r from-red-950/45 via-[#080808] to-yellow-950/25 px-4 py-3 md:p-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-400 md:text-xs md:tracking-[0.25em]">
               {displayTeamName(currentInnings.batting_team)}
             </p>
 
-            <div className="mt-0.5 flex items-end justify-between gap-2 md:mt-2 md:flex-wrap md:gap-3">
+            <div className="mt-1.5 flex items-end justify-between gap-3 md:mt-2 md:flex-wrap">
               <div>
-                <h1 className="text-2xl font-black sm:text-3xl md:text-5xl">
+                <h1 className="text-[34px] font-black leading-none sm:text-4xl md:text-5xl">
                   {currentInnings.total_runs}/{currentInnings.wickets}
                 </h1>
 
-                <p className="text-[10px] font-bold text-white/50 md:mt-1 md:text-sm">
+                <p className="mt-1.5 text-[11px] font-bold text-white/45 md:mt-1 md:text-sm">
                   {oversFromBalls(currentInnings.legal_balls)} / {MAX_OVERS} overs
                 </p>
               </div>
 
               <div className="text-right">
-                <p className="text-[8px] font-black uppercase tracking-wider text-white/35 md:text-xs">CRR</p>
-                <p className="text-sm font-black text-yellow-400 md:text-lg">
+                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-white/35 md:text-xs">CRR</p>
+                <p className="mt-0.5 text-xl font-black text-yellow-400 md:text-lg">
                   {currentRunRate}
                 </p>
               </div>
@@ -1058,9 +1058,9 @@ export default function MatchScorerPage() {
             )}
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col p-1.5 md:block md:p-3">
+          <div className="flex flex-1 flex-col p-2.5 md:block md:p-3">
 
-            <div className="grid grid-cols-3 gap-1 md:gap-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-2">
               <CompactPlayerRow
                 title="Striker"
                 selectValue={strikerId}
@@ -1093,9 +1093,9 @@ export default function MatchScorerPage() {
               />
             </div>
 
-            <div className="mt-1 shrink-0 rounded-lg border border-white/10 bg-black px-2 py-1 md:mt-3 md:rounded-xl md:p-3">
+            <div className="mt-2 shrink-0 rounded-xl border border-white/10 bg-black/80 px-3 py-2 md:mt-3 md:p-3">
               <div className="flex items-center gap-2">
-                <p className="shrink-0 text-[8px] font-black uppercase tracking-[0.18em] text-white/35 md:text-xs md:tracking-[0.25em]">
+                <p className="shrink-0 text-[9px] font-black uppercase tracking-[0.2em] text-white/35 md:text-xs md:tracking-[0.25em]">
                   Recent
                 </p>
 
@@ -1106,7 +1106,7 @@ export default function MatchScorerPage() {
                   lastSix.map((delivery) => (
                     <span
                       key={delivery.id}
-                      className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] font-black md:h-8 md:min-w-8 md:px-2 md:text-xs ${
+                      className={`flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[11px] font-black md:h-8 md:min-w-8 md:text-xs ${
                         delivery.wicket
                           ? "bg-red-600 text-white"
                           : delivery.runs_batter === 4 || delivery.runs_batter === 6
@@ -1122,8 +1122,8 @@ export default function MatchScorerPage() {
               </div>
             </div>
 
-            <section className="mt-1 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0b] md:mt-3 md:block md:rounded-2xl">
-              <div className="grid min-h-0 flex-[6] grid-cols-3">
+            <section className="mt-2 overflow-hidden rounded-2xl border border-white/10 bg-[#0b0b0b] md:mt-3 md:block">
+              <div className="grid grid-cols-3">
                 {[0, 1, 2, 3, 4, 6].map((runs) => (
                   <button
                     key={runs}
@@ -1134,7 +1134,7 @@ export default function MatchScorerPage() {
                         strikeChangeRuns: runs,
                       })
                     }
-                    className={`min-h-0 border-b border-r border-white/10 text-lg font-black transition active:scale-95 disabled:opacity-40 md:min-h-[66px] md:text-2xl ${
+                    className={`h-[64px] border-b border-r border-white/10 text-xl font-black transition active:bg-white/10 active:scale-[0.98] disabled:opacity-40 md:min-h-[66px] md:h-auto md:text-2xl ${
                       runs === 4 || runs === 6
                         ? "text-yellow-400"
                         : "text-white"
@@ -1150,7 +1150,7 @@ export default function MatchScorerPage() {
                 ))}
               </div>
 
-              <div className="grid min-h-0 flex-[2] grid-cols-4 border-t border-white/10">
+              <div className="grid grid-cols-4 border-t border-white/10">
                 {[
                   ["WD", "wide"],
                   ["NB", "no_ball"],
@@ -1165,14 +1165,14 @@ export default function MatchScorerPage() {
                         type as "wide" | "no_ball" | "bye" | "leg_bye"
                       )
                     }
-                    className="min-h-0 border-r border-white/10 text-[11px] font-black text-blue-200 active:scale-95 disabled:opacity-40 md:min-h-[52px] md:text-sm"
+                    className="h-[52px] border-r border-white/10 text-[11px] font-black tracking-wide text-blue-200 active:bg-blue-950/30 active:scale-[0.98] disabled:opacity-40 md:min-h-[52px] md:h-auto md:text-sm"
                   >
                     {label}
                   </button>
                 ))}
               </div>
 
-              <div className="grid min-h-0 flex-[2] grid-cols-2 border-t border-white/10">
+              <div className="grid grid-cols-2 border-t border-white/10">
                 <button
                   disabled={saving}
                   onClick={() => {
@@ -1184,7 +1184,7 @@ export default function MatchScorerPage() {
                     setRunOutRunType("bat");
                     setShowWicket(true);
                   }}
-                  className="min-h-0 border-r border-white/10 bg-red-950/30 text-xs font-black uppercase text-red-300 active:scale-95 disabled:opacity-40 md:min-h-[56px] md:text-base"
+                  className="h-[58px] border-r border-white/10 bg-red-950/35 text-sm font-black uppercase tracking-wide text-red-300 active:bg-red-900/40 active:scale-[0.98] disabled:opacity-40 md:min-h-[56px] md:h-auto md:text-base"
                 >
                   Out
                 </button>
@@ -1192,7 +1192,7 @@ export default function MatchScorerPage() {
                 <button
                   disabled={saving}
                   onClick={undoLastBall}
-                  className="min-h-0 text-xs font-black uppercase text-white active:scale-95 disabled:opacity-40 md:min-h-[56px] md:text-base"
+                  className="h-[58px] text-sm font-black uppercase tracking-wide text-white active:bg-white/5 active:scale-[0.98] disabled:opacity-40 md:min-h-[56px] md:h-auto md:text-base"
                 >
                   ↶ Undo
                 </button>
@@ -1657,32 +1657,75 @@ function CompactPlayerRow({
 }) {
   return (
     <div
-      className={`min-w-0 rounded-lg border p-1.5 md:rounded-xl md:p-3 ${
+      className={`relative min-w-0 rounded-xl border px-3 py-2.5 md:rounded-xl md:p-3 ${
         active
-          ? "border-yellow-400/35 bg-yellow-400/5"
-          : "border-white/10 bg-black"
+          ? "border-yellow-400/40 bg-gradient-to-r from-yellow-400/[0.08] to-transparent"
+          : "border-white/10 bg-black/80"
       }`}
     >
-      <div className="flex items-start justify-between gap-1 md:gap-3">
-        <div className="min-w-0">
-          <p className="text-[7px] font-black uppercase tracking-wider text-white/35 md:text-[9px]">
-            {title}
-          </p>
-          <p className={`truncate text-[10px] font-black leading-tight md:mt-1 md:text-sm ${active ? "text-yellow-400" : "text-white"}`}>
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/35 md:text-[9px] md:tracking-wider">
+              {title}
+            </p>
+            {detail && (
+              <span className="hidden text-[9px] font-bold text-white/30 md:inline">
+                {detail}
+              </span>
+            )}
+          </div>
+
+          <p
+            className={`mt-1 truncate text-[14px] font-black leading-tight md:text-sm ${
+              active ? "text-yellow-400" : "text-white"
+            }`}
+          >
             {name}
           </p>
         </div>
 
-        <div className="shrink-0 text-right">
-          <p className="text-[11px] font-black md:text-lg">{score}</p>
-          <p className="hidden text-[10px] text-white/40 sm:block">{detail}</p>
+        <div className="flex shrink-0 items-center gap-2.5">
+          <div className="text-right">
+            <p className="text-[15px] font-black leading-none md:text-lg">{score}</p>
+            <p className="mt-1 text-[9px] font-bold text-white/35 md:hidden">{detail}</p>
+          </div>
+
+          {/* Mobile: clean three-dot player changer */}
+          <details className="group relative md:hidden">
+            <summary
+              aria-label={`Change ${title}`}
+              className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-xl font-black leading-none text-white/70 transition active:scale-95 [&::-webkit-details-marker]:hidden"
+            >
+              ⋯
+            </summary>
+
+            <div className="absolute right-0 top-11 z-40 w-[min(78vw,310px)] rounded-2xl border border-white/15 bg-[#111111] p-3 shadow-2xl">
+              <p className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
+                Change {title}
+              </p>
+              <select
+                value={selectValue}
+                onChange={(event) => onSelect(event.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-black px-3 py-3 text-sm font-bold text-white outline-none focus:border-yellow-400/50"
+              >
+                <option value="">Select player</option>
+                {players.map((player) => (
+                  <option key={player.player_id} value={player.player_id}>
+                    {playerLabel(player)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </details>
         </div>
       </div>
 
+      {/* Desktop keeps the familiar selector. Mobile hides it behind ⋯ */}
       <select
         value={selectValue}
         onChange={(event) => onSelect(event.target.value)}
-        className="mt-1 w-full min-w-0 rounded-md border border-white/10 bg-[#0a0a0a] px-1 py-1 text-[9px] font-bold text-white md:mt-2 md:rounded-lg md:px-2 md:py-1.5 md:text-[11px]"
+        className="mt-2 hidden w-full min-w-0 rounded-lg border border-white/10 bg-[#0a0a0a] px-2 py-1.5 text-[11px] font-bold text-white md:block"
       >
         <option value="">Select player</option>
         {players.map((player) => (
