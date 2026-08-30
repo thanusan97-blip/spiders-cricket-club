@@ -999,33 +999,39 @@ export default function MatchScorerPage() {
   }
 
   return (
-    <main className="min-h-[100dvh] bg-[#030303] text-white md:min-h-screen">
-      <div className="mx-auto flex min-h-[100dvh] max-w-3xl flex-col px-3 pb-4 pt-2 sm:px-4 md:block md:min-h-0 md:py-5">
+    <main className="h-[100dvh] overflow-hidden bg-[#030303] text-white md:min-h-screen md:h-auto md:overflow-visible">
+      <div
+        className="mx-auto flex h-full max-w-3xl flex-col px-3 sm:px-4 md:block md:h-auto md:py-5"
+        style={{
+          paddingTop: "max(12px, calc(env(safe-area-inset-top) + 8px))",
+          paddingBottom: "max(10px, calc(env(safe-area-inset-bottom) + 6px))",
+        }}
+      >
 
-        <div className="mb-2 flex shrink-0 items-center justify-between gap-2 md:mb-2">
+        <div className="mb-2.5 flex shrink-0 items-center justify-between gap-2 px-0.5 md:mb-2">
           <Link
             href="/vctb/2026/scoring"
-            className="text-[13px] font-bold text-white/55 hover:text-yellow-400 md:text-sm"
+            className="whitespace-nowrap text-[12px] font-black text-white/75 hover:text-yellow-400 md:text-sm"
           >
             ← Scoring Centre
           </Link>
 
           <div className="flex items-center gap-1 md:gap-2">
-            <button onClick={() => setShowScorecard(true)} className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-2 text-[10px] font-black uppercase tracking-wide text-white md:px-3 md:py-1.5">Scorecard</button>
+            <button onClick={() => setShowScorecard(true)} className="rounded-full border border-white/20 bg-white/[0.08] px-3 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-sm md:px-3 md:py-1.5">Scorecard</button>
             <div className="hidden rounded-full border border-yellow-400/20 bg-yellow-400/5 px-3 py-1.5 text-[10px] font-black uppercase text-yellow-400 sm:block">
               {match.pitch} • Match {match.match_number}
             </div>
             <button
               onClick={signOutScorer}
-              className="rounded-full border border-red-400/25 bg-red-950/25 px-3 py-2 text-[10px] font-black uppercase tracking-wide text-red-200 md:px-3 md:py-1.5"
+              className="rounded-full border border-red-400/30 bg-red-950/35 px-3 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-red-100 shadow-sm md:px-3 md:py-1.5"
             >
               Sign Out
             </button>
           </div>
         </div>
 
-        <section className="flex flex-1 flex-col overflow-hidden rounded-[22px] border border-white/10 bg-[#080808] shadow-2xl md:block md:rounded-[20px]">
-          <div className="shrink-0 border-b border-white/10 bg-gradient-to-r from-red-950/45 via-[#080808] to-yellow-950/25 px-4 py-3 md:p-3">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-white/10 bg-[#080808] shadow-2xl md:block md:rounded-[20px]">
+          <div className="shrink-0 border-b border-white/10 bg-gradient-to-r from-red-950/45 via-[#080808] to-yellow-950/25 px-4 py-2.5 md:p-3">
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-400 md:text-xs md:tracking-[0.25em]">
               {displayTeamName(currentInnings.batting_team)}
             </p>
@@ -1058,9 +1064,9 @@ export default function MatchScorerPage() {
             )}
           </div>
 
-          <div className="flex flex-1 flex-col p-2.5 md:block md:p-3">
+          <div className="flex min-h-0 flex-1 flex-col p-2.5 md:block md:p-3">
 
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-2">
+            <div className="grid shrink-0 grid-cols-1 gap-1.5 md:grid-cols-3 md:gap-2">
               <CompactPlayerRow
                 title="Striker"
                 selectValue={strikerId}
@@ -1093,7 +1099,7 @@ export default function MatchScorerPage() {
               />
             </div>
 
-            <div className="mt-2 shrink-0 rounded-xl border border-white/10 bg-black/80 px-3 py-2 md:mt-3 md:p-3">
+            <div className="mt-1.5 shrink-0 rounded-xl border border-white/10 bg-black/80 px-3 py-1.5 md:mt-3 md:p-3">
               <div className="flex items-center gap-2">
                 <p className="shrink-0 text-[9px] font-black uppercase tracking-[0.2em] text-white/35 md:text-xs md:tracking-[0.25em]">
                   Recent
@@ -1122,8 +1128,8 @@ export default function MatchScorerPage() {
               </div>
             </div>
 
-            <section className="mt-2 overflow-hidden rounded-2xl border border-white/10 bg-[#0b0b0b] md:mt-3 md:block">
-              <div className="grid grid-cols-3">
+            <section className="mt-1.5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0b0b0b] md:mt-3 md:block">
+              <div className="grid min-h-0 flex-[6] grid-cols-3">
                 {[0, 1, 2, 3, 4, 6].map((runs) => (
                   <button
                     key={runs}
@@ -1134,7 +1140,7 @@ export default function MatchScorerPage() {
                         strikeChangeRuns: runs,
                       })
                     }
-                    className={`h-[64px] border-b border-r border-white/10 text-xl font-black transition active:bg-white/10 active:scale-[0.98] disabled:opacity-40 md:min-h-[66px] md:h-auto md:text-2xl ${
+                    className={`min-h-0 border-b border-r border-white/10 text-xl font-black transition active:bg-white/10 active:scale-[0.98] disabled:opacity-40 md:min-h-[66px] md:text-2xl ${
                       runs === 4 || runs === 6
                         ? "text-yellow-400"
                         : "text-white"
@@ -1150,7 +1156,7 @@ export default function MatchScorerPage() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-4 border-t border-white/10">
+              <div className="grid min-h-0 flex-[2] grid-cols-4 border-t border-white/10">
                 {[
                   ["WD", "wide"],
                   ["NB", "no_ball"],
@@ -1165,14 +1171,14 @@ export default function MatchScorerPage() {
                         type as "wide" | "no_ball" | "bye" | "leg_bye"
                       )
                     }
-                    className="h-[52px] border-r border-white/10 text-[11px] font-black tracking-wide text-blue-200 active:bg-blue-950/30 active:scale-[0.98] disabled:opacity-40 md:min-h-[52px] md:h-auto md:text-sm"
+                    className="min-h-0 border-r border-white/10 text-[11px] font-black tracking-wide text-blue-200 active:bg-blue-950/30 active:scale-[0.98] disabled:opacity-40 md:min-h-[52px] md:text-sm"
                   >
                     {label}
                   </button>
                 ))}
               </div>
 
-              <div className="grid grid-cols-2 border-t border-white/10">
+              <div className="grid min-h-0 flex-[2] grid-cols-2 border-t border-white/10">
                 <button
                   disabled={saving}
                   onClick={() => {
@@ -1184,7 +1190,7 @@ export default function MatchScorerPage() {
                     setRunOutRunType("bat");
                     setShowWicket(true);
                   }}
-                  className="h-[58px] border-r border-white/10 bg-red-950/35 text-sm font-black uppercase tracking-wide text-red-300 active:bg-red-900/40 active:scale-[0.98] disabled:opacity-40 md:min-h-[56px] md:h-auto md:text-base"
+                  className="min-h-0 border-r border-white/10 bg-red-950/35 text-sm font-black uppercase tracking-wide text-red-300 active:bg-red-900/40 active:scale-[0.98] disabled:opacity-40 md:min-h-[56px] md:text-base"
                 >
                   Out
                 </button>
@@ -1192,7 +1198,7 @@ export default function MatchScorerPage() {
                 <button
                   disabled={saving}
                   onClick={undoLastBall}
-                  className="h-[58px] text-sm font-black uppercase tracking-wide text-white active:bg-white/5 active:scale-[0.98] disabled:opacity-40 md:min-h-[56px] md:h-auto md:text-base"
+                  className="min-h-0 text-sm font-black uppercase tracking-wide text-white active:bg-white/5 active:scale-[0.98] disabled:opacity-40 md:min-h-[56px] md:text-base"
                 >
                   ↶ Undo
                 </button>
@@ -1657,7 +1663,7 @@ function CompactPlayerRow({
 }) {
   return (
     <div
-      className={`relative min-w-0 rounded-xl border px-3 py-2.5 md:rounded-xl md:p-3 ${
+      className={`relative min-w-0 rounded-xl border px-3 py-2 md:rounded-xl md:p-3 ${
         active
           ? "border-yellow-400/40 bg-gradient-to-r from-yellow-400/[0.08] to-transparent"
           : "border-white/10 bg-black/80"
@@ -1695,7 +1701,7 @@ function CompactPlayerRow({
           <details className="group relative md:hidden">
             <summary
               aria-label={`Change ${title}`}
-              className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-xl font-black leading-none text-white/70 transition active:scale-95 [&::-webkit-details-marker]:hidden"
+              className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-lg font-black leading-none text-white/75 transition active:scale-95 [&::-webkit-details-marker]:hidden"
             >
               ⋯
             </summary>
