@@ -446,7 +446,7 @@ export default function VCTBOverlayPage() {
           bowlerId: latest.bowler_id,
         });
         animationTimer.current = null;
-      }, 2600);
+      }, 6000);
 
       return;
     }
@@ -454,7 +454,7 @@ export default function VCTBOverlayPage() {
     animationTimer.current = window.setTimeout(() => {
       setEventAnimation(null);
       animationTimer.current = null;
-    }, 2200);
+    }, 6000);
   }, [
     match?.id,
     match?.status,
@@ -505,7 +505,7 @@ export default function VCTBOverlayPage() {
     };
 
     if (eventAnimation === "WICKET") {
-      window.setTimeout(showNext, 2700);
+      window.setTimeout(showNext, 6100);
     } else {
       showNext();
     }
