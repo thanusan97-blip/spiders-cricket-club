@@ -1048,7 +1048,46 @@ export default function VCTBOverlayPage() {
           0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,.38), 0 0 0 rgba(231,180,58,0); }
           50% { box-shadow: 0 8px 28px rgba(0,0,0,.45), 0 0 22px rgba(231,180,58,.28); }
         }
+        @keyframes spidersLogoRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
       `}</style>
+
+      {match?.status === "live" && (
+        <div
+          style={{
+            position: "absolute",
+            right: 24,
+            top: 24,
+            zIndex: 445,
+            width: 108,
+            height: 108,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            borderRadius: "50%",
+            border: `2px solid ${gold}`,
+            background: "rgba(6,22,47,.92)",
+            boxShadow: "0 10px 30px rgba(0,0,0,.48), 0 0 20px rgba(231,180,58,.18)",
+          }}
+        >
+          <img
+            src="/logo.png"
+            alt="Spiders Sports Club UK"
+            style={{
+              width: 94,
+              height: 94,
+              objectFit: "contain",
+              borderRadius: "50%",
+              animation: "spidersLogoRotate 14s linear infinite",
+              transformOrigin: "50% 50%",
+              willChange: "transform",
+            }}
+          />
+        </div>
+      )}
 
       {match?.status === "live" && (
         <div
