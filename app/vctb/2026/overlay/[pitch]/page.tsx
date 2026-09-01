@@ -1048,9 +1048,38 @@ export default function VCTBOverlayPage() {
           0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,.38), 0 0 0 rgba(231,180,58,0); }
           50% { box-shadow: 0 8px 28px rgba(0,0,0,.45), 0 0 22px rgba(231,180,58,.28); }
         }
-        @keyframes spidersLogoRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        /* Spiders logo stays upright. Only the surrounding rings move in/out. */
+        @keyframes spidersOuterPulse {
+          0%,100% {
+            transform: scale(1);
+            opacity: .72;
+            box-shadow: 0 0 8px rgba(231,180,58,.28);
+          }
+          50% {
+            transform: scale(1.16);
+            opacity: 1;
+            box-shadow: 0 0 24px rgba(231,180,58,.65);
+          }
+        }
+
+        @keyframes spidersInnerPulse {
+          0%,100% {
+            transform: scale(1.08);
+            opacity: .95;
+          }
+          50% {
+            transform: scale(.92);
+            opacity: .58;
+          }
+        }
+
+        @keyframes spidersLogoGlow {
+          0%,100% {
+            filter: drop-shadow(0 0 3px rgba(255,255,255,.15));
+          }
+          50% {
+            filter: drop-shadow(0 0 10px rgba(231,180,58,.42));
+          }
         }
       `}</style>
 
@@ -1061,31 +1090,72 @@ export default function VCTBOverlayPage() {
             right: 24,
             top: 24,
             zIndex: 445,
-            width: 108,
-            height: 108,
+            width: 116,
+            height: 116,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             pointerEvents: "none",
-            borderRadius: "50%",
-            border: `2px solid ${gold}`,
-            background: "rgba(6,22,47,.92)",
-            boxShadow: "0 10px 30px rgba(0,0,0,.48), 0 0 20px rgba(231,180,58,.18)",
           }}
         >
-          <img
-            src="/logo.png"
-            alt="Spiders Sports Club UK"
+          {/* OUTER RING: expands outward and comes back in. No clockwise spin. */}
+          <div
             style={{
-              width: 94,
-              height: 94,
-              objectFit: "contain",
+              position: "absolute",
+              inset: 0,
               borderRadius: "50%",
-              animation: "spidersLogoRotate 14s linear infinite",
+              border: `2px solid ${gold}`,
+              background: "transparent",
+              animation: "spidersOuterPulse 3.8s ease-in-out infinite",
               transformOrigin: "50% 50%",
-              willChange: "transform",
+              willChange: "transform, opacity",
             }}
           />
+
+          {/* INNER RING: moves in the opposite in/out rhythm. */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 8,
+              borderRadius: "50%",
+              border: "2px solid rgba(44,132,255,.75)",
+              background: "rgba(6,22,47,.20)",
+              animation: "spidersInnerPulse 3.8s ease-in-out infinite",
+              transformOrigin: "50% 50%",
+              willChange: "transform, opacity",
+            }}
+          />
+
+          {/* LOGO: always stays vertically upright and steady. */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 2,
+              width: 96,
+              height: 96,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              borderRadius: "50%",
+              border: "2px solid rgba(255,255,255,.72)",
+              background: "rgba(6,22,47,.96)",
+              boxShadow:
+                "0 10px 30px rgba(0,0,0,.48), inset 0 0 16px rgba(255,255,255,.06)",
+            }}
+          >
+            <img
+              src="/logo.png"
+              alt="Spiders Sports Club UK"
+              style={{
+                width: 90,
+                height: 90,
+                objectFit: "contain",
+                borderRadius: "50%",
+                animation: "spidersLogoGlow 3.8s ease-in-out infinite",
+              }}
+            />
+          </div>
         </div>
       )}
 
