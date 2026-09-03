@@ -170,51 +170,132 @@ export default function PublicMatchPage() {
     if (!matchId || Number.isNaN(matchId)) return;
 
     try {
-      const [
-        { data: matchData, error: matchError },
-        { data: playerData, error: playerError },
-        { data: inningsData, error: inningsError },
-        { data: deliveryData, error: deliveryError },
-      ] = await Promise.all([
-        supabase.from("matches").select("*").eq("id", matchId).single(),
-        supabase
-          .from("match_players")
-          .select("*")
-          .eq("match_id", matchId)
-          .order("team")
-          .order("player_name"),
-        supabase
-          .from("innings")
-          .select("*")
-          .eq("match_id", matchId)
-          .order("innings_number"),
-        supabase
-          .from("deliveries")
-          .select("*")
-          .eq("match_id", matchId)
-          .order("id"),
-      ]);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      if (matchError) throw matchError;
-      if (playerError) throw playerError;
-      if (inningsError) throw inningsError;
-      if (deliveryError) throw deliveryError;
+      // IMPORTANT:
+      // Mobile browsers can sometimes reuse/carry a stale GET response.
+      // This helper forces every live-score request to be a brand-new network request.
+      const restGet = async (table: string, query: string) => {
+        if (!supabaseUrl || !supabaseAnonKey) {
+          throw new Error("Supabase public environment variables are missing.");
+        }
 
-      const { data: awardData } = await supabase
-        .from("match_awards")
-        .select("player_of_match_id")
-        .eq("match_id", matchId)
-        .maybeSingle();
+        const separator = query ? "&" : "";
+        const url = `${supabaseUrl}/rest/v1/${table}?${query}${separator}_live=${Date.now()}`;
 
-      setPlayerOfMatchId(awardData?.player_of_match_id || "");
+        const response = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
+        });
+
+        if (!response.ok) {
+          const message = await response.text();
+          throw new Error(`${table}: ${response.status} ${message}`);
+        }
+
+        return response.json();
+      };
+
+      const cacheBust = Date.now();
+
+      const [matchRows, playerRows, inningsRows, deliveryRows, awardRows] =
+        await Promise.all([
+          restGet(
+            "matches",
+            `select=*&id=eq.${matchId}&limit=1&cb=${cacheBust}`
+          ),
+          restGet(
+            "match_players",
+            `select=*&match_id=eq.${matchId}&order=team.asc,player_name.asc&cb=${cacheBust}`
+          ),
+          restGet(
+            "innings",
+            `select=*&match_id=eq.${matchId}&order=innings_number.asc&cb=${cacheBust}`
+          ),
+          restGet(
+            "deliveries",
+            `select=*&match_id=eq.${matchId}&order=id.asc&cb=${cacheBust}`
+          ),
+          restGet(
+            "match_awards",
+            `select=player_of_match_id&match_id=eq.${matchId}&limit=1&cb=${cacheBust}`
+          ),
+        ]);
+
+      const matchData = Array.isArray(matchRows) ? matchRows[0] : null;
+
+      if (!matchData) {
+        throw new Error("Match not found.");
+      }
+
+      setPlayerOfMatchId(
+        Array.isArray(awardRows) && awardRows[0]?.player_of_match_id
+          ? awardRows[0].player_of_match_id
+          : ""
+      );
       setMatch(matchData as MatchRow);
-      setPlayers((playerData || []) as MatchPlayer[]);
-      setInnings((inningsData || []) as InningsRow[]);
-      setDeliveries((deliveryData || []) as DeliveryRow[]);
+      setPlayers((playerRows || []) as MatchPlayer[]);
+      setInnings((inningsRows || []) as InningsRow[]);
+      setDeliveries((deliveryRows || []) as DeliveryRow[]);
       setErrorMessage("");
     } catch (error) {
-      console.error(error);
-      setErrorMessage("Could not load this match.");
+      console.error("Live match refresh failed:", error);
+
+      // Fallback to the existing Supabase client if direct REST ever fails.
+      try {
+        const [
+          { data: matchData, error: matchError },
+          { data: playerData, error: playerError },
+          { data: inningsData, error: inningsError },
+          { data: deliveryData, error: deliveryError },
+        ] = await Promise.all([
+          supabase.from("matches").select("*").eq("id", matchId).single(),
+          supabase
+            .from("match_players")
+            .select("*")
+            .eq("match_id", matchId)
+            .order("team")
+            .order("player_name"),
+          supabase
+            .from("innings")
+            .select("*")
+            .eq("match_id", matchId)
+            .order("innings_number"),
+          supabase
+            .from("deliveries")
+            .select("*")
+            .eq("match_id", matchId)
+            .order("id"),
+        ]);
+
+        if (matchError) throw matchError;
+        if (playerError) throw playerError;
+        if (inningsError) throw inningsError;
+        if (deliveryError) throw deliveryError;
+
+        const { data: awardData } = await supabase
+          .from("match_awards")
+          .select("player_of_match_id")
+          .eq("match_id", matchId)
+          .maybeSingle();
+
+        setPlayerOfMatchId(awardData?.player_of_match_id || "");
+        setMatch(matchData as MatchRow);
+        setPlayers((playerData || []) as MatchPlayer[]);
+        setInnings((inningsData || []) as InningsRow[]);
+        setDeliveries((deliveryData || []) as DeliveryRow[]);
+        setErrorMessage("");
+      } catch (fallbackError) {
+        console.error(fallbackError);
+        setErrorMessage("Could not load this match.");
+      }
     } finally {
       setLoading(false);
     }
@@ -275,31 +356,25 @@ export default function PublicMatchPage() {
       )
       .subscribe();
 
-    // Reliable fallback for mobile browsers:
-    // pull fresh score data every second while this page is open.
+    // Hard live-score fallback.
+    // Each call now uses a cache-busted, cache:"no-store" REST request.
     const liveRefreshTimer = window.setInterval(() => {
       loadMatch();
     }, 1000);
 
-    // Force an immediate catch-up whenever Safari/Chrome returns to this page.
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        loadMatch();
-      }
-    };
+    const refreshNow = () => loadMatch();
 
-    const handleFocus = () => loadMatch();
-    const handlePageShow = () => loadMatch();
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", refreshNow);
+    window.addEventListener("focus", refreshNow);
+    window.addEventListener("pageshow", refreshNow);
+    window.addEventListener("online", refreshNow);
 
     return () => {
       window.clearInterval(liveRefreshTimer);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", refreshNow);
+      window.removeEventListener("focus", refreshNow);
+      window.removeEventListener("pageshow", refreshNow);
+      window.removeEventListener("online", refreshNow);
       supabase.removeChannel(channel);
       supabase.removeChannel(awardsChannel);
     };
