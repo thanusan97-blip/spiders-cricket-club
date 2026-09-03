@@ -80,7 +80,6 @@ type BowlerStat = {
   legalBalls: number;
   runs: number;
   wickets: number;
-  maidens: number;
 };
 
 const BALLS_PER_OVER = 5;
@@ -223,6 +222,7 @@ export default function PublicMatchPage() {
   useEffect(() => {
     loadMatch();
 
+    // Primary live updates: Supabase Realtime.
     const channel = supabase
       .channel(`public-vctb-match-${matchId}`)
       .on(
@@ -271,7 +271,33 @@ export default function PublicMatchPage() {
       )
       .subscribe();
 
+    // Mobile-safe fallback:
+    // Some phone browsers can temporarily pause/drop the realtime websocket.
+    // While this page is visible, quietly re-sync every 2 seconds.
+    const liveSyncTimer = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadMatch();
+      }
+    }, 2000);
+
+    // Immediately catch up when the user returns to this browser tab/app.
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadMatch();
+      }
+    };
+
+    const handleWindowFocus = () => {
+      loadMatch();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleWindowFocus);
+
     return () => {
+      window.clearInterval(liveSyncTimer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleWindowFocus);
       supabase.removeChannel(channel);
       supabase.removeChannel(awardsChannel);
     };
@@ -481,50 +507,11 @@ export default function PublicMatchPage() {
             )
         ).length;
 
-        const overNumbers = Array.from(
-          new Set(bowled.map((delivery) => delivery.over_number))
-        );
-
-        const maidens = overNumbers.filter((overNumber) => {
-          const overDeliveries = inningsDeliveries.filter(
-            (delivery) =>
-              delivery.over_number === overNumber &&
-              delivery.bowler_id === player.player_id
-          );
-
-          const legalCount = overDeliveries.filter(
-            (delivery) => delivery.is_legal_ball
-          ).length;
-
-          if (legalCount !== BALLS_PER_OVER) return false;
-
-          const runsConceded = overDeliveries.reduce((sum, delivery) => {
-            const kind = delivery.extra_type || "";
-
-            if (kind === "bye" || kind === "leg_bye") {
-              return sum;
-            }
-
-            if (kind === "no_ball_bye" || kind === "no_ball_leg_bye") {
-              return sum + 1;
-            }
-
-            return (
-              sum +
-              Number(delivery.runs_batter || 0) +
-              Number(delivery.extras || 0)
-            );
-          }, 0);
-
-          return runsConceded === 0;
-        }).length;
-
         return {
           player,
           legalBalls,
           runs,
           wickets,
-          maidens,
         };
       })
       .filter((row): row is BowlerStat => Boolean(row));
@@ -549,38 +536,6 @@ export default function PublicMatchPage() {
   const activeBowlerStat = currentBowlers.find(
     (row) => row.player.player_id === bowlerId
   );
-
-  function getFallOfWickets(
-    inningsRow: InningsRow,
-    inningsDeliveries: DeliveryRow[]
-  ) {
-    let runningScore = 0;
-    let wicketNumber = 0;
-
-    return inningsDeliveries
-      .map((delivery) => {
-        runningScore +=
-          Number(delivery.runs_batter || 0) + Number(delivery.extras || 0);
-
-        if (!delivery.wicket) return null;
-
-        wicketNumber += 1;
-        const dismissed = getPlayer(delivery.dismissed_player_id);
-
-        return {
-          wicketNumber,
-          score: runningScore,
-          over: `${delivery.over_number}.${delivery.ball_in_over}`,
-          playerName: dismissed?.player_name || "Unknown",
-        };
-      })
-      .filter(Boolean) as {
-        wicketNumber: number;
-        score: number;
-        over: string;
-        playerName: string;
-      }[];
-  }
 
   function deliveryBadge(delivery: DeliveryRow) {
     if (delivery.wicket) return "W";
@@ -1013,17 +968,16 @@ export default function PublicMatchPage() {
                     ))}
 
                     <div className="border-t border-white/10 bg-black/30">
-                      <div className="grid grid-cols-[1fr_38px_34px_38px_38px_54px] px-3 py-2 text-[8px] font-black uppercase text-white/35 md:text-[10px]">
-                        <span>Bowler</span><span className="text-right">O</span><span className="text-right">M</span><span className="text-right">R</span><span className="text-right">W</span><span className="text-right">Econ</span>
+                      <div className="grid grid-cols-[1fr_48px_48px_48px_60px] px-3 py-2 text-[8px] font-black uppercase text-white/35 md:text-[10px]">
+                        <span>Bowler</span><span className="text-right">O</span><span className="text-right">R</span><span className="text-right">W</span><span className="text-right">Econ</span>
                       </div>
-                      <div className="grid grid-cols-[1fr_38px_34px_38px_38px_54px] items-center px-3 pb-3">
+                      <div className="grid grid-cols-[1fr_48px_48px_48px_60px] items-center px-3 pb-3">
                         <span className="pr-2 text-[12px] font-black md:text-sm">
                           {activeBowlerStat ? playerLabel(activeBowlerStat.player) : "Waiting for bowler"}
                         </span>
                         <span className="text-right text-[11px]">
                           {activeBowlerStat ? oversFromBalls(activeBowlerStat.legalBalls) : "-"}
                         </span>
-                        <span className="text-right text-[11px]">{activeBowlerStat?.maidens ?? "-"}</span>
                         <span className="text-right text-[11px]">{activeBowlerStat?.runs ?? "-"}</span>
                         <span className="text-right text-[11px] font-black">{activeBowlerStat?.wickets ?? "-"}</span>
                         <span className="text-right text-[11px]">
@@ -1117,7 +1071,9 @@ export default function PublicMatchPage() {
 
           {activeTab === "scorecard" && (
             <section className="mt-3 space-y-3">
-              {innings.map((inningsRow) => {
+              {[...innings]
+                .sort((a, b) => b.innings_number - a.innings_number)
+                .map((inningsRow) => {
                 const inningsDeliveries = deliveries.filter(
                   (delivery) => delivery.innings_id === inningsRow.id
                 );
@@ -1128,10 +1084,6 @@ export default function PublicMatchPage() {
                   0
                 );
                 const yetToBat = batters.filter((row) => row.dismissal === "DNB");
-                const fallOfWickets = getFallOfWickets(
-                  inningsRow,
-                  inningsDeliveries
-                );
 
                 return (
                   <section
@@ -1214,21 +1166,20 @@ export default function PublicMatchPage() {
                         </div>
                       )}
 
-                      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_34px_30px_34px_34px_48px] border-b border-white/10 pb-2 text-[8px] font-black uppercase text-white/35 sm:grid-cols-[minmax(0,1fr)_46px_42px_46px_46px_62px] sm:text-[10px]">
-                        <span>Bowler</span><span className="text-right">O</span><span className="text-right">M</span><span className="text-right">R</span><span className="text-right">W</span><span className="text-right">Econ</span>
+                      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_38px_38px_38px_52px] border-b border-white/10 pb-2 text-[8px] font-black uppercase text-white/35 sm:grid-cols-[minmax(0,1fr)_48px_48px_48px_65px] sm:text-[10px]">
+                        <span>Bowler</span><span className="text-right">O</span><span className="text-right">R</span><span className="text-right">W</span><span className="text-right">Econ</span>
                       </div>
 
                       <div className="divide-y divide-white/5">
                         {bowlers.map((row) => (
                           <div
                             key={row.player.player_id}
-                            className="grid grid-cols-[minmax(0,1fr)_34px_30px_34px_34px_48px] items-center py-2.5 sm:grid-cols-[minmax(0,1fr)_46px_42px_46px_46px_62px]"
+                            className="grid grid-cols-[minmax(0,1fr)_38px_38px_38px_52px] items-center py-2.5 sm:grid-cols-[minmax(0,1fr)_48px_48px_48px_65px]"
                           >
                             <span className="pr-2 text-[10px] font-black sm:text-sm">
                               {scorecardPlayerLabel(row.player)}
                             </span>
                             <span className="text-right text-[10px] sm:text-sm">{oversFromBalls(row.legalBalls)}</span>
-                            <span className="text-right text-[10px] sm:text-sm">{row.maidens}</span>
                             <span className="text-right text-[10px] sm:text-sm">{row.runs}</span>
                             <span className="text-right text-[10px] font-black sm:text-sm">{row.wickets}</span>
                             <span className="text-right text-[10px] sm:text-sm">
@@ -1236,39 +1187,6 @@ export default function PublicMatchPage() {
                             </span>
                           </div>
                         ))}
-                      </div>
-
-                      <div className="mt-4 border-t border-white/10 pt-3">
-                        <div className="grid grid-cols-[1fr_62px_52px] border-b border-white/10 pb-2 text-[8px] font-black uppercase text-white/35 sm:text-[10px]">
-                          <span>Fall of Wickets</span>
-                          <span className="text-right">Score</span>
-                          <span className="text-right">Over</span>
-                        </div>
-
-                        {fallOfWickets.length > 0 ? (
-                          <div className="divide-y divide-white/5">
-                            {fallOfWickets.map((item) => (
-                              <div
-                                key={`${inningsRow.id}-${item.wicketNumber}`}
-                                className="grid grid-cols-[1fr_62px_52px] items-center py-2.5"
-                              >
-                                <span className="pr-2 text-[10px] font-black sm:text-sm">
-                                  {item.playerName}
-                                </span>
-                                <span className="text-right text-[10px] font-black sm:text-sm">
-                                  {item.score}-{item.wicketNumber}
-                                </span>
-                                <span className="text-right text-[10px] sm:text-sm">
-                                  {item.over}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="py-3 text-[10px] font-bold text-white/35 sm:text-sm">
-                            No wickets have fallen.
-                          </p>
-                        )}
                       </div>
                     </div>
                   </section>
