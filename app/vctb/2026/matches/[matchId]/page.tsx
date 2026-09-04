@@ -1083,6 +1083,17 @@ export default function PublicMatchPage() {
                     )}
                   </div>
 
+                  {match.status === "completed" && match.result_text && (
+                    <div className="mt-3 rounded-[18px] border border-green-400/30 bg-green-950/30 px-4 py-3.5 text-center">
+                      <p className="text-[9px] font-black uppercase tracking-[0.22em] text-green-300">
+                        Match Result
+                      </p>
+                      <p className="mt-1.5 text-base font-black text-green-300 md:text-lg">
+                        {match.result_text}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="mt-3 overflow-hidden rounded-[18px] border border-white/10 bg-[#080808]">
                     <div className="grid grid-cols-[1fr_42px_42px_42px_42px_58px] border-b border-white/10 px-3 py-2 text-[8px] font-black uppercase text-white/35 md:text-[10px]">
                       <span>Batter</span><span className="text-right">R</span><span className="text-right">B</span><span className="text-right">4s</span><span className="text-right">6s</span><span className="text-right">SR</span>
@@ -1220,6 +1231,17 @@ export default function PublicMatchPage() {
 
           {activeTab === "scorecard" && (
             <section className="mt-3 space-y-3">
+              {match.status === "completed" && match.result_text && (
+                <div className="rounded-[18px] border border-green-400/30 bg-green-950/30 px-4 py-3.5 text-center">
+                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-green-300">
+                    Match Result
+                  </p>
+                  <p className="mt-1.5 text-base font-black text-green-300 md:text-lg">
+                    {match.result_text}
+                  </p>
+                </div>
+              )}
+
               {[...innings]
                 .sort((a, b) => b.innings_number - a.innings_number)
                 .map((inningsRow) => {
