@@ -339,8 +339,12 @@ export default function VCTB2026Page() {
   // PUBLIC LIVE MATCH DATA
   // =====================================================
 
-  const loadPublicMatchData = useCallback(async () => {
-    setLoadingLiveMatches(true);
+  const loadPublicMatchData = useCallback(async (silent = false) => {
+    // Only show the loading state on the first page load.
+    // Silent refreshes keep the current live cards visible while scores update.
+    if (!silent) {
+      setLoadingLiveMatches(true);
+    }
 
     const [
       { data: matchData, error: matchError },
@@ -363,13 +367,17 @@ export default function VCTB2026Page() {
 
     if (matchError) {
       console.error("Live matches error:", matchError);
-      setLoadingLiveMatches(false);
+      if (!silent) {
+        setLoadingLiveMatches(false);
+      }
       return;
     }
 
     if (inningsError) {
       console.error("Live innings error:", inningsError);
-      setLoadingLiveMatches(false);
+      if (!silent) {
+        setLoadingLiveMatches(false);
+      }
       return;
     }
 
@@ -395,12 +403,17 @@ export default function VCTB2026Page() {
       )
     );
 
-    setLoadingLiveMatches(false);
+    if (!silent) {
+      setLoadingLiveMatches(false);
+    }
   }, [supabase]);
 
   useEffect(() => {
+    // Initial load keeps the existing loading behaviour.
     loadPublicMatchData();
 
+    // Keep Supabase Realtime exactly as before, but refresh silently so the
+    // live cards never disappear or flash a loading state between balls.
     const channel = supabase
       .channel("vctb-2026-public-live-home")
       .on(
@@ -411,7 +424,7 @@ export default function VCTB2026Page() {
           table: "matches",
         },
         () => {
-          loadPublicMatchData();
+          loadPublicMatchData(true);
         }
       )
       .on(
@@ -422,12 +435,42 @@ export default function VCTB2026Page() {
           table: "innings",
         },
         () => {
-          loadPublicMatchData();
+          loadPublicMatchData(true);
         }
       )
       .subscribe();
 
+    // Realtime is kept as the primary update method. This one-second silent
+    // refresh is only a fallback for phones/tablets where the Realtime socket
+    // can pause or miss an update.
+    const liveRefreshTimer = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadPublicMatchData(true);
+      }
+    }, 1000);
+
+    // Refresh immediately when the browser/app returns to the foreground.
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") {
+        loadPublicMatchData(true);
+      }
+    };
+
+    const refreshNow = () => {
+      loadPublicMatchData(true);
+    };
+
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    window.addEventListener("focus", refreshNow);
+    window.addEventListener("pageshow", refreshNow);
+    window.addEventListener("online", refreshNow);
+
     return () => {
+      window.clearInterval(liveRefreshTimer);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.removeEventListener("focus", refreshNow);
+      window.removeEventListener("pageshow", refreshNow);
+      window.removeEventListener("online", refreshNow);
       supabase.removeChannel(channel);
     };
   }, [supabase, loadPublicMatchData]);
