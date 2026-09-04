@@ -73,16 +73,6 @@ type StandingRow = {
 
 const PLAYING_XI_SIZE = 11;
 
-const teamGroups: Record<string, "A" | "B"> = {
-  "Aathiyadi JL Super Kings": "A",
-  "Balmoral Fighters": "A",
-  "Thunnalai Royals": "A",
-  "Niruvaththampai Knights": "B",
-  "Team Tiger": "B",
-  "Vallvai Blues SC UK": "B",
-};
-
-
 const fixtures: Fixture[] = [
   { matchNumber: 1, pitch: "Pitch 1", startTime: "08:30", teamA: "Thunnalai Royals", teamB: "Vallvai Blues SC UK" },
   { matchNumber: 2, pitch: "Pitch 2", startTime: "08:30", teamA: "Balmoral Fighters", teamB: "Niruvaththampai Knights" },
@@ -326,14 +316,10 @@ export default function VCTBScoringCentrePage() {
       innings: StandingInnings[];
     }[];
 
-  function buildGroupStandings(group: "A" | "B") {
-    const groupTeams = Object.keys(teamGroups).filter(
-      (team) => teamGroups[team] === group
-    );
-
+  function buildCommonStandings() {
     const table = new Map<string, StandingRow>();
 
-    groupTeams.forEach((team) => {
+    Object.keys(retainedByTeam).forEach((team) => {
       table.set(team, {
         team,
         played: 0,
@@ -468,30 +454,27 @@ export default function VCTBScoringCentrePage() {
     });
   }
 
-  const groupAStandings = buildGroupStandings("A");
-  const groupBStandings = buildGroupStandings("B");
+  const commonStandings = buildCommonStandings();
 
   const groupStageComplete =
     completedGroupMatches.length === fixtures.length;
 
   const automaticSemiFinals: Fixture[] =
-    groupStageComplete &&
-    groupAStandings.length >= 2 &&
-    groupBStandings.length >= 2
+    groupStageComplete && commonStandings.length >= 4
       ? [
           {
             matchNumber: 10,
             pitch: "Pitch 1",
             startTime: "16:00",
-            teamA: groupAStandings[0].team,
-            teamB: groupAStandings[1].team,
+            teamA: commonStandings[0].team,
+            teamB: commonStandings[3].team,
           },
           {
             matchNumber: 11,
             pitch: "Pitch 2",
             startTime: "16:00",
-            teamA: groupBStandings[0].team,
-            teamB: groupBStandings[1].team,
+            teamA: commonStandings[1].team,
+            teamB: commonStandings[2].team,
           },
         ]
       : [];
@@ -1215,7 +1198,7 @@ export default function VCTBScoringCentrePage() {
                   ✓ Group Stage Complete
                 </p>
                 <p className="mt-2 font-black text-white">
-                  Semi Final 1 and Semi Final 2 have been generated automatically from the final points tables.
+                  Semi Final 1 and Semi Final 2 have been generated automatically from the final common points table.
                 </p>
               </div>
             )}

@@ -179,8 +179,8 @@ const fixtures: Fixture[] = [
   { matchNumber: 7, time: "1:00 PM", pitch: "Pitch 2", teamA: "Aathiyadi JL Super Kings", teamB: "Vallvai Blues SC UK", kind: "match" },
   { matchNumber: 8, time: "2:30 PM", pitch: "Pitch 1", teamA: "Thunnalai Royals", teamB: "Team Tiger", kind: "match" },
   { matchNumber: 9, time: "2:30 PM", pitch: "Pitch 2", teamA: "Aathiyadi JL Super Kings", teamB: "Niruvaththampai Knights", kind: "match" },
-  { matchNumber: 10, time: "4:00 PM", pitch: "Pitch 1", label: "Semi Final 1 — 1st of Group A vs 2nd of Group A", kind: "semi" },
-  { matchNumber: 11, time: "4:00 PM", pitch: "Pitch 2", label: "Semi Final 2 — 1st of Group B vs 2nd of Group B", kind: "semi" },
+  { matchNumber: 10, time: "4:00 PM", pitch: "Pitch 1", label: "Semi Final 1 — 1st Place vs 4th Place", kind: "semi" },
+  { matchNumber: 11, time: "4:00 PM", pitch: "Pitch 2", label: "Semi Final 2 — 2nd Place vs 3rd Place", kind: "semi" },
   { matchNumber: 12, time: "5:30 PM", pitch: "Pitch 1", label: "VCTB Grand Final", kind: "final" },
   { time: "7:15 PM", pitch: "Pitch 1", label: "Presentation Ceremony", kind: "ceremony" },
   { time: "7:15 PM", pitch: "Pitch 2", label: "Presentation Ceremony", kind: "ceremony" },
@@ -205,7 +205,6 @@ export default function VCTB2026Page() {
   const [statMatchPlayers, setStatMatchPlayers] = useState<MatchPlayerStatRow[]>([]);
   const [statDeliveries, setStatDeliveries] = useState<DeliveryStatRow[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [mobilePointsGroup, setMobilePointsGroup] = useState<"A" | "B">("A");
   const [mobileAuctionOpen, setMobileAuctionOpen] = useState(false);
   const [openStatTop10, setOpenStatTop10] = useState<string | null>(null);
 
@@ -673,10 +672,8 @@ export default function VCTB2026Page() {
       } => Boolean(row)
     );
 
-  function buildStandings(group: "A" | "B") {
-    const groupTeams = teams
-      .filter((team) => teamMeta[team.name].group === group)
-      .map((team) => team.name);
+  function buildStandings() {
+    const groupTeams = teams.map((team) => team.name);
 
     const table = new Map<string, StandingRow>();
 
@@ -878,27 +875,26 @@ export default function VCTB2026Page() {
     });
   }
 
-  const groupAStandings = buildStandings("A");
-  const groupBStandings = buildStandings("B");
+  const commonStandings = buildStandings();
 
   const allGroupMatchesCompleted =
     completedGroupMatches.length === groupStageFixtures.length;
 
   const semiFinal1Teams =
     allGroupMatchesCompleted &&
-    groupAStandings.length >= 2
+    commonStandings.length >= 4
       ? {
-          teamA: groupAStandings[0].team,
-          teamB: groupAStandings[1].team,
+          teamA: commonStandings[0].team,
+          teamB: commonStandings[3].team,
         }
       : null;
 
   const semiFinal2Teams =
     allGroupMatchesCompleted &&
-    groupBStandings.length >= 2
+    commonStandings.length >= 4
       ? {
-          teamA: groupBStandings[0].team,
-          teamB: groupBStandings[1].team,
+          teamA: commonStandings[1].team,
+          teamB: commonStandings[2].team,
         }
       : null;
 
@@ -1746,28 +1742,10 @@ export default function VCTB2026Page() {
             </p>
           </div>
 
-          <div className="md:hidden">
-            <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-[#080808] p-1.5">
-              {(["A", "B"] as const).map((group) => (
-                <button
-                  key={group}
-                  onClick={() => setMobilePointsGroup(group)}
-                  className={`rounded-lg px-3 py-2 text-xs font-black uppercase ${mobilePointsGroup === group ? "bg-yellow-400 text-black" : "text-white/55"}`}
-                >
-                  Group {group}
-                </button>
-              ))}
-            </div>
-            <PointsTable
-              group={mobilePointsGroup}
-              standings={mobilePointsGroup === "A" ? groupAStandings : groupBStandings}
-            />
-          </div>
-
-          <div className="hidden gap-6 md:grid xl:grid-cols-2">
-            <PointsTable group="A" standings={groupAStandings} />
-            <PointsTable group="B" standings={groupBStandings} />
-          </div>
+          <PointsTable
+            standings={commonStandings}
+            allGroupMatchesCompleted={allGroupMatchesCompleted}
+          />
 
           {allGroupMatchesCompleted && semiFinal1Teams && semiFinal2Teams && (
             <div className="mt-6 rounded-[24px] border border-green-400/25 bg-green-950/20 p-5">
@@ -2320,7 +2298,9 @@ function FixtureRow({
 
       {fixture.kind === "semi" && !fixtureMatch && (
         <p className="mt-3 text-xs font-bold text-red-200/60">
-          Automatically qualified from the final Group {fixture.pitch === "Pitch 1" ? "A" : "B"} standings.
+          {fixture.matchNumber === 10
+            ? "Automatically qualified: 1st Place vs 4th Place from the common standings."
+            : "Automatically qualified: 2nd Place vs 3rd Place from the common standings."}
         </p>
       )}
 
@@ -2458,19 +2438,19 @@ function getDisplayMobileTeamName(teamName:string){
 }
 
 function PointsTable({
-  group,
   standings,
+  allGroupMatchesCompleted,
 }: {
-  group: "A" | "B";
   standings: StandingRow[];
+  allGroupMatchesCompleted: boolean;
 }) {
   return (
     <div className="overflow-hidden rounded-[18px] border border-white/10 bg-[#080808] md:rounded-[28px]">
       <div className="border-b border-white/10 bg-white/5 px-4 py-3 md:px-6 md:py-5">
         <p className="text-[9px] font-black uppercase tracking-[0.25em] text-yellow-400 md:text-xs">
-          Group {group}
+          Common Points Table
         </p>
-        <h3 className="mt-1 text-lg font-black md:mt-2 md:text-2xl">Standings</h3>
+        <h3 className="mt-1 text-lg font-black md:mt-2 md:text-2xl">Tournament Standings</h3>
       </div>
 
       {/* MOBILE TABLE — no horizontal scrolling */}
@@ -2481,9 +2461,10 @@ function PointsTable({
         {standings.map((row,index)=>{
           const team=teams.find((teamRow)=>teamRow.name===row.team);
           if(!team)return null;
+          const qualified = allGroupMatchesCompleted && index < 4;
           return (
-            <div key={row.team} className={`grid grid-cols-[24px_1fr_28px_38px_52px] items-center border-b border-white/5 px-3 py-2.5 ${index<2&&row.played>0?"bg-green-950/10":""}`}>
-              <span className={`text-xs font-black ${index<2&&row.played>0?"text-green-400":"text-white/35"}`}>{index+1}</span>
+            <div key={row.team} className={`grid grid-cols-[24px_1fr_28px_38px_52px] items-center border-b border-white/5 px-3 py-2.5 ${qualified?"bg-green-950/10":""}`}>
+              <span className={`text-xs font-black ${qualified?"text-green-400":"text-white/35"}`}>{index+1}</span>
               <div className="flex min-w-0 items-center gap-2">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-0.5"><Image src={team.logo} alt={team.name} width={26} height={26} className="h-full w-full object-contain"/></div>
                 <span className="truncate text-[10px] font-black">{teamMeta[team.name].shortName}</span>
@@ -2494,45 +2475,34 @@ function PointsTable({
             </div>
           );
         })}
-        <div className="px-3 py-2 text-[9px] text-white/30">Top 2 qualify for the same-group semi-final.</div>
+        <div className="px-3 py-2 text-[9px] text-white/30">Top 4 qualify • SF1: 1st vs 4th • SF2: 2nd vs 3rd.</div>
       </div>
 
-      {/* DESKTOP TABLE — ORIGINAL DESIGN */}
+      {/* DESKTOP TABLE — same styling, one common table */}
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[620px] text-left text-sm">
           <thead>
             <tr className="border-b border-white/10 text-xs font-black uppercase tracking-wider text-white/40">
-              <th className="px-5 py-4">#</th>
-              <th className="px-3 py-4">Team</th>
-              <th className="px-3 py-4 text-center">P</th>
-              <th className="px-3 py-4 text-center">W</th>
-              <th className="px-3 py-4 text-center">L</th>
-              <th className="px-3 py-4 text-center">T</th>
-              <th className="px-3 py-4 text-center">Pts</th>
-              <th className="px-3 py-4 text-right">NRR</th>
+              <th className="px-5 py-4">#</th><th className="px-3 py-4">Team</th><th className="px-3 py-4 text-center">P</th><th className="px-3 py-4 text-center">W</th><th className="px-3 py-4 text-center">L</th><th className="px-3 py-4 text-center">T</th><th className="px-3 py-4 text-center">Pts</th><th className="px-3 py-4 text-right">NRR</th>
             </tr>
           </thead>
           <tbody>
-            {standings.map((row, index) => {
-              const team = teams.find((teamRow) => teamRow.name === row.team);
-              if (!team) return null;
+            {standings.map((row,index)=>{
+              const team=teams.find((teamRow)=>teamRow.name===row.team);
+              if(!team)return null;
+              const qualified = allGroupMatchesCompleted && index < 4;
               return (
-                <tr key={row.team} className={`border-b border-white/5 ${index < 2 && row.played > 0 ? "bg-green-950/10" : ""}`}>
-                  <td className="px-5 py-4"><span className={`font-black ${index < 2 && row.played > 0 ? "text-green-400" : "text-white/35"}`}>{index + 1}</span></td>
+                <tr key={row.team} className={`border-b border-white/5 ${qualified?"bg-green-950/10":""}`}>
+                  <td className="px-5 py-4"><span className={`font-black ${qualified?"text-green-400":"text-white/35"}`}>{index+1}</span></td>
                   <td className="px-3 py-4"><div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-1"><Image src={team.logo} alt={team.name} width={32} height={32} className="h-full w-full object-contain"/></div><span className="font-black">{teamMeta[team.name].shortName}</span></div></td>
-                  <td className="px-3 py-4 text-center text-white/60">{row.played}</td>
-                  <td className="px-3 py-4 text-center text-white/60">{row.won}</td>
-                  <td className="px-3 py-4 text-center text-white/60">{row.lost}</td>
-                  <td className="px-3 py-4 text-center text-white/60">{row.tied}</td>
-                  <td className="px-3 py-4 text-center font-black text-yellow-400">{row.points}</td>
-                  <td className={`px-3 py-4 text-right font-black ${row.nrr > 0 ? "text-green-400" : row.nrr < 0 ? "text-red-400" : "text-white/50"}`}>{row.nrr > 0 ? "+" : ""}{row.nrr.toFixed(3)}</td>
+                  <td className="px-3 py-4 text-center text-white/60">{row.played}</td><td className="px-3 py-4 text-center text-white/60">{row.won}</td><td className="px-3 py-4 text-center text-white/60">{row.lost}</td><td className="px-3 py-4 text-center text-white/60">{row.tied}</td><td className="px-3 py-4 text-center font-black text-yellow-400">{row.points}</td><td className={`px-3 py-4 text-right font-black ${row.nrr>0?"text-green-400":row.nrr<0?"text-red-400":"text-white/50"}`}>{row.nrr>0?"+":""}{row.nrr.toFixed(3)}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-      <div className="hidden border-t border-white/10 px-5 py-3 text-xs text-white/35 md:block">Top 2 qualify for the same-group semi-final.</div>
+      <div className="hidden border-t border-white/10 px-5 py-3 text-xs text-white/35 md:block">Top 4 qualify • Semi Final 1: 1st vs 4th • Semi Final 2: 2nd vs 3rd.</div>
     </div>
   );
 }
