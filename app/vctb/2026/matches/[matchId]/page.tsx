@@ -826,14 +826,12 @@ export default function PublicMatchPage() {
       return aEcon - bEcon || b.wickets - a.wickets;
     })[0];
 
-  function findBattingStreak(required: number, boundaryMode: boolean) {
+  function findBattingStreak(required: number, mode: "six" | "four") {
     for (const player of players) {
       const faced = deliveries.filter((d) => d.striker_id === player.player_id);
       let streak = 0;
       for (const d of faced) {
-        const hit = boundaryMode
-          ? d.runs_batter === 4 || d.runs_batter === 6
-          : d.runs_batter === 6;
+        const hit = mode === "four" ? d.runs_batter === 4 : d.runs_batter === 6;
         streak = hit ? streak + 1 : 0;
         if (streak >= required) return player;
       }
@@ -841,8 +839,8 @@ export default function PublicMatchPage() {
     return undefined;
   }
 
-  const sixHatTrickPlayer = findBattingStreak(3, false);
-  const boundaryKingPlayer = findBattingStreak(4, true);
+  const sixHatTrickPlayer = findBattingStreak(3, "six");
+  const boundaryKingPlayer = findBattingStreak(4, "four");
 
   const maidenOvers = (() => {
     const found: { player: MatchPlayer; innings: number; over: number }[] = [];
@@ -1457,7 +1455,7 @@ export default function PublicMatchPage() {
                     icon="💥"
                     title="Boundary King"
                     player={boundaryKingPlayer}
-                    detail={boundaryKingPlayer ? "4 consecutive boundaries" : "Not achieved"}
+                    detail={boundaryKingPlayer ? "4 consecutive fours" : "Not achieved"}
                   />
                   <div className="rounded-[20px] border border-white/10 bg-[#080808] p-4">
                     <div className="flex items-center gap-3">
