@@ -1002,12 +1002,34 @@ export default function VCTBScoringCentrePage() {
     setStartingMatch(true);
 
     try {
-      // Prevent duplicate rows if this fixture already exists.
-      const { data: existingRows, error: existingError } = await supabase
+      // Prevent duplicate rows only for THIS exact fixture generation.
+      // Knockout matches can reuse Match 10/11/12 across tests or previous
+      // generations, so do not let an old completed/walkover row block the
+      // current Semi-Final or Final.
+      let existingQuery = supabase
         .from("matches")
-        .select("id, status, result_text")
+        .select("id, status, result_text, team_a, team_b")
         .eq("match_number", selectedFixture.matchNumber)
         .eq("pitch", selectedFixture.pitch)
+        .eq("team_a", selectedFixture.teamA)
+        .eq("team_b", selectedFixture.teamB);
+
+      if (selectedFixture.matchNumber === 10 || selectedFixture.matchNumber === 11) {
+        existingQuery = existingQuery.gt("id", currentGroupGenerationId);
+      }
+
+      if (selectedFixture.matchNumber === 12) {
+        const currentSemiGenerationId =
+          semiFinal1Match && semiFinal2Match
+            ? Math.max(semiFinal1Match.id, semiFinal2Match.id)
+            : 0;
+
+        if (currentSemiGenerationId > 0) {
+          existingQuery = existingQuery.gt("id", currentSemiGenerationId);
+        }
+      }
+
+      const { data: existingRows, error: existingError } = await existingQuery
         .order("id", { ascending: false })
         .limit(1);
 
